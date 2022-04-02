@@ -27,6 +27,11 @@ public class Planet : MonoBehaviour
         _ressources[ressource] += count;
     }
 
+    public void TakeRessource(PlanetRegistry.Ressources ressource, int count = 1)
+    {
+        _ressources[ressource] -= count;
+    }
+
     public int GetPeople()
     {
         return _people;
