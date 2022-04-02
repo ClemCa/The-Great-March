@@ -19,7 +19,6 @@ public class SystemSpawning : MonoBehaviour
         {
             _last += _every;
             _spawned.Add(Instantiate(_systemPrefab, new Vector3(_last, 0), Quaternion.identity));
-            Debug.Log("instantiate prefab now");
         }
         if(_spawned.Count > _maxSystems)
         {

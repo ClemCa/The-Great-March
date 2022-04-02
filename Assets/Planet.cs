@@ -1,3 +1,5 @@
+using cakeslice;
+using ClemCAddons;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -52,6 +54,7 @@ public class Planet : MonoBehaviour
 
     #endregion Accessibility
     #region Routines
+    private static Planet selected;
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -59,11 +62,22 @@ public class Planet : MonoBehaviour
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var hit, 100))
             {
-                if (hit.transform != transform)
+                if(transform == hit.transform || transform.FindDeep(t => t == hit.transform))
+                {
+                    selected = this;
                     return;
-                Debug.Log("Selected " + gameObject);
+                }
+                if (!hit.transform.TryGetComponent<Planet>(out _) && hit.transform.FindParentWithComponent(typeof(Planet)) == null)
+                {
+                    selected = null;
+                }
+            }
+            else
+            {
+                selected = null;
             }
         }
+        GetComponentInChildren<Outline>().color = (selected == this).ToInt();
     }
     #endregion Routines
     #region Generation
@@ -75,27 +89,37 @@ public class Planet : MonoBehaviour
             _ressources.Add((PlanetRegistry.Ressources)i, r == -1 ? 0 : ressourcesCount[r]);
         }
         Destroy(GetComponent<MeshRenderer>());
+        for(int i = transform.childCount - 1; i >= 0 ; i--)
+        {
+            Destroy(transform.GetChild(i).gameObject); // might have cloned too late, after the original spawned a new planet inside
+        }
         switch (systemType)
         {
             case PlanetRegistry.SystemType.Alien:
-                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Alien), transform);
+                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Alien), transform)
+                     .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             case PlanetRegistry.SystemType.Cold:
-                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Frozen), transform);
+                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Frozen), transform)
+                     .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             case PlanetRegistry.SystemType.Hot:
-                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Desert), transform);
+                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Desert), transform)
+                     .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             case PlanetRegistry.SystemType.Temperate:
                 if (Random.Range(0, 1) == 0)
-                    Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Temperate), transform);
+                    Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Temperate), transform)
+                        .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 else
-                    Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Earth), transform);
+                    Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Earth), transform)
+                        .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             default:
                 Debug.Log(systemType);
                 break;
         }
+
     }
     #endregion Generation
 }

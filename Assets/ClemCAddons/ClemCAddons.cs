@@ -2832,6 +2832,16 @@ namespace ClemCAddons
             }
             return null;
         }
+        public static Transform FindDeep(this Transform transform, Predicate<Transform> predicate)
+        {
+            if (transform.childCount == 0)
+                return null;
+            Transform[] res = transform.GetComponentsInChildren<Transform>(true);
+            var r = Array.Find(res, predicate);
+            if (r != null)
+                return r;
+            return null;
+        }
         public static GameObject FindDeep(this GameObject gameObject, string name, bool startsWith = false)
         {
             var r = gameObject.transform.FindDeep(name, startsWith);
@@ -2903,6 +2913,8 @@ namespace ClemCAddons
             if (transform == null)
                 return null;
             Transform res = transform.parent;
+            if (res == null)
+                return null;
             if (res.TryGetComponent(type, out _))
             {
                 return res;
