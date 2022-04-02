@@ -2,6 +2,7 @@ using ClemCAddons;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -14,6 +15,7 @@ public class PlanetRegistry : MonoBehaviour
     [SerializeField] private GameObject[] _temperatePlanets;
     [SerializeField] private GameObject[] _tundraPlanets;
     [SerializeField] private ResourceSprite[] _resourceSprites;
+    [SerializeField] private FacilityInfos[] _facilitiesInfo;
 
     private static PlanetRegistry _instance;
 
@@ -24,11 +26,20 @@ public class PlanetRegistry : MonoBehaviour
         return (Resources[])Enum.GetValues(typeof(Resources));
     }
 
+
     [Serializable]
     public class ResourceSprite
     {
-        public Resources resource;
-        public Sprite sprite;
+        public Resources Resource;
+        public Sprite Sprite;
+    }
+
+    [Serializable]
+    public class FacilityInfos
+    {
+        public Facilities Facility;
+        public Resources AssociatedResource;
+        public Sprite Sprite;
     }
 
     public enum PlanetType
@@ -70,7 +81,8 @@ public class PlanetRegistry : MonoBehaviour
         OilExtractor,
         GasExtractor,
         WaterPump,
-        AnimalKidnappingCenter
+        AnimalKidnappingCenter,
+        SuperGrowthGreenhouse
     }
 
     void Awake()
@@ -78,10 +90,27 @@ public class PlanetRegistry : MonoBehaviour
         _instance = this;
     }
 
-    public Sprite GetRessourceSprite(Resources resource)
+    public Sprite GetResourceSprite(Resources resource)
     {
-        return Array.Find(_resourceSprites, t => t.resource == resource).sprite;
+        return Array.Find(_resourceSprites, t => t.Resource == resource).Sprite;
     }
+
+
+    public Sprite GetFacilitySprite(Facilities facility)
+    {
+        return Array.Find(_facilitiesInfo, t => t.Facility == facility).Sprite;
+    }
+
+    public Resources GetAssociatedResource(Facilities facility)
+    {
+        return Array.Find(_facilitiesInfo, t => t.Facility == facility).AssociatedResource;
+    }
+
+    public Facilities[] GetAssociatedFacilities(Resources resource)
+    {
+        return _facilitiesInfo.Where(t => t.AssociatedResource == resource).Select(t => t.Facility).ToArray();
+    }
+
 
     public GameObject GetRandomPlanet(PlanetType planetType = PlanetType.None)
     {

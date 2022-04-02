@@ -12,6 +12,7 @@ public class Planet : MonoBehaviour
     private int _people = 0;
     private PlanetRegistry.Resources[] _availableResources;
     private List<PlanetRegistry.Facilities> _facilities = new List<PlanetRegistry.Facilities>();
+    private List<float> _facilitiesProgression = new List<float>();
     private static Planet selected;
     #endregion localStorage
     #region Accessibility
@@ -19,6 +20,11 @@ public class Planet : MonoBehaviour
     public List<PlanetRegistry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
     public static Planet Selected { get => selected;}
     public PlanetRegistry.Resources[] AvailableResources { get => _availableResources;}
+
+    public bool GetSlot(PlanetRegistry.Resources resource)
+    {
+        return _availableResources.FindIndex(resource) != -1;
+    }
 
     public int GetResource(PlanetRegistry.Resources resoure)
     {
@@ -53,11 +59,64 @@ public class Planet : MonoBehaviour
     public void FacilityBuilt(PlanetRegistry.Facilities facility)
     {
         _facilities.Add(facility);
+        _facilitiesProgression.Add(0);
     }
 
-    public bool IsFacilityBuild(PlanetRegistry.Facilities facility)
+    public bool IsFacilityBuilt(PlanetRegistry.Facilities facility)
     {
         return _facilities.FindIndex(t => t == facility) != -1;
+    }
+
+    public bool HasFacility(PlanetRegistry.Resources resource)
+    {
+        var r = _availableResources.FindIndex(resource);
+        var t = PlanetRegistry.Instance.GetAssociatedFacilities(resource);
+        foreach (var facility in t)
+        {
+            var i = _facilities.FindIndex(t => t == facility);
+            if (i != -1)
+                return true;
+        }
+        return false;
+    }
+
+    public PlanetRegistry.Facilities GetFacility(PlanetRegistry.Resources resource)
+    {
+        var r = _availableResources.FindIndex(resource);
+        var t = PlanetRegistry.Instance.GetAssociatedFacilities(resource);
+        foreach (var facility in t)
+        {
+            var i = _facilities.FindIndex(t => t == facility);
+            if (i != -1)
+                return _facilities[i];
+        }
+        return _facilities[0];
+    }
+
+    public float GetFactoryProgression(PlanetRegistry.Resources resource)
+    {
+        var r = _availableResources.FindIndex(resource);
+        if (r == -1)
+            return 0;
+        var t = PlanetRegistry.Instance.GetAssociatedFacilities(resource);
+        int index = -1;
+        foreach(var facility in t)
+        {
+            var i = _facilities.FindIndex(t => t == facility);
+            if (i != -1)
+                index = i;
+        }
+        if (index == -1)
+            return 0;
+        return _facilitiesProgression[index];
+    }
+
+    public float GetFactoryProgression(PlanetRegistry.Facilities facility)
+    {
+        var index = _facilities.FindIndex(t => t == facility);
+        if (index == -1)
+            return 0;
+        return _facilitiesProgression[index];
     }
 
     #endregion Accessibility

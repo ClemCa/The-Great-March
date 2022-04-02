@@ -20,7 +20,7 @@ public class ResourceMenu : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        GetComponentInChildren<Image>().sprite = PlanetRegistry.Instance.GetRessourceSprite(_resourceType);
+        GetComponentInChildren<Image>().sprite = PlanetRegistry.Instance.GetResourceSprite(_resourceType);
     }
 
     void Update()
