@@ -44,26 +44,24 @@ public class PlanetRegistry : MonoBehaviour
 
     public enum Ressources
     {
-        ExampleRessource0,
-        ExampleRessource1,
-        ExampleRessource2,
-        ExampleRessource3,
-        ExampleRessource4,
-        ExampleRessource5,
-        ExampleRessource6,
-        ExampleRessource7
+        Metal,
+        Water,
+        Food,
+        Hydrogen,
+        Oil,
+        Gas,
+        Animals,
+        Plants
     }
 
     public enum Facilities
     {
-        ExampleFacility0,
-        ExampleFacility1,
-        ExampleFacility2,
-        ExampleFacility3,
-        ExampleFacility4,
-        ExampleFacility5,
-        ExampleFacility6,
-        ExampleFacility7
+        HydrogenExtractor,
+        Mine,
+        OilExtractor,
+        GasExtractor,
+        WaterPump,
+        AnimalKidnappingCenter
     }
 
     void Awake()
