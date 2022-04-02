@@ -4,18 +4,21 @@ using UnityEngine;
 
 public class CloudMoveScript : MonoBehaviour
 {
-    public float movementSpeed = 1.0f;
+    [SerializeField] private float timeToCenter = 1.0f;
+
+    private float speed;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        var r = Camera.main.ViewportToWorldPoint(Vector3.zero);
+        speed = (r.x - transform.position.x) / timeToCenter;
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.position += Vector3.right * movementSpeed * Time.deltaTime;
+        transform.position += Vector3.right * speed * Time.deltaTime;
 
         // Ensure that the cloud can always be seen by the main camera
         Vector3 worldCameraCorner = Camera.main.ViewportToWorldPoint(Vector3.zero);
