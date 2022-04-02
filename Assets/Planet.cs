@@ -8,28 +8,28 @@ using UnityEngine.EventSystems;
 public class Planet : MonoBehaviour
 {
     #region localStorage
-    private Dictionary<PlanetRegistry.Ressources, int> _ressources = new Dictionary<PlanetRegistry.Ressources, int>();
+    private Dictionary<PlanetRegistry.Resources, int> _resources = new Dictionary<PlanetRegistry.Resources, int>();
     private int _people = 0;
     private List<PlanetRegistry.Facilities> _facilities = new List<PlanetRegistry.Facilities>();
     #endregion localStorage
     #region Accessibility
-    public Dictionary<PlanetRegistry.Ressources, int> Ressources { get => _ressources; set => _ressources = value; }
+    public Dictionary<PlanetRegistry.Resources, int> Resources { get => _resources; set => _resources = value; }
     public List<PlanetRegistry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
 
 
-    public int GetRessource(PlanetRegistry.Ressources ressoure)
+    public int GetResource(PlanetRegistry.Resources resoure)
     {
-        return _ressources[ressoure];
+        return _resources[resoure];
     }
 
-    public void AddRessource(PlanetRegistry.Ressources ressource, int count = 1)
+    public void AddResource(PlanetRegistry.Resources resource, int count = 1)
     {
-        _ressources[ressource] += count;
+        _resources[resource] += count;
     }
 
-    public void TakeRessource(PlanetRegistry.Ressources ressource, int count = 1)
+    public void TakeResource(PlanetRegistry.Resources resource, int count = 1)
     {
-        _ressources[ressource] -= count;
+        _resources[resource] -= count;
     }
 
     public int GetPeople()
@@ -86,12 +86,12 @@ public class Planet : MonoBehaviour
     }
     #endregion Routines
     #region Generation
-    public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Ressources[] ressources, int[] ressourcesCount)
+    public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Resources[] resources, int[] resourcesCount)
     {
-        for (int i = 0; i < System.Enum.GetNames(typeof(PlanetRegistry.Ressources)).Length; i++)
+        for (int i = 0; i < System.Enum.GetNames(typeof(PlanetRegistry.Resources)).Length; i++)
         {
-            int r = System.Array.FindIndex(ressources, t => t == (PlanetRegistry.Ressources)i);
-            _ressources.Add((PlanetRegistry.Ressources)i, r == -1 ? 0 : ressourcesCount[r]);
+            int r = System.Array.FindIndex(resources, t => t == (PlanetRegistry.Resources)i);
+            _resources.Add((PlanetRegistry.Resources)i, r == -1 ? 0 : resourcesCount[r]);
         }
         Destroy(GetComponent<MeshRenderer>());
         for(int i = transform.childCount - 1; i >= 0 ; i--)

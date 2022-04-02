@@ -17,9 +17,9 @@ public class PlanetRegistry : MonoBehaviour
 
     public static PlanetRegistry Instance { get => _instance; set => _instance = value; }
 
-    public static Ressources[] GetRessources()
+    public static Resources[] GetResources()
     {
-        return (Ressources[])Enum.GetValues(typeof(Ressources));
+        return (Resources[])Enum.GetValues(typeof(Resources));
     }
 
     public enum PlanetType
@@ -42,7 +42,7 @@ public class PlanetRegistry : MonoBehaviour
         Cold
     }
 
-    public enum Ressources
+    public enum Resources
     {
         Metal,
         Water,

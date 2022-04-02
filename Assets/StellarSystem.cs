@@ -33,9 +33,9 @@ public class StellarSystem : MonoBehaviour
         while(_systemType == PlanetRegistry.SystemType.None)
             _systemType = (PlanetRegistry.SystemType)Random.Range(0, System.Enum.GetNames(typeof(PlanetRegistry.SystemType)).Length - 1);
         int planets = Random.Range(2,5);
-        int ressources = Random.Range(5, 8);
-        var r = PlanetRegistry.GetRessources();
-        while(r.Length > ressources)
+        int resources = Random.Range(5, 8);
+        var r = PlanetRegistry.GetResources();
+        while(r.Length > resources)
         {
             r = r.RemoveAt(Random.Range(0, r.Length));
         }
@@ -50,26 +50,26 @@ public class StellarSystem : MonoBehaviour
             }
             _lanes[i].Planet.transform.localPosition = Random.insideUnitCircle.normalized * _lanes[i].Distance;
             
-            var ressourcesToDistribute = new int[r.Length];
-            for (int t = 0; t < ressourcesToDistribute.Length; t++)
+            var resourcesToDistribute = new int[r.Length];
+            for (int t = 0; t < resourcesToDistribute.Length; t++)
             {
-                ressourcesToDistribute[t] = Mathf.CeilToInt(ratios[t] * Mathf.Floor(ressources / (float)planets));
+                resourcesToDistribute[t] = Mathf.CeilToInt(ratios[t] * Mathf.Floor(resources / (float)planets));
             }
 
-            _lanes[i].Planet.GetComponent<Planet>().Initialize(_systemType, r, ressourcesToDistribute);
+            _lanes[i].Planet.GetComponent<Planet>().Initialize(_systemType, r, resourcesToDistribute);
         }
     }
 
     private void PrintChildInventory()
     {
-        var r = PlanetRegistry.GetRessources();
+        var r = PlanetRegistry.GetResources();
         var count = new int[r.Length];
         var children = GetComponentsInChildren<Planet>();
         for(int i = 0; i < children.Length; i++)
         {
             for(int t = 0; t < count.Length; t++)
             {
-                count[t] += children[i].Ressources[r[t]];
+                count[t] += children[i].Resources[r[t]];
             }
         }
         for(int i = 0; i < r.Length; i++)
