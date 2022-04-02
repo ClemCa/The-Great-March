@@ -17,6 +17,11 @@ public class PlanetRegistry : MonoBehaviour
 
     public static PlanetRegistry Instance { get => _instance; set => _instance = value; }
 
+    public static Ressources[] GetRessources()
+    {
+        return (Ressources[])Enum.GetValues(typeof(Ressources));
+    }
+
     public enum PlanetType
     {
         None,
@@ -37,8 +42,20 @@ public class PlanetRegistry : MonoBehaviour
         Cold
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public enum Ressources
+    {
+        ExampleRessource0,
+        ExampleRessource1,
+        ExampleRessource2,
+        ExampleRessource3,
+        ExampleRessource4,
+        ExampleRessource5,
+        ExampleRessource6,
+        ExampleRessource7
+    }
+
+
+    void Awake()
     {
         _instance = this;
     }

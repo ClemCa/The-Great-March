@@ -1,0 +1,98 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using ClemCAddons;
+using System.Linq;
+
+public class StellarSystem : MonoBehaviour
+{
+    [SerializeField] private GameObject _sun;
+    [SerializeField] private GameObject _firstPlanet;
+    [SerializeField] private float _distancePlanets = 3;
+    [SerializeField] private float _minimumDistance = 2;
+    [SerializeField] private PlanetRegistry.SystemType _systemType;
+    private Lane[] _lanes;
+    private struct Lane
+    {
+        public GameObject Planet;
+        public float Distance;
+        public Lane(GameObject planet, float distance)
+        {
+            Planet = planet;
+            Distance = distance;
+        }
+    }
+
+    public void Setup(PlanetRegistry.SystemType systemType)
+    {
+        _systemType = systemType;
+    }
+
+    void Start()
+    {
+        while(_systemType == PlanetRegistry.SystemType.None)
+            _systemType = (PlanetRegistry.SystemType)Random.Range(0, System.Enum.GetNames(typeof(PlanetRegistry.SystemType)).Length - 1);
+        int planets = Random.Range(2,5);
+        int ressources = Random.Range(5, 8);
+        var r = PlanetRegistry.GetRessources();
+        while(r.Length > ressources)
+        {
+            r = r.RemoveAt(Random.Range(0, r.Length));
+        }
+        var ratios = GetRandomRatio(r.Length);
+        _lanes = new Lane[planets];
+        _lanes[1] = new Lane(_firstPlanet, _distancePlanets * 2 + _minimumDistance);
+        for(int i = 0; i < _lanes.Length; i++)
+        {
+            if(_lanes[i].Planet == null)
+            {
+                _lanes[i] = new Lane(Instantiate(_firstPlanet, transform), _distancePlanets * (i+1) + _minimumDistance);
+            }
+            _lanes[i].Planet.transform.localPosition = Random.insideUnitCircle.normalized * _lanes[i].Distance;
+            
+            var ressourcesToDistribute = new int[r.Length];
+            for (int t = 0; t < ressourcesToDistribute.Length; t++)
+            {
+                ressourcesToDistribute[t] = Mathf.CeilToInt(ratios[t] * Mathf.Floor(ressources / (float)planets));
+            }
+
+            _lanes[i].Planet.GetComponent<PlanetGenerator>().Initialize(_systemType, r, ressourcesToDistribute);
+        }
+    }
+
+    private void PrintChildInventory()
+    {
+        var r = PlanetRegistry.GetRessources();
+        var count = new int[r.Length];
+        var children = GetComponentsInChildren<PlanetGenerator>();
+        for(int i = 0; i < children.Length; i++)
+        {
+            for(int t = 0; t < count.Length; t++)
+            {
+                count[t] += children[i].Ressources[r[t]];
+            }
+        }
+        for(int i = 0; i < r.Length; i++)
+        {
+            Debug.Log(r[i] + ": " + count[i]);
+        }
+    }
+
+    private float[] GetRandomRatio(int length)
+    {
+        var result = new float[length];
+        int total = 0;
+        while(total == 0) // just to be sure there isn't one rare case where all random values roll 0
+            for(int i = 0; i < result.Length; i++)
+            {
+                var v = Random.Range(1, 100);
+                total += v;
+                result[i] = v;
+            }
+        for(int i = 0; i < result.Length; i++)
+        {
+            result[i] = result[i] / total;
+        }
+        return result;
+    }
+}

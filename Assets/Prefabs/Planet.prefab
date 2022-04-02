@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5966636836606932626}
   - component: {fileID: 5966636836606932637}
   - component: {fileID: 5966636836606932624}
-  - component: {fileID: 5966636836606932636}
+  - component: {fileID: 3346230633303776928}
   m_Layer: 0
   m_Name: Planet
   m_TagString: Untagged
@@ -97,7 +97,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _minimumRessources: 0
   _systemType: 1
---- !u!114 &5966636836606932636
+--- !u!114 &3346230633303776928
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -106,7 +106,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5966636836606932639}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7102312ea41d420448fd50e8caa47402, type: 3}
+  m_Script: {fileID: 11500000, guid: 40a597c66f1257f46b6e8ffd2ba69cc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 20
+  _sun: {fileID: 0}
+  _speed: 2
+  _rotationSpeed: 100
