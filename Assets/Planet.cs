@@ -51,6 +51,21 @@ public class Planet : MonoBehaviour
     }
 
     #endregion Accessibility
+    #region Routines
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out var hit, 100))
+            {
+                if (hit.transform != transform)
+                    return;
+                Debug.Log("Selected " + gameObject);
+            }
+        }
+    }
+    #endregion Routines
     #region Generation
     public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Ressources[] ressources, int[] ressourcesCount)
     {
