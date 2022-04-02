@@ -1,3 +1,4 @@
+using ClemCAddons;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -47,7 +48,7 @@ public class UniverseParallaxScript : MonoBehaviour
                 range - Camera.main.transform.position.z
             ));
 
-            stars.Add(Instantiate(star, randomized, Quaternion.identity));
+            stars.Add(Instantiate(star, randomized, Quaternion.identity, transform));
         }
 
         // By keeping them sorted like this, we can optimize Update() below
@@ -57,23 +58,25 @@ public class UniverseParallaxScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 worldCameraCorner = Camera.main.ViewportToWorldPoint(Vector3.zero);
-
+        var ray = Camera.main.ViewportPointToRay(Vector3.zero);
         for (int i = 0; i < stars.Count; i++)
         {
             GameObject item = stars[i];
-            Bounds bounds = item.GetComponent<MeshFilter>().sharedMesh.bounds;
+            Vector3 worldCameraCorner = ray.origin + ray.direction * (ray.origin.z - item.transform.position.z).Abs();
 
-            if (worldCameraCorner.x > bounds.max.x)
+            Bounds bounds = item.GetComponent<Collider>().bounds;
+
+            if (worldCameraCorner.x > item.transform.position.x + bounds.extents.x)
             {
                 // We want to move it from right outside of the screen to the left, to
                 // right outside of the screen to the right
                 Vector3 randomized = Camera.main.ScreenToWorldPoint(new Vector3(
-                    Camera.main.pixelWidth + bounds.extents.x,
-                    Camera.main.pixelHeight + bounds.extents.y,
+                    Camera.main.pixelWidth + Camera.main.WorldToScreenPoint(item.transform.position).x.Abs(),
+                    0,
                     item.transform.position.z - Camera.main.transform.position.z
                 ));
-                item.transform.position = randomized;
+
+                item.transform.position = randomized.SetY(item.transform.position.y);
 
                 // Keep the list sorted after moving an item
                 stars.RemoveAt(i);
