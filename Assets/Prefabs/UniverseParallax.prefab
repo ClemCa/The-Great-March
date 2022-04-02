@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   population: 100
-  closeStar: {fileID: 3546608549815285461, guid: c2c6077a0b8342a438725a157e8f25a4, type: 3}
+  closeStar: {fileID: 3957288194208684736, guid: 659979f5fa27a1040910d2aed1ff7617, type: 3}
   closeStarRange: 50
   mediumStar: {fileID: 3546608549815285461, guid: c2c6077a0b8342a438725a157e8f25a4, type: 3}
   mediumStarRange: 100
