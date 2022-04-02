@@ -56,7 +56,7 @@ public class StellarSystem : MonoBehaviour
                 ressourcesToDistribute[t] = Mathf.CeilToInt(ratios[t] * Mathf.Floor(ressources / (float)planets));
             }
 
-            _lanes[i].Planet.GetComponent<PlanetGenerator>().Initialize(_systemType, r, ressourcesToDistribute);
+            _lanes[i].Planet.GetComponent<Planet>().Initialize(_systemType, r, ressourcesToDistribute);
         }
     }
 
@@ -64,7 +64,7 @@ public class StellarSystem : MonoBehaviour
     {
         var r = PlanetRegistry.GetRessources();
         var count = new int[r.Length];
-        var children = GetComponentsInChildren<PlanetGenerator>();
+        var children = GetComponentsInChildren<Planet>();
         for(int i = 0; i < children.Length; i++)
         {
             for(int t = 0; t < count.Length; t++)

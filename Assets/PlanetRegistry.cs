@@ -54,6 +54,17 @@ public class PlanetRegistry : MonoBehaviour
         ExampleRessource7
     }
 
+    public enum Facilities
+    {
+        ExampleFacility0,
+        ExampleFacility1,
+        ExampleFacility2,
+        ExampleFacility3,
+        ExampleFacility4,
+        ExampleFacility5,
+        ExampleFacility6,
+        ExampleFacility7
+    }
 
     void Awake()
     {
