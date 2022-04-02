@@ -50,13 +50,13 @@ public class StellarSystem : MonoBehaviour
             }
             _lanes[i].Planet.transform.localPosition = Random.insideUnitCircle.normalized * _lanes[i].Distance;
             
-            var resourcesToDistribute = new int[r.Length];
-            for (int t = 0; t < resourcesToDistribute.Length; t++)
+            var resourcesToDistribute = new List<PlanetRegistry.Resources>();
+            for (int t = 0; t < r.Length; t++)
             {
-                resourcesToDistribute[t] = Mathf.CeilToInt(ratios[t] * Mathf.Floor(resources / (float)planets));
+                if (Mathf.CeilToInt(ratios[t] * Mathf.Floor(resources / (float)planets)) > 0)
+                    resourcesToDistribute.Add(r[t]);
             }
-
-            _lanes[i].Planet.GetComponent<Planet>().Initialize(_systemType, r, resourcesToDistribute);
+            _lanes[i].Planet.GetComponent<Planet>().Initialize(_systemType, r);
         }
     }
 

@@ -10,12 +10,15 @@ public class Planet : MonoBehaviour
     #region localStorage
     private Dictionary<PlanetRegistry.Resources, int> _resources = new Dictionary<PlanetRegistry.Resources, int>();
     private int _people = 0;
+    private PlanetRegistry.Resources[] _availableResources;
     private List<PlanetRegistry.Facilities> _facilities = new List<PlanetRegistry.Facilities>();
+    private static Planet selected;
     #endregion localStorage
     #region Accessibility
     public Dictionary<PlanetRegistry.Resources, int> Resources { get => _resources; set => _resources = value; }
     public List<PlanetRegistry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
-
+    public static Planet Selected { get => selected;}
+    public PlanetRegistry.Resources[] AvailableResources { get => _availableResources;}
 
     public int GetResource(PlanetRegistry.Resources resoure)
     {
@@ -59,16 +62,34 @@ public class Planet : MonoBehaviour
 
     #endregion Accessibility
     #region Routines
-    private static Planet selected;
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
+            PointerEventData pointerData = new PointerEventData(EventSystem.current)
+            {
+                pointerId = -1,
+            };
+            pointerData.position = Input.mousePosition;
+            List<RaycastResult> results = new List<RaycastResult>();
+
+            EventSystem.current.RaycastAll(pointerData, results);
+
+            foreach(var r in results)
+            {
+                if (r.gameObject.name == "PlanetMenu" || r.gameObject.FindParentDeep("PlanetMenu"))
+                    return;
+            }
+
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var hit, 100))
-            {
-                if(transform == hit.transform || transform.FindDeep(t => t == hit.transform))
+            {                if(transform == hit.transform || transform.FindDeep(t => t == hit.transform))
                 {
+                    if(selected == this)
+                    {
+                        selected = null;
+                        return;
+                    }
                     selected = this;
                     return;
                 }
@@ -86,13 +107,13 @@ public class Planet : MonoBehaviour
     }
     #endregion Routines
     #region Generation
-    public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Resources[] resources, int[] resourcesCount)
+    public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Resources[] resources)
     {
         for (int i = 0; i < System.Enum.GetNames(typeof(PlanetRegistry.Resources)).Length; i++)
         {
-            int r = System.Array.FindIndex(resources, t => t == (PlanetRegistry.Resources)i);
-            _resources.Add((PlanetRegistry.Resources)i, r == -1 ? 0 : resourcesCount[r]);
+            _resources.Add((PlanetRegistry.Resources)i, 0);
         }
+        _availableResources = resources;
         Destroy(GetComponent<MeshRenderer>());
         for(int i = transform.childCount - 1; i >= 0 ; i--)
         {

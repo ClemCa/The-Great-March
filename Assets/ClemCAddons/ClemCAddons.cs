@@ -2885,6 +2885,8 @@ namespace ClemCAddons
             if (transform == null)
                 return null;
             Transform res = transform.parent;
+            if (res == null)
+                return null;
             if (res.name == name)
             {
                 return res;

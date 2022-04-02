@@ -1,3 +1,4 @@
+using ClemCAddons;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ public class PlanetRegistry : MonoBehaviour
     [SerializeField] private GameObject[] _frozenPlanets;
     [SerializeField] private GameObject[] _temperatePlanets;
     [SerializeField] private GameObject[] _tundraPlanets;
+    [SerializeField] private ResourceSprite[] _resourceSprites;
 
     private static PlanetRegistry _instance;
 
@@ -20,6 +22,13 @@ public class PlanetRegistry : MonoBehaviour
     public static Resources[] GetResources()
     {
         return (Resources[])Enum.GetValues(typeof(Resources));
+    }
+
+    [Serializable]
+    public class ResourceSprite
+    {
+        public Resources resource;
+        public Sprite sprite;
     }
 
     public enum PlanetType
@@ -68,6 +77,12 @@ public class PlanetRegistry : MonoBehaviour
     {
         _instance = this;
     }
+
+    public Sprite GetRessourceSprite(Resources resource)
+    {
+        return Array.Find(_resourceSprites, t => t.resource == resource).sprite;
+    }
+
     public GameObject GetRandomPlanet(PlanetType planetType = PlanetType.None)
     {
         while (planetType == PlanetType.None)
