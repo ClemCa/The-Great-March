@@ -12,6 +12,7 @@ public class ShippingSubMenu : MonoBehaviour
     private bool _enabled;
     private static ShippingSubMenu _instance;
     private int _currentValue = 0;
+    private bool _mode;
 
     public static ShippingSubMenu Instance { get => _instance; }
 
@@ -51,33 +52,57 @@ public class ShippingSubMenu : MonoBehaviour
             ResetMenu();
         }
     }
+    private void SetState(bool value)
+    {
+        _enabled = value;
+        if (_enabled)
+        {
+            _rectTransform.position = _target.position;
+            FacilitySubMenu.Hide();
+            ResourcesSelectionSubMenu.Hide(null);
+        }
+        else
+        {
+            ResetMenu();
+        }
+    }
     private void ExecuteResetMenu()
     {
         transform.FindDeep("ContentChoice").gameObject.SetActive(true);
         transform.FindDeep("PeopleChoice").gameObject.SetActive(false);
         transform.FindDeep("ResourcesChoice").gameObject.SetActive(false);
+        transform.GetComponentInChildren<SelectResourcesButton>(true).SetResource(null);
         ResourcesSelectionSubMenu.Hide(null);
         _currentValue = 0;
     }
 
     public void ShowPeopleChoice()
-    {
+    {       
+        _mode = true;
         transform.FindDeep("ContentChoice").gameObject.SetActive(false);
         transform.FindDeep("PeopleChoice").gameObject.SetActive(true);
-        var slider = transform.FindDeep("PeopleChoice").GetComponentInChildren<Slider>();
-        slider.minValue = 0;
-        slider.maxValue = Planet.Selected.GetPeople();
-        slider.value = _currentValue;
+        _currentValue = _currentValue.Min(Planet.Selected.GetPeople());
     }
     public void ShowResourcesChoice()
     {
+        _mode = false;
         transform.FindDeep("ContentChoice").gameObject.SetActive(false);
         transform.FindDeep("ResourcesChoice").gameObject.SetActive(true);
+        _currentValue = 0;
     }
 
-    public void UpdateValue(float value)
+    public void UpdateValue(int value)
     {
-        _currentValue = (int)value;
+        if(_mode)
+            _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetPeople());
+        var button = GetComponentInChildren<SelectResourcesButton>();
+        if(!_mode && button.Unlocked)
+            _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.Resource));
+    }
+
+    public void Reset(int value)
+    {
+        _currentValue = value;
     }
 
     public int GetValue()
@@ -93,6 +118,11 @@ public class ShippingSubMenu : MonoBehaviour
     {
         _instance._enabled = false;
         ResetMenu();
+    }
+
+    public static void Show()
+    {
+        _instance.SetState(true);
     }
 
     public static void ResetMenu()

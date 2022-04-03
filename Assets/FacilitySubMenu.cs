@@ -9,6 +9,7 @@ public class FacilitySubMenu : MonoBehaviour
     private Transform _target;
     private bool _enabled;
     private static FacilitySubMenu _instance;
+    private PlanetRegistry.Resources? _ressource;
 
     void Start()
     {
@@ -33,8 +34,12 @@ public class FacilitySubMenu : MonoBehaviour
 
     private void ExecuteFlip(Transform target, PlanetRegistry.Resources resource)
     {
+        if (_ressource.HasValue && _ressource.Value != resource)
+            _enabled = true;
+        else
+            _enabled = !_enabled;
         _target = target;
-        _enabled = !_enabled;
+        _ressource = resource;
         if (_enabled)
         {
             _rectTransform.position = _target.position;

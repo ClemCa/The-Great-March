@@ -14,12 +14,17 @@ public class Planet : MonoBehaviour
     private List<PlanetRegistry.Facilities> _facilities = new List<PlanetRegistry.Facilities>();
     private List<float> _facilitiesProgression = new List<float>();
     private static Planet selected;
+    private static PlanetRegistry.Resources moveSelection;
+    private static int moveSelectionCount;
+    private static Planet moveSelectionOrigin;
+    private static bool moveSelectionType;
     #endregion localStorage
     #region Accessibility
     public Dictionary<PlanetRegistry.Resources, int> Resources { get => _resources; set => _resources = value; }
     public List<PlanetRegistry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
     public static Planet Selected { get => selected;}
     public PlanetRegistry.Resources[] AvailableResources { get => _availableResources;}
+
 
     public bool GetSlot(PlanetRegistry.Resources resource)
     {
@@ -128,10 +133,89 @@ public class Planet : MonoBehaviour
     {
         _availableResources = availableResources;
     }
-
+    public void EngageMoveSelectionMode(PlanetRegistry.Resources resource, int count)
+    {
+        Pausing.Block();
+        moveSelection = resource;
+        moveSelectionCount = count;
+        moveSelectionOrigin = selected;
+        moveSelectionType = true;
+        selected = null;
+    }
+    public void EngageMoveSelectionMode(int count)
+    {
+        Pausing.Block();
+        moveSelectionCount = count;
+        moveSelectionOrigin = selected;
+        moveSelectionType = false;
+        selected = null;
+    }
     #endregion Accessibility
     #region Routines
     void Update()
+    {
+        if (moveSelectionCount == 0)
+            StandardUpdate();
+        else
+            MoveSelectionMode();
+    }
+    private void MoveSelectionMode()
+    {
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            pointerId = -1,
+        };
+        pointerData.position = Input.mousePosition;
+        List<RaycastResult> results = new List<RaycastResult>();
+
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (moveSelectionOrigin == this)
+        {
+            GetComponentInChildren<Outline>().color = 0;
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            moveSelectionCount = 0;
+            selected = moveSelectionOrigin;
+            ShippingSubMenu.Show();
+            ShippingSubMenu.ResetMenu();
+            if (moveSelectionType)
+                ShippingSubMenu.Instance.ShowResourcesChoice();
+            else
+                ShippingSubMenu.Instance.ShowPeopleChoice();
+            Pausing.Unblock();
+
+        }
+        if (Physics.Raycast(ray, out var hit, 100))
+        {
+            if (transform == hit.transform || transform.FindDeep(t => t == hit.transform))
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    if (moveSelectionType)
+                        CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelection, moveSelectionCount);
+                    else
+                        CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelectionCount);
+                    moveSelectionCount = 0;
+                    ShippingSubMenu.ResetMenu();
+                    Pausing.Unblock();
+                }
+                else
+                {
+                    GetComponentInChildren<Outline>().color = 2;
+                }
+            }
+            else
+            {
+                GetComponentInChildren<Outline>().color = 1;
+            }
+        }
+    }
+    private void StandardUpdate()
     {
         if (Input.GetMouseButtonDown(0))
         {
@@ -144,7 +228,8 @@ public class Planet : MonoBehaviour
 
             EventSystem.current.RaycastAll(pointerData, results);
 
-            foreach(var r in results)
+
+            foreach (var r in results)
             {
                 if (r.gameObject.name == "Menu" || r.gameObject.FindParentDeep("Menu"))
                     return;
@@ -152,9 +237,10 @@ public class Planet : MonoBehaviour
 
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out var hit, 100))
-            {                if(transform == hit.transform || transform.FindDeep(t => t == hit.transform))
+            {
+                if (transform == hit.transform || transform.FindDeep(t => t == hit.transform))
                 {
-                    if(selected == this)
+                    if (selected == this)
                     {
                         selected = null;
                         return;

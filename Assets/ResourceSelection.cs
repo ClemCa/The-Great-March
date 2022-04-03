@@ -13,7 +13,10 @@ public class ResourceSelection : MonoBehaviour, IPointerClickHandler
     {
         ResourcesSelectionSubMenu.Hide(_resourceType);
     }
-
+    public PlanetRegistry.Resources GetResource()
+    {
+        return _resourceType;
+    }
     public void SetResource(PlanetRegistry.Resources resourceType)
     {
         _resourceType = resourceType;
@@ -28,6 +31,7 @@ public class ResourceSelection : MonoBehaviour, IPointerClickHandler
     {
         if (Planet.Selected == null)
             return;
-        transform.GetComponentInChildren<TMPro.TMP_Text>().text = Planet.Selected.GetResource(_resourceType).ToString();
+        if(ClemCAddons.Utilities.Timer.MinimumDelay("nospamtext".GetHashCode(),100,true))
+            transform.GetComponentInChildren<TMPro.TMP_Text>().text = Planet.Selected.GetResource(_resourceType).ToString();
     }
 }

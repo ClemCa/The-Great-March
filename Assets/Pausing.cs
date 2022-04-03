@@ -7,8 +7,19 @@ using UnityEngine.UI;
 public class Pausing : MonoBehaviour
 {
     private static bool _paused;
+    private static bool _blocked;
 
     public static bool Paused { get => _paused; }
+
+    public static void Block()
+    {
+        _blocked = true;
+    }
+
+    public static void Unblock()
+    {
+        _blocked = false;
+    }
 
     public static void Pause()
     {
@@ -33,7 +44,7 @@ public class Pausing : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && !_blocked)
         {
             FlipPause();
         }

@@ -41,9 +41,11 @@ public class ResourcesSelectionSubMenu : MonoBehaviour
 
     public static void Hide(PlanetRegistry.Resources? result)
     {
-        if(_instance._enabled)
+        if (_instance._enabled)
             _resourceReturn.Invoke(result);
         _instance._enabled = false;
+        _instance.GetComponentInChildren<InventoryUpdater>().Safe = false;
+
     }
     
     public static void Show(Transform target, ResourceReturn resourceReturn)
@@ -52,5 +54,6 @@ public class ResourcesSelectionSubMenu : MonoBehaviour
         _instance._target = target;
         _instance._rectTransform.position = target.position;
         _resourceReturn = resourceReturn;
+        _instance.GetComponentInChildren<InventoryUpdater>().Safe = true;
     }
 }

@@ -2898,7 +2898,7 @@ namespace ClemCAddons
             var r = gameObject.transform.FindParentDeep(name);
             return r == null ? null : r.gameObject;
         }
-        public static Transform[] GetChildsWithComponent(this Transform transform, Type type)
+        public static Transform[] GetChildrenWithComponent(this Transform transform, Type type)
         {
             Transform[] r = new Transform[] { };
             for (int i = 0; i < transform.childCount; i++)
