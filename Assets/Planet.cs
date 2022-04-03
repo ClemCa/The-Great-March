@@ -16,16 +16,18 @@ public class Planet : MonoBehaviour
     private List<float> _facilitiesProgression = new List<float>();
     private List<Registry.TransformationFacilities> _transformationFacilities = new List<Registry.TransformationFacilities>();
     private List<float> _transformationFacilitiesProgression = new List<float>();
+    private string _name;
+    private int _availableWildcards;
     private static Planet selected;
     private static Registry.Resources moveSelection;
     private static int moveSelectionCount;
     private static Planet moveSelectionOrigin;
     private static bool moveSelectionType;
-    private string _name;
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
     public List<Registry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
+    public List<Registry.TransformationFacilities> TransformationFacilities { get => _transformationFacilities; set => _transformationFacilities = value; }
     public static Planet Selected { get => selected;}
     public Registry.Resources[] AvailableResources { get => _availableResources;}
     public string Name { get => _name; }
@@ -39,6 +41,12 @@ public class Planet : MonoBehaviour
     {
         return _availableResources.FindIndex(resource) != -1;
     }
+
+    public int GetWildcardSlots()
+    {
+        return _availableWildcards;
+    }
+
 
     public int GetResource(Registry.Resources resoure)
     {
@@ -87,6 +95,13 @@ public class Planet : MonoBehaviour
         _facilitiesProgression.Add(0);
     }
 
+
+    public void RegisterBuiltFacility(Registry.TransformationFacilities facility)
+    {
+        _transformationFacilities.Add(facility);
+        _transformationFacilitiesProgression.Add(0);
+    }
+
     public bool IsFacilityBuilt(Registry.Facilities facility)
     {
         return _facilities.FindIndex(t => t == facility) != -1;
@@ -96,6 +111,13 @@ public class Planet : MonoBehaviour
     {
         return _availableResources.FindIndex(Registry.Instance.GetAssociatedResource(facility)) != -1;
     }
+
+
+    public bool CanBuildFacility(Registry.TransformationFacilities facility)
+    {
+        return _availableWildcards > 0;
+    }
+
 
     public bool HasFacility(Registry.Resources resource)
     {
@@ -108,6 +130,10 @@ public class Planet : MonoBehaviour
                 return true;
         }
         return false;
+    }
+    public bool HasFacility(Registry.TransformationFacilities facility)
+    {
+        return _transformationFacilities.FindIndex(t => t == facility) != -1;
     }
 
     public Registry.Facilities GetFacility(Registry.Resources resource)
@@ -178,6 +204,8 @@ public class Planet : MonoBehaviour
             StandardUpdate();
         else
             MoveSelectionMode();
+        RunBasicFacilities();
+        RunTransformationFacilities(); ;
     }
 
     private void RunTransformationFacilities()

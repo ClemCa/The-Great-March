@@ -4,14 +4,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class FacilityMenu : MonoBehaviour, IPointerClickHandler
+public class TransformationFacilityMenu : MonoBehaviour, IPointerClickHandler
 {
-    private Registry.Facilities _facility;
+    private Registry.TransformationFacilities _facility;
 
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log(_facility + " clicked");
-
         OrderHandler.Instance.Queue(
             new OrderHandler.Order(
                 OrderHandler.OrderType.Building,
@@ -25,14 +24,14 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
         FacilitySubMenu.Hide();
     }
 
-    public void SetFacility(Registry.Facilities facility)
+    public void SetFacility(Registry.TransformationFacilities facility)
     {
         _facility = facility;
     }
 
     void Start()
     {
-        GetComponentInChildren<Image>().sprite = Registry.Instance.GetFacilitySprite(_facility);
+        GetComponentInChildren<Image>().sprite = Registry.Instance.GetTransformationFacilitySprite(_facility);
     }
 
     void Update()

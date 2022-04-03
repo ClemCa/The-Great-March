@@ -45,6 +45,7 @@ public class ShippingSubMenu : MonoBehaviour
         {
             _rectTransform.position = _target.position;
             FacilitySubMenu.Hide();
+            TransformationFacilitySubMenu.Hide();
             ResourcesSelectionSubMenu.Hide(null);
         }
         else
@@ -59,6 +60,7 @@ public class ShippingSubMenu : MonoBehaviour
         {
             _rectTransform.position = _target.position;
             FacilitySubMenu.Hide();
+            TransformationFacilitySubMenu.Hide();
             ResourcesSelectionSubMenu.Hide(null);
         }
         else

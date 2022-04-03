@@ -19,7 +19,7 @@ public class CloudMoveScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position += Vector3.right * speed * Time.deltaTime;
+        transform.position += Vector3.right * speed * Time.smoothDeltaTime;
 
         // Ensure that the cloud can always be seen by the main camera
         var ray = Camera.main.ViewportPointToRay(new Vector3(0,0.5f));

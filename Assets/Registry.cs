@@ -146,6 +146,11 @@ public class Registry : MonoBehaviour
         return Array.Find(_facilitiesInfo, t => t.Facility == facility).Sprite;
     }
 
+    public Sprite GetTransformationFacilitySprite(TransformationFacilities facility)
+    {
+        return Array.Find(_transformationFacilitiesInfos, t => t.Facility == facility).Sprite;
+    }
+
     public Resources GetAssociatedResource(Facilities facility)
     {
         return Array.Find(_facilitiesInfo, t => t.Facility == facility).AssociatedResource;

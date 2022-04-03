@@ -7,7 +7,10 @@ using ClemCAddons;
 
 public class OrderHandler : MonoBehaviour
 {
+    private static OrderHandler _instance;
     private Dictionary<Planet, List<Order>> _queue = new Dictionary<Planet, List<Order>>();
+
+    public static OrderHandler Instance { get => _instance; }
 
     public class Order
     {
@@ -37,6 +40,11 @@ public class OrderHandler : MonoBehaviour
         CargoResources,
         CargoPeople,
         CargoSelf
+    }
+
+    void Start()
+    {
+        _instance = this;
     }
 
     public void Queue(Order order, Planet planet)
