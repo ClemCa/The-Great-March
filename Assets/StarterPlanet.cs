@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class StarterPlanet : MonoBehaviour
 {
+    [SerializeField] private string starterName = "";
     [SerializeField] private int starterPeople = 0;
     [SerializeField] private StarterResource[] starterResources = new StarterResource[] { };
     [SerializeField] private PlanetRegistry.Facilities[] starterFacilities = new PlanetRegistry.Facilities[] { };
@@ -31,6 +32,7 @@ public class StarterPlanet : MonoBehaviour
             planet.RegisterBuiltFacility(facility);
         }
         planet.SetAvailableResources(starterSlots);
+        planet.SetName(starterName);
     }
 
 }

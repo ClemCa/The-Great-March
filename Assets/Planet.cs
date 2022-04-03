@@ -18,13 +18,19 @@ public class Planet : MonoBehaviour
     private static int moveSelectionCount;
     private static Planet moveSelectionOrigin;
     private static bool moveSelectionType;
+    private string _name;
     #endregion localStorage
     #region Accessibility
     public Dictionary<PlanetRegistry.Resources, int> Resources { get => _resources; set => _resources = value; }
     public List<PlanetRegistry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
     public static Planet Selected { get => selected;}
     public PlanetRegistry.Resources[] AvailableResources { get => _availableResources;}
+    public string Name { get => _name; }
 
+    public void SetName(string name)
+    {
+        _name = name;
+    }
 
     public bool GetSlot(PlanetRegistry.Resources resource)
     {
@@ -159,6 +165,13 @@ public class Planet : MonoBehaviour
         else
             MoveSelectionMode();
     }
+    private void RunFacilities()
+    {
+        foreach(var r in _facilities)
+        {
+
+        }
+    }
     private void MoveSelectionMode()
     {
         PointerEventData pointerData = new PointerEventData(EventSystem.current)
@@ -270,6 +283,11 @@ public class Planet : MonoBehaviour
         }
         if (_doNotRegenerate)
             return;
+        var rnd = new System.Random();
+        char a = (char)rnd.Next('a', 'z');
+        char b = (char)rnd.Next('a', 'z');
+        int num = rnd.Next(100, 9999);
+        _name = string.Concat(a, b, num);
         _availableResources = resources;
         Destroy(GetComponent<MeshRenderer>());
         for(int i = transform.childCount - 1; i >= 0 ; i--)
