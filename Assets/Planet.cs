@@ -56,7 +56,7 @@ public class Planet : MonoBehaviour
         _people -= count;
     }
 
-    public void FacilityBuilt(PlanetRegistry.Facilities facility)
+    public void RegisterBuiltFacility(PlanetRegistry.Facilities facility)
     {
         _facilities.Add(facility);
         _facilitiesProgression.Add(0);
@@ -65,6 +65,11 @@ public class Planet : MonoBehaviour
     public bool IsFacilityBuilt(PlanetRegistry.Facilities facility)
     {
         return _facilities.FindIndex(t => t == facility) != -1;
+    }
+
+    public bool CanBuildFacility(PlanetRegistry.Facilities facility)
+    {
+        return _availableResources.FindIndex(PlanetRegistry.Instance.GetAssociatedResource(facility)) != -1;
     }
 
     public bool HasFacility(PlanetRegistry.Resources resource)
@@ -136,7 +141,7 @@ public class Planet : MonoBehaviour
 
             foreach(var r in results)
             {
-                if (r.gameObject.name == "PlanetMenu" || r.gameObject.FindParentDeep("PlanetMenu"))
+                if (r.gameObject.name == "Menu" || r.gameObject.FindParentDeep("Menu"))
                     return;
             }
 

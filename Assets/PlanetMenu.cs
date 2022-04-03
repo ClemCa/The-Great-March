@@ -13,7 +13,6 @@ public class PlanetMenu : MonoBehaviour
         _rectTransform = GetComponent<RectTransform>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if((Planet.Selected != null).OnceIfTrueGate("PlanetMenu".GetHashCode()))

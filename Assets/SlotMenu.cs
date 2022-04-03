@@ -10,7 +10,10 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log(_resourceType + " clicked");
+        if (!Planet.Selected.HasFacility(_resourceType))
+        {
+            FacilitySubMenu.Flip(transform, _resourceType);
+        }
     }
 
     public void SetResource(PlanetRegistry.Resources resourceType)
