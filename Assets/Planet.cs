@@ -124,6 +124,11 @@ public class Planet : MonoBehaviour
         return _facilitiesProgression[index];
     }
 
+    public void SetAvailableResources(PlanetRegistry.Resources[] availableResources)
+    {
+        _availableResources = availableResources;
+    }
+
     #endregion Accessibility
     #region Routines
     void Update()
@@ -171,12 +176,14 @@ public class Planet : MonoBehaviour
     }
     #endregion Routines
     #region Generation
-    public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Resources[] resources)
+    public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Resources[] resources, bool _doNotRegenerate = false)
     {
         for (int i = 0; i < System.Enum.GetNames(typeof(PlanetRegistry.Resources)).Length; i++)
         {
             _resources.Add((PlanetRegistry.Resources)i, 0);
         }
+        if (_doNotRegenerate)
+            return;
         _availableResources = resources;
         Destroy(GetComponent<MeshRenderer>());
         for(int i = transform.childCount - 1; i >= 0 ; i--)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ClemCAddons;
 
 public class SlotMenu : MonoBehaviour, IPointerClickHandler
 {
@@ -12,7 +13,7 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
     {
         if (!Planet.Selected.HasFacility(_resourceType))
         {
-            FacilitySubMenu.Flip(transform, _resourceType);
+            FacilitySubMenu.Flip(transform.FindParentDeep("PlanetMenu").Find("Inventory Section"), _resourceType);
         }
     }
 

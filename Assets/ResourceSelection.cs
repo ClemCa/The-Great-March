@@ -1,18 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using ClemCAddons;
-using System.Linq;
 
-public class ResourceMenu : MonoBehaviour, IPointerClickHandler
+public class ResourceSelection : MonoBehaviour, IPointerClickHandler
 {
     private PlanetRegistry.Resources _resourceType;
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("Nothing to do on resource click");
+        ResourcesSelectionSubMenu.Hide(_resourceType);
     }
 
     public void SetResource(PlanetRegistry.Resources resourceType)

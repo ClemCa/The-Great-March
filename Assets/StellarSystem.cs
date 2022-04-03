@@ -11,6 +11,7 @@ public class StellarSystem : MonoBehaviour
     [SerializeField] private float _distancePlanets = 3;
     [SerializeField] private float _minimumDistance = 2;
     [SerializeField] private PlanetRegistry.SystemType _systemType;
+    [SerializeField] private bool _doNotRegenerate = false;
     private Lane[] _lanes;
     private struct Lane
     {
@@ -28,13 +29,18 @@ public class StellarSystem : MonoBehaviour
         _systemType = systemType;
     }
 
-    void Start()
+    void Awake()
     {
-        while(_systemType == PlanetRegistry.SystemType.None)
+        while (_systemType == PlanetRegistry.SystemType.None)
             _systemType = (PlanetRegistry.SystemType)Random.Range(0, System.Enum.GetNames(typeof(PlanetRegistry.SystemType)).Length - 1);
         int planets = Random.Range(2,5);
         int resources = Random.Range(5, 8);
         var r = PlanetRegistry.GetResources();
+        if (_doNotRegenerate)
+        {
+            _firstPlanet.GetComponent<Planet>().Initialize(_systemType, new PlanetRegistry.Resources[] { }, true);
+            return;
+        }
         while(r.Length > resources)
         {
             r = r.RemoveAt(Random.Range(0, r.Length));

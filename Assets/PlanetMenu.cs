@@ -5,6 +5,8 @@ using ClemCAddons;
 
 public class PlanetMenu : MonoBehaviour
 {
+    [SerializeField] private bool _targetMode;
+
     private RectTransform _rectTransform;
     private Transform _target;
 
@@ -15,7 +17,7 @@ public class PlanetMenu : MonoBehaviour
 
     void Update()
     {
-        if((Planet.Selected != null).OnceIfTrueGate("PlanetMenu".GetHashCode()))
+        if(_targetMode && (Planet.Selected != null).OnceIfTrueGate("PlanetMenu".GetHashCode()))
         {
             _target = Planet.Selected.transform;
             _rectTransform.position = Camera.main.WorldToScreenPoint(Planet.Selected.transform.position);
@@ -25,11 +27,18 @@ public class PlanetMenu : MonoBehaviour
             _rectTransform.anchoredPosition = new Vector3(1920,0);
             return;
         }
-        if(Planet.Selected != _target)
+        if (_targetMode)
         {
-            _target = Planet.Selected.transform;
-            _rectTransform.position = Camera.main.WorldToScreenPoint(Planet.Selected.transform.position);
+            if (Planet.Selected != _target)
+            {
+                _target = Planet.Selected.transform;
+                _rectTransform.position = Camera.main.WorldToScreenPoint(Planet.Selected.transform.position);
+            }
+            _rectTransform.position = Vector3.Lerp(_rectTransform.position, Camera.main.WorldToScreenPoint(_target.position), Time.deltaTime * 5);
         }
-        _rectTransform.position = Vector3.Lerp(_rectTransform.position, Camera.main.WorldToScreenPoint(_target.position), Time.deltaTime * 5);
+        else
+        {
+            _rectTransform.anchoredPosition = Vector3.Lerp(_rectTransform.anchoredPosition, new Vector3(1920-_rectTransform.sizeDelta.x, 0), Time.deltaTime * 5);
+        }
     }
 }

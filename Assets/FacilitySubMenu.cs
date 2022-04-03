@@ -39,6 +39,8 @@ public class FacilitySubMenu : MonoBehaviour
         {
             _rectTransform.position = _target.position;
             GetComponentInChildren<FacilitiesSubMenuUpdater>().SelectResource(resource);
+            ShippingSubMenu.Hide();
+            ResourcesSelectionSubMenu.Hide(null);
         }
     }
     public static void Flip(Transform target, PlanetRegistry.Resources resource)
