@@ -8,10 +8,10 @@ public class SelectResourcesButton : MonoBehaviour, IPointerClickHandler
 {
     private bool _unlocked;
     private bool _canConfirm;
-    private PlanetRegistry.Resources _resource;
+    private Registry.Resources _resource;
 
     public bool Unlocked { get => _unlocked; }
-    public PlanetRegistry.Resources Resource { get => _resource; }
+    public Registry.Resources Resource { get => _resource; }
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -28,12 +28,12 @@ public class SelectResourcesButton : MonoBehaviour, IPointerClickHandler
         ResourcesSelectionSubMenu.Show(transform, SetResource);
     }
 
-    public void SetResource(PlanetRegistry.Resources? resource)
+    public void SetResource(Registry.Resources? resource)
     {
         if (resource.HasValue)
         {     
             _resource = resource.Value;
-            transform.GetComponentInChildren<Image>().sprite = PlanetRegistry.Instance.GetResourceSprite(resource.Value);
+            transform.GetComponentInChildren<Image>().sprite = Registry.Instance.GetResourceSprite(resource.Value);
             _unlocked = true;
             ShippingSubMenu.Instance.Reset(1);
         }

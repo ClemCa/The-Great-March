@@ -8,21 +8,21 @@ using System.Linq;
 
 public class ResourceMenu : MonoBehaviour, IPointerClickHandler
 {
-    private PlanetRegistry.Resources _resourceType;
+    private Registry.Resources _resourceType;
 
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log("Nothing to do on resource click");
     }
 
-    public void SetResource(PlanetRegistry.Resources resourceType)
+    public void SetResource(Registry.Resources resourceType)
     {
         _resourceType = resourceType;
     }
 
     void Start()
     {
-        GetComponentInChildren<Image>().sprite = PlanetRegistry.Instance.GetResourceSprite(_resourceType);
+        GetComponentInChildren<Image>().sprite = Registry.Instance.GetResourceSprite(_resourceType);
     }
 
     void Update()

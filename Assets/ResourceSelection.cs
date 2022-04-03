@@ -7,24 +7,24 @@ using UnityEngine.UI;
 
 public class ResourceSelection : MonoBehaviour, IPointerClickHandler
 {
-    private PlanetRegistry.Resources _resourceType;
+    private Registry.Resources _resourceType;
 
     public void OnPointerClick(PointerEventData eventData)
     {
         ResourcesSelectionSubMenu.Hide(_resourceType);
     }
-    public PlanetRegistry.Resources GetResource()
+    public Registry.Resources GetResource()
     {
         return _resourceType;
     }
-    public void SetResource(PlanetRegistry.Resources resourceType)
+    public void SetResource(Registry.Resources resourceType)
     {
         _resourceType = resourceType;
     }
 
     void Start()
     {
-        GetComponentInChildren<Image>().sprite = PlanetRegistry.Instance.GetResourceSprite(_resourceType);
+        GetComponentInChildren<Image>().sprite = Registry.Instance.GetResourceSprite(_resourceType);
     }
 
     void Update()

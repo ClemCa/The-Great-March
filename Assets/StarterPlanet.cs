@@ -8,13 +8,13 @@ public class StarterPlanet : MonoBehaviour
     [SerializeField] private string starterName = "";
     [SerializeField] private int starterPeople = 0;
     [SerializeField] private StarterResource[] starterResources = new StarterResource[] { };
-    [SerializeField] private PlanetRegistry.Facilities[] starterFacilities = new PlanetRegistry.Facilities[] { };
-    [SerializeField] private PlanetRegistry.Resources[] starterSlots = new PlanetRegistry.Resources[] { };
+    [SerializeField] private Registry.Facilities[] starterFacilities = new Registry.Facilities[] { };
+    [SerializeField] private Registry.Resources[] starterSlots = new Registry.Resources[] { };
 
     [Serializable]
     public class StarterResource
     {
-        public PlanetRegistry.Resources Ressource;
+        public Registry.Resources Ressource;
         public int Quantity;
     }
 

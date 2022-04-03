@@ -9,7 +9,7 @@ public class FacilitySubMenu : MonoBehaviour
     private Transform _target;
     private bool _enabled;
     private static FacilitySubMenu _instance;
-    private PlanetRegistry.Resources? _ressource;
+    private Registry.Resources? _ressource;
 
     void Start()
     {
@@ -32,7 +32,7 @@ public class FacilitySubMenu : MonoBehaviour
         _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.deltaTime * 5);
     }
 
-    private void ExecuteFlip(Transform target, PlanetRegistry.Resources resource)
+    private void ExecuteFlip(Transform target, Registry.Resources resource)
     {
         if (_ressource.HasValue && _ressource.Value != resource)
             _enabled = true;
@@ -48,7 +48,7 @@ public class FacilitySubMenu : MonoBehaviour
             ResourcesSelectionSubMenu.Hide(null);
         }
     }
-    public static void Flip(Transform target, PlanetRegistry.Resources resource)
+    public static void Flip(Transform target, Registry.Resources resource)
     {
         _instance.ExecuteFlip(target, resource);
     }

@@ -20,7 +20,7 @@ public class FacilitiesUpdater : MonoBehaviour
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
-        var r = PlanetRegistry.GetResources();
+        var r = Registry.GetResources();
         foreach (var resource in r)
         {
             if (_target.GetSlot(resource))

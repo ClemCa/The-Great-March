@@ -6,7 +6,7 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class PlanetRegistry : MonoBehaviour
+public class Registry : MonoBehaviour
 {
     [SerializeField] private GameObject[] _alienPlanets;
     [SerializeField] private GameObject[] _desertPlanets;
@@ -16,10 +16,11 @@ public class PlanetRegistry : MonoBehaviour
     [SerializeField] private GameObject[] _tundraPlanets;
     [SerializeField] private ResourceSprite[] _resourceSprites;
     [SerializeField] private FacilityInfos[] _facilitiesInfo;
+    [SerializeField] private TransformationFacilitiesInfos[] _transformationFacilitiesInfos;
 
-    private static PlanetRegistry _instance;
+    private static Registry _instance;
 
-    public static PlanetRegistry Instance { get => _instance; set => _instance = value; }
+    public static Registry Instance { get => _instance; set => _instance = value; }
 
     public static Resources[] GetResources()
     {
@@ -40,6 +41,21 @@ public class PlanetRegistry : MonoBehaviour
         public Facilities Facility;
         public Resources AssociatedResource;
         public Sprite Sprite;
+        public float Cooldown;
+    }
+
+    [Serializable]
+    public class TransformationFacilitiesInfos
+    {
+        public bool Advanced;
+        public TransformationFacilities Facility;
+        public Resources[] InputResources;
+        public Resources OutputResource;
+        public AdvancedResources OutputResourceTransformation;
+        public Sprite Sprite;
+        public float Cooldown;
+        public int Cost;
+        public int Production;
     }
 
     public enum PlanetType
@@ -74,6 +90,13 @@ public class PlanetRegistry : MonoBehaviour
         Plants
     }
 
+    public enum AdvancedResources
+    {
+        HighEfficiencyFuel,
+        HydrogenBattery,
+        PreparedFood
+    }
+
     public enum Facilities
     {
         HydrogenExtractor,
@@ -85,16 +108,38 @@ public class PlanetRegistry : MonoBehaviour
         SuperGrowthGreenhouse
     }
 
+    public enum TransformationFacilities
+    {
+        Type1Farm,
+        Type2Farm,
+        Type1Kitchen,
+        Type2Kitchen,
+        HellsKitchen,
+        Type1Raffinery,
+        Type2Raffinery,
+        Factory
+    }
+
     void Awake()
     {
         _instance = this;
+    }
+
+
+    public TransformationFacilitiesInfos GetFacilityInfo(TransformationFacilities facility)
+    {
+        return _transformationFacilitiesInfos.First(t => t.Facility == facility);
+    }
+
+    public FacilityInfos GetFacilityInfo(Facilities facility)
+    {
+        return _facilitiesInfo.First(t => t.Facility == facility);
     }
 
     public Sprite GetResourceSprite(Resources resource)
     {
         return Array.Find(_resourceSprites, t => t.Resource == resource).Sprite;
     }
-
 
     public Sprite GetFacilitySprite(Facilities facility)
     {

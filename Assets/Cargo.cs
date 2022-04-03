@@ -19,7 +19,7 @@ public class Cargo : MonoBehaviour
     public CargoType Type { get; private set; }
 
     public int Amount { get; private set; }
-    public PlanetRegistry.Resources? Resource { get; private set; }
+    public Registry.Resources? Resource { get; private set; }
 
     public Planet Origin { get; private set; }
     public Planet Destination { get; private set; }
@@ -52,7 +52,7 @@ public class Cargo : MonoBehaviour
         // smh comparing transform doesn't work
     }
 
-    public void Initialize(Planet origin, Planet destination, int amount, PlanetRegistry.Resources resource)
+    public void Initialize(Planet origin, Planet destination, int amount, Registry.Resources resource)
     {
         Type = CargoType.Resource;
 

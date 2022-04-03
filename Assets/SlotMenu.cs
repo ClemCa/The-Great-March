@@ -7,7 +7,7 @@ using ClemCAddons;
 
 public class SlotMenu : MonoBehaviour, IPointerClickHandler
 {
-    private PlanetRegistry.Resources _resourceType;
+    private Registry.Resources _resourceType;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -17,14 +17,14 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void SetResource(PlanetRegistry.Resources resourceType)
+    public void SetResource(Registry.Resources resourceType)
     {
         _resourceType = resourceType;
     }
 
     void Start()
     {
-        GetComponentInChildren<Image>().sprite = PlanetRegistry.Instance.GetResourceSprite(_resourceType);
+        GetComponentInChildren<Image>().sprite = Registry.Instance.GetResourceSprite(_resourceType);
     }
 
     void Update()
@@ -34,7 +34,7 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
         if (Planet.Selected.HasFacility(_resourceType))
         {
             transform.GetChild(1).gameObject.SetActive(true);
-            transform.GetChild(1).GetComponent<Image>().sprite = PlanetRegistry.Instance.GetFacilitySprite(Planet.Selected.GetFacility(_resourceType));
+            transform.GetChild(1).GetComponent<Image>().sprite = Registry.Instance.GetFacilitySprite(Planet.Selected.GetFacility(_resourceType));
         }
         else
         {

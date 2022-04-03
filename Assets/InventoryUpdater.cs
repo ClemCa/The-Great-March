@@ -15,7 +15,7 @@ public class InventoryUpdater : MonoBehaviour
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
-        var r = PlanetRegistry.GetResources();
+        var r = Registry.GetResources();
         foreach(var resource in r)
         {
             var t = Instantiate(_itemPrefab, transform);
@@ -41,7 +41,7 @@ public class InventoryUpdater : MonoBehaviour
     private void ClearUpdate()
     {
         Transform[] children = transform.GetChildrenWithComponent(typeof(ResourceSelection));
-        var r = PlanetRegistry.GetResources();
+        var r = Registry.GetResources();
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
         foreach (var resource in r)

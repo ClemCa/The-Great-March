@@ -16,7 +16,7 @@ public class ResourcesSelectionSubMenu : MonoBehaviour
     public static ResourcesSelectionSubMenu Instance { get => _instance; }
     public bool Enabled { get => _enabled; set => _enabled = value; }
 
-    public delegate void ResourceReturn(PlanetRegistry.Resources? resource);
+    public delegate void ResourceReturn(Registry.Resources? resource);
 
     void Start()
     {
@@ -39,7 +39,7 @@ public class ResourcesSelectionSubMenu : MonoBehaviour
         _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.deltaTime * 5);
     }
 
-    public static void Hide(PlanetRegistry.Resources? result)
+    public static void Hide(Registry.Resources? result)
     {
         if (_instance._enabled)
             _resourceReturn.Invoke(result);

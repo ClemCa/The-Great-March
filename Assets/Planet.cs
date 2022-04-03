@@ -8,23 +8,26 @@ using UnityEngine.EventSystems;
 public class Planet : MonoBehaviour
 {
     #region localStorage
-    private Dictionary<PlanetRegistry.Resources, int> _resources = new Dictionary<PlanetRegistry.Resources, int>();
+    private Dictionary<Registry.Resources, int> _resources = new Dictionary<Registry.Resources, int>();
+    private Dictionary<Registry.AdvancedResources, int> _advancedResources = new Dictionary<Registry.AdvancedResources, int>();
     private int _people = 0;
-    private PlanetRegistry.Resources[] _availableResources;
-    private List<PlanetRegistry.Facilities> _facilities = new List<PlanetRegistry.Facilities>();
+    private Registry.Resources[] _availableResources;
+    private List<Registry.Facilities> _facilities = new List<Registry.Facilities>();
     private List<float> _facilitiesProgression = new List<float>();
+    private List<Registry.TransformationFacilities> _transformationFacilities = new List<Registry.TransformationFacilities>();
+    private List<float> _transformationFacilitiesProgression = new List<float>();
     private static Planet selected;
-    private static PlanetRegistry.Resources moveSelection;
+    private static Registry.Resources moveSelection;
     private static int moveSelectionCount;
     private static Planet moveSelectionOrigin;
     private static bool moveSelectionType;
     private string _name;
     #endregion localStorage
     #region Accessibility
-    public Dictionary<PlanetRegistry.Resources, int> Resources { get => _resources; set => _resources = value; }
-    public List<PlanetRegistry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
+    public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
+    public List<Registry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
     public static Planet Selected { get => selected;}
-    public PlanetRegistry.Resources[] AvailableResources { get => _availableResources;}
+    public Registry.Resources[] AvailableResources { get => _availableResources;}
     public string Name { get => _name; }
 
     public void SetName(string name)
@@ -32,22 +35,33 @@ public class Planet : MonoBehaviour
         _name = name;
     }
 
-    public bool GetSlot(PlanetRegistry.Resources resource)
+    public bool GetSlot(Registry.Resources resource)
     {
         return _availableResources.FindIndex(resource) != -1;
     }
 
-    public int GetResource(PlanetRegistry.Resources resoure)
+    public int GetResource(Registry.Resources resoure)
     {
         return _resources[resoure];
     }
 
-    public void AddResource(PlanetRegistry.Resources resource, int count = 1)
+
+    public void AddResource(Registry.AdvancedResources resource, int count = 1)
+    {
+        _advancedResources[resource] += count;
+    }
+
+    public void TakeResource(Registry.AdvancedResources resource, int count = 1)
+    {
+        _advancedResources[resource] -= count;
+    }
+
+    public void AddResource(Registry.Resources resource, int count = 1)
     {
         _resources[resource] += count;
     }
 
-    public void TakeResource(PlanetRegistry.Resources resource, int count = 1)
+    public void TakeResource(Registry.Resources resource, int count = 1)
     {
         _resources[resource] -= count;
     }
@@ -67,26 +81,26 @@ public class Planet : MonoBehaviour
         _people -= count;
     }
 
-    public void RegisterBuiltFacility(PlanetRegistry.Facilities facility)
+    public void RegisterBuiltFacility(Registry.Facilities facility)
     {
         _facilities.Add(facility);
         _facilitiesProgression.Add(0);
     }
 
-    public bool IsFacilityBuilt(PlanetRegistry.Facilities facility)
+    public bool IsFacilityBuilt(Registry.Facilities facility)
     {
         return _facilities.FindIndex(t => t == facility) != -1;
     }
 
-    public bool CanBuildFacility(PlanetRegistry.Facilities facility)
+    public bool CanBuildFacility(Registry.Facilities facility)
     {
-        return _availableResources.FindIndex(PlanetRegistry.Instance.GetAssociatedResource(facility)) != -1;
+        return _availableResources.FindIndex(Registry.Instance.GetAssociatedResource(facility)) != -1;
     }
 
-    public bool HasFacility(PlanetRegistry.Resources resource)
+    public bool HasFacility(Registry.Resources resource)
     {
         var r = _availableResources.FindIndex(resource);
-        var t = PlanetRegistry.Instance.GetAssociatedFacilities(resource);
+        var t = Registry.Instance.GetAssociatedFacilities(resource);
         foreach (var facility in t)
         {
             var i = _facilities.FindIndex(t => t == facility);
@@ -96,10 +110,10 @@ public class Planet : MonoBehaviour
         return false;
     }
 
-    public PlanetRegistry.Facilities GetFacility(PlanetRegistry.Resources resource)
+    public Registry.Facilities GetFacility(Registry.Resources resource)
     {
         var r = _availableResources.FindIndex(resource);
-        var t = PlanetRegistry.Instance.GetAssociatedFacilities(resource);
+        var t = Registry.Instance.GetAssociatedFacilities(resource);
         foreach (var facility in t)
         {
             var i = _facilities.FindIndex(t => t == facility);
@@ -109,12 +123,12 @@ public class Planet : MonoBehaviour
         return _facilities[0];
     }
 
-    public float GetFactoryProgression(PlanetRegistry.Resources resource)
+    public float GetFactoryProgression(Registry.Resources resource)
     {
         var r = _availableResources.FindIndex(resource);
         if (r == -1)
             return 0;
-        var t = PlanetRegistry.Instance.GetAssociatedFacilities(resource);
+        var t = Registry.Instance.GetAssociatedFacilities(resource);
         int index = -1;
         foreach(var facility in t)
         {
@@ -127,7 +141,7 @@ public class Planet : MonoBehaviour
         return _facilitiesProgression[index];
     }
 
-    public float GetFactoryProgression(PlanetRegistry.Facilities facility)
+    public float GetFactoryProgression(Registry.Facilities facility)
     {
         var index = _facilities.FindIndex(t => t == facility);
         if (index == -1)
@@ -135,11 +149,11 @@ public class Planet : MonoBehaviour
         return _facilitiesProgression[index];
     }
 
-    public void SetAvailableResources(PlanetRegistry.Resources[] availableResources)
+    public void SetAvailableResources(Registry.Resources[] availableResources)
     {
         _availableResources = availableResources;
     }
-    public void EngageMoveSelectionMode(PlanetRegistry.Resources resource, int count)
+    public void EngageMoveSelectionMode(Registry.Resources resource, int count)
     {
         Pausing.Block();
         moveSelection = resource;
@@ -165,11 +179,43 @@ public class Planet : MonoBehaviour
         else
             MoveSelectionMode();
     }
-    private void RunFacilities()
-    {
-        foreach(var r in _facilities)
-        {
 
+    private void RunTransformationFacilities()
+    {
+        for (int i = 0; i < _transformationFacilities.Count; i++)
+        {
+            var info = Registry.Instance.GetFacilityInfo(_transformationFacilities[i]);
+            bool confirm = true;
+            foreach (var resource in info.InputResources)
+                if (GetResource(resource) < info.Cost)
+                    confirm = false;
+            if (!confirm)
+                continue;
+            _transformationFacilitiesProgression[i] += Time.deltaTime * (_people / 5f);
+            if (_transformationFacilitiesProgression[i] > info.Cooldown)
+            {
+                _facilitiesProgression[i] = 0;
+                foreach(var resource in info.InputResources)
+                    TakeResource(resource, info.Cost);
+                if (info.Advanced)
+                    AddResource(info.OutputResourceTransformation, info.Production);
+                else
+                    AddResource(info.OutputResource, info.Production);
+            }
+        }
+    }
+
+    private void RunBasicFacilities()
+    {
+        for(int i = 0; i < _facilities.Count; i++)
+        {
+            var info = Registry.Instance.GetFacilityInfo(_facilities[i]);
+            _facilitiesProgression[i] += Time.deltaTime * (_people / 5f);
+            if(_facilitiesProgression[i] > info.Cooldown)
+            {
+                _facilitiesProgression[i] = 0;
+                AddResource(info.AssociatedResource);
+            }
         }
     }
     private void MoveSelectionMode()
@@ -275,11 +321,11 @@ public class Planet : MonoBehaviour
     }
     #endregion Routines
     #region Generation
-    public void Initialize(PlanetRegistry.SystemType systemType, PlanetRegistry.Resources[] resources, bool _doNotRegenerate = false)
+    public void Initialize(Registry.SystemType systemType, Registry.Resources[] resources, bool _doNotRegenerate = false)
     {
-        for (int i = 0; i < System.Enum.GetNames(typeof(PlanetRegistry.Resources)).Length; i++)
+        for (int i = 0; i < System.Enum.GetNames(typeof(Registry.Resources)).Length; i++)
         {
-            _resources.Add((PlanetRegistry.Resources)i, 0);
+            _resources.Add((Registry.Resources)i, 0);
         }
         if (_doNotRegenerate)
             return;
@@ -296,24 +342,24 @@ public class Planet : MonoBehaviour
         }
         switch (systemType)
         {
-            case PlanetRegistry.SystemType.Alien:
-                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Alien), transform)
+            case Registry.SystemType.Alien:
+                Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Alien), transform)
                      .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
-            case PlanetRegistry.SystemType.Cold:
-                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Frozen), transform)
+            case Registry.SystemType.Cold:
+                Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Frozen), transform)
                      .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
-            case PlanetRegistry.SystemType.Hot:
-                Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Desert), transform)
+            case Registry.SystemType.Hot:
+                Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Desert), transform)
                      .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
-            case PlanetRegistry.SystemType.Temperate:
+            case Registry.SystemType.Temperate:
                 if (Random.Range(0, 1) == 0)
-                    Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Temperate), transform)
+                    Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Temperate), transform)
                         .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 else
-                    Instantiate(PlanetRegistry.Instance.GetRandomPlanet(PlanetRegistry.PlanetType.Earth), transform)
+                    Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Earth), transform)
                         .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             default:

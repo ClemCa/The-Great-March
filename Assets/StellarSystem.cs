@@ -10,7 +10,7 @@ public class StellarSystem : MonoBehaviour
     [SerializeField] private GameObject _firstPlanet;
     [SerializeField] private float _distancePlanets = 3;
     [SerializeField] private float _minimumDistance = 2;
-    [SerializeField] private PlanetRegistry.SystemType _systemType;
+    [SerializeField] private Registry.SystemType _systemType;
     [SerializeField] private bool _doNotRegenerate = false;
     private Lane[] _lanes;
     private struct Lane
@@ -24,21 +24,21 @@ public class StellarSystem : MonoBehaviour
         }
     }
 
-    public void Setup(PlanetRegistry.SystemType systemType)
+    public void Setup(Registry.SystemType systemType)
     {
         _systemType = systemType;
     }
 
     void Awake()
     {
-        while (_systemType == PlanetRegistry.SystemType.None)
-            _systemType = (PlanetRegistry.SystemType)Random.Range(0, System.Enum.GetNames(typeof(PlanetRegistry.SystemType)).Length - 1);
+        while (_systemType == Registry.SystemType.None)
+            _systemType = (Registry.SystemType)Random.Range(0, System.Enum.GetNames(typeof(Registry.SystemType)).Length - 1);
         int planets = Random.Range(2,5);
         int resources = Random.Range(5, 8);
-        var r = PlanetRegistry.GetResources();
+        var r = Registry.GetResources();
         if (_doNotRegenerate)
         {
-            _firstPlanet.GetComponent<Planet>().Initialize(_systemType, new PlanetRegistry.Resources[] { }, true);
+            _firstPlanet.GetComponent<Planet>().Initialize(_systemType, new Registry.Resources[] { }, true);
             return;
         }
         while(r.Length > resources)
@@ -56,7 +56,7 @@ public class StellarSystem : MonoBehaviour
             }
             _lanes[i].Planet.transform.localPosition = Random.insideUnitCircle.normalized * _lanes[i].Distance;
             
-            var resourcesToDistribute = new List<PlanetRegistry.Resources>();
+            var resourcesToDistribute = new List<Registry.Resources>();
             for (int t = 0; t < r.Length; t++)
             {
                 if (Mathf.CeilToInt(ratios[t] * Mathf.Floor(resources / (float)planets)) > 0)
@@ -68,7 +68,7 @@ public class StellarSystem : MonoBehaviour
 
     private void PrintChildInventory()
     {
-        var r = PlanetRegistry.GetResources();
+        var r = Registry.GetResources();
         var count = new int[r.Length];
         var children = GetComponentsInChildren<Planet>();
         for(int i = 0; i < children.Length; i++)

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class FacilityMenu : MonoBehaviour, IPointerClickHandler
 {
-    private PlanetRegistry.Facilities _facility;
+    private Registry.Facilities _facility;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -17,14 +17,14 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
         Debug.Log("temporarily creating instantly");
     }
 
-    public void SetFacility(PlanetRegistry.Facilities facility)
+    public void SetFacility(Registry.Facilities facility)
     {
         _facility = facility;
     }
 
     void Start()
     {
-        GetComponentInChildren<Image>().sprite = PlanetRegistry.Instance.GetFacilitySprite(_facility);
+        GetComponentInChildren<Image>().sprite = Registry.Instance.GetFacilitySprite(_facility);
     }
 
     void Update()
