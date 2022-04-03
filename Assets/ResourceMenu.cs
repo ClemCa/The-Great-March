@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ClemCAddons;
+using System.Linq;
 
 public class ResourceMenu : MonoBehaviour, IPointerClickHandler
 {
@@ -11,6 +13,11 @@ public class ResourceMenu : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log(_resourceType + " clicked");
+        var r = Instantiate(PlanetRegistry.Instance.CargoPrefab);
+        var planets = FindObjectsOfType<Planet>().ToList();
+        planets.Remove(Planet.Selected);
+        var destination = planets[Random.Range(0, planets.Count)];
+        r.GetComponent<Cargo>().Initialize(Planet.Selected, destination, 1, _resourceType);
     }
 
     public void SetResource(PlanetRegistry.Resources resourceType)

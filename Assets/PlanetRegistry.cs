@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 
 public class PlanetRegistry : MonoBehaviour
 {
+    [SerializeField] private GameObject _cargoPrefab;
     [SerializeField] private GameObject[] _alienPlanets;
     [SerializeField] private GameObject[] _desertPlanets;
     [SerializeField] private GameObject[] _earthLikePlanets;
@@ -20,6 +21,7 @@ public class PlanetRegistry : MonoBehaviour
     private static PlanetRegistry _instance;
 
     public static PlanetRegistry Instance { get => _instance; set => _instance = value; }
+    public GameObject CargoPrefab { get => _cargoPrefab; set => _cargoPrefab = value; }
 
     public static Resources[] GetResources()
     {

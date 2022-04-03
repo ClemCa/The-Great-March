@@ -3053,6 +3053,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d0fd679580b3d2419100c248f911dea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cargoPrefab: {fileID: 7060606935528129019, guid: ac4d0c201c96efa4fb2933ffc0cb4e6e, type: 3}
   _alienPlanets:
   - {fileID: 1345651076695995216, guid: 642454a265967e1468360a08fc66db60, type: 3}
   - {fileID: 1771551219379481457, guid: 177ffad0c8fd19146974e0fbc8614e5f, type: 3}
