@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 
 public class Pausing : MonoBehaviour
 {
+    private static Pausing _instance;
+
     private static bool _paused;
     private static bool _blocked;
 
@@ -26,22 +28,34 @@ public class Pausing : MonoBehaviour
     {
         _paused = true;
         Time.timeScale = 0;
+
+        _instance.GetComponent<AudioSource>().Play();
+        AudioListener.volume = 0.5f;
     }
 
     public static void Unpause()
     {
         _paused = false;
         Time.timeScale = 1;
+
+        _instance.GetComponent<AudioSource>().Play();
+        AudioListener.volume = 1f;
     }
 
     public static void FlipPause()
     {
-        _paused = !_paused;
-        Time.timeScale = (!_paused).ToInt();
+        if (_paused) Unpause();
+        else Pause();
+    }
+
+    void Awake()
+    {
+        _instance = this;
     }
 
     private float _currentTransparency = 0;
     private bool _step;
+
     // Update is called once per frame
     void Update()
     {
