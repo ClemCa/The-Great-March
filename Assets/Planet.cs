@@ -315,11 +315,34 @@ public class Planet : MonoBehaviour
                 if (Input.GetMouseButtonDown(0))
                 {
                     if (moveSelectionType)
-                        CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelection, moveSelectionCount);
+                    {
+                        var order = new OrderHandler.Order(
+                            OrderHandler.OrderType.PreparingCargo,
+                            20,
+                            0.5f,
+                            3,
+                            () => {
+                                CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelection, moveSelectionCount);
+                            }
+                        );
+                        OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                    }
                     else
-                        CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelectionCount);
+                    {
+                        var order = new OrderHandler.Order(
+                               OrderHandler.OrderType.PreparingForTrip,
+                               20,
+                               0.5f,
+                               20,
+                               () => {
+                                   CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelectionCount);
+                               }
+                           );
+                        OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                    }
                     moveSelectionCount = 0;
                     ShippingSubMenu.ResetMenu();
+                    selected = moveSelectionOrigin;
                     Pausing.Unblock();
                 }
                 else

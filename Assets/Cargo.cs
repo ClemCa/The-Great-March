@@ -142,10 +142,23 @@ public class Cargo : MonoBehaviour
         }
         if (HasArrived())
         {
+            
             if (Type == CargoType.Resource)
-                Destination.AddResource(Resource.Value, Amount);
-            else  // Type == CargoType.People
+            {
+                var order = new OrderHandler.Order(
+                    OrderHandler.OrderType.UnpackingCargo,
+                    20,
+                    0.5f,
+                    3,
+                    () => {
+                        Destination.AddResource(Resource.Value, Amount);
+                    });
+                OrderHandler.Instance.Queue(order, Destination);
+            }
+            else
+            {
                 Destination.AddPeople(Amount);
+            }
             Destroy(gameObject);
         }
     }

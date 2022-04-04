@@ -38,8 +38,9 @@ public class OrderHandler : MonoBehaviour
     {
         Building,
         CargoResources,
-        CargoPeople,
-        CargoSelf
+        PreparingCargo,
+        PreparingForTrip,
+        UnpackingCargo
     }
 
     void Start()

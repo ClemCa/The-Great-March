@@ -96,14 +96,14 @@ public class ShippingSubMenu : MonoBehaviour
     public void UpdateValue(int value)
     {
         if(_mode)
-            _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetPeople());
+            _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetPeople().Min(5));
         var button = GetComponentInChildren<SelectResourcesButton>();
         if(!_mode && button.Unlocked)
         {
             if(button.IsAdvanced)
-                _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.AdvancedResource));
+                _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.AdvancedResource).Min(10));
             else
-                _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.Resource));
+                _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.Resource).Min(10));
 
         }
     }
