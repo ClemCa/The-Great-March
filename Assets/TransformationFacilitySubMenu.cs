@@ -45,7 +45,7 @@ public class TransformationFacilitySubMenu : MonoBehaviour
             _rectTransform.position = _target.position;
             ShippingSubMenu.Hide();
             FacilitySubMenu.Hide();
-            ResourcesSelectionSubMenu.Hide(null);
+            ResourcesSelectionSubMenu.Hide();
         }
     }
     public static void Flip(Transform target, int slotID)

@@ -46,7 +46,7 @@ public class FacilitySubMenu : MonoBehaviour
             GetComponentInChildren<FacilitiesSubMenuUpdater>().SelectResource(resource);
             ShippingSubMenu.Hide();
             TransformationFacilitySubMenu.Hide();
-            ResourcesSelectionSubMenu.Hide(null);
+            ResourcesSelectionSubMenu.Hide();
         }
     }
     public static void Flip(Transform target, Registry.Resources resource)

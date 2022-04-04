@@ -9,9 +9,13 @@ public class SelectResourcesButton : MonoBehaviour, IPointerClickHandler
     private bool _unlocked;
     private bool _canConfirm;
     private Registry.Resources _resource;
+    private Registry.AdvancedResources _advancedResource;
+    private bool _isAdvanced;
 
     public bool Unlocked { get => _unlocked; }
     public Registry.Resources Resource { get => _resource; }
+    public Registry.AdvancedResources AdvancedResource { get => _advancedResource; }
+    public bool IsAdvanced { get => _isAdvanced; }
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -22,18 +26,27 @@ public class SelectResourcesButton : MonoBehaviour, IPointerClickHandler
         }
         if (ResourcesSelectionSubMenu.Instance.Enabled)
         {
-            ResourcesSelectionSubMenu.Hide(null);
+            ResourcesSelectionSubMenu.Hide();
             return;
         }
         ResourcesSelectionSubMenu.Show(transform, SetResource);
     }
 
-    public void SetResource(Registry.Resources? resource)
+    public void SetResource(Registry.Resources? resource, Registry.AdvancedResources? advancedResource)
     {
         if (resource.HasValue)
         {     
             _resource = resource.Value;
+            _isAdvanced = false;
             transform.GetComponentInChildren<Image>().sprite = Registry.Instance.GetResourceSprite(resource.Value);
+            _unlocked = true;
+            ShippingSubMenu.Instance.Reset(1);
+        }
+        else if (advancedResource.HasValue)
+        {
+            _advancedResource = advancedResource.Value;
+            _isAdvanced = true;
+            transform.GetComponentInChildren<Image>().sprite = Registry.Instance.GetAdvancedResourceSprite(advancedResource.Value);
             _unlocked = true;
             ShippingSubMenu.Instance.Reset(1);
         }

@@ -8,13 +8,16 @@ public class TransformationFacilitiesSubMenuUpdater : MonoBehaviour
     [SerializeField] private GameObject _facilityPrefab;
     private Planet _target;
     private int _wildcards;
+    private int _building;
+
 
     void Update()
     {
-        if (Planet.Selected != null && (Planet.Selected != _target || Planet.Selected.GetWildcardSlots() != _wildcards))
+        if (Planet.Selected != null && (Planet.Selected != _target || Planet.Selected.GetWildcardSlots() != _wildcards || _building != TransformationFacilityMenu.OrderedFacilities.Count))
         {
             _target = Planet.Selected;
             _wildcards = Planet.Selected.GetWildcardSlots();
+            _building = TransformationFacilityMenu.OrderedFacilities.Count;
             Redraw();
         }
     }
@@ -27,7 +30,7 @@ public class TransformationFacilitiesSubMenuUpdater : MonoBehaviour
         var r = _target.TransformationFacilities;
         foreach(var possibility in possibilities)
         {
-            if (!r.Contains(possibility))
+            if (!r.Contains(possibility) && TransformationFacilityMenu.OrderedFacilities.FindIndex(t => t.Value == possibility) == -1)
             {
                 Instantiate(_facilityPrefab, transform).GetComponentInChildren<TransformationFacilityMenu>().SetFacility(possibility);
             }

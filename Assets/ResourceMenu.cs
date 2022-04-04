@@ -9,6 +9,8 @@ using System.Linq;
 public class ResourceMenu : MonoBehaviour, IPointerClickHandler
 {
     private Registry.Resources _resourceType;
+    private Registry.AdvancedResources _advancedResourceType;
+    private bool _advancedResources;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -20,15 +22,27 @@ public class ResourceMenu : MonoBehaviour, IPointerClickHandler
         _resourceType = resourceType;
     }
 
+    public void SetResource(Registry.AdvancedResources resourceType)
+    {
+        _advancedResourceType = resourceType;
+        _advancedResources = true;
+    }
+
     void Start()
     {
-        GetComponentInChildren<Image>().sprite = Registry.Instance.GetResourceSprite(_resourceType);
+        if(_advancedResources)
+            GetComponentInChildren<Image>().sprite = Registry.Instance.GetAdvancedResourceSprite(_advancedResourceType);
+        else
+            GetComponentInChildren<Image>().sprite = Registry.Instance.GetResourceSprite(_resourceType);
     }
 
     void Update()
     {
         if (Planet.Selected == null)
             return;
-        transform.GetComponentInChildren<TMPro.TMP_Text>().text = Planet.Selected.GetResource(_resourceType).ToString();
+        if(_advancedResources)
+            transform.GetComponentInChildren<TMPro.TMP_Text>().text = Planet.Selected.GetResource(_advancedResourceType).ToString();
+        else
+            transform.GetComponentInChildren<TMPro.TMP_Text>().text = Planet.Selected.GetResource(_resourceType).ToString();
     }
 }

@@ -16,7 +16,7 @@ public class ResourcesSelectionSubMenu : MonoBehaviour
     public static ResourcesSelectionSubMenu Instance { get => _instance; }
     public bool Enabled { get => _enabled; set => _enabled = value; }
 
-    public delegate void ResourceReturn(Registry.Resources? resource);
+    public delegate void ResourceReturn(Registry.Resources? resource, Registry.AdvancedResources? advancedResource);
 
     void Start()
     {
@@ -39,15 +39,31 @@ public class ResourcesSelectionSubMenu : MonoBehaviour
         _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.deltaTime * 5);
     }
 
+    public static void Hide()
+    {
+        if (_instance._enabled)
+            _resourceReturn.Invoke(null, null);
+        _instance._enabled = false;
+        _instance.GetComponentInChildren<InventoryUpdater>().Safe = false;
+    }
+
     public static void Hide(Registry.Resources? result)
     {
         if (_instance._enabled)
-            _resourceReturn.Invoke(result);
+            _resourceReturn.Invoke(result, null);
+        _instance._enabled = false;
+        _instance.GetComponentInChildren<InventoryUpdater>().Safe = false;
+    }
+
+    public static void Hide(Registry.AdvancedResources? result)
+    {
+        if (_instance._enabled)
+            _resourceReturn.Invoke(null, result);
         _instance._enabled = false;
         _instance.GetComponentInChildren<InventoryUpdater>().Safe = false;
 
     }
-    
+
     public static void Show(Transform target, ResourceReturn resourceReturn)
     {
         _instance._enabled = true;

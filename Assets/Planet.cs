@@ -26,10 +26,15 @@ public class Planet : MonoBehaviour
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
+    public Dictionary<Registry.AdvancedResources, int> AdvancedResources { get => _advancedResources; set => _advancedResources = value; }
+
     public List<Registry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
     public List<Registry.TransformationFacilities> TransformationFacilities { get => _transformationFacilities; set => _transformationFacilities = value; }
+
     public static Planet Selected { get => selected;}
+
     public Registry.Resources[] AvailableResources { get => _availableResources;}
+
     public string Name { get => _name; }
 
     public void SetWildcardSlots(int slots)
@@ -58,6 +63,10 @@ public class Planet : MonoBehaviour
         return _resources[resoure];
     }
 
+    public int GetResource(Registry.AdvancedResources resoure)
+    {
+        return _advancedResources[resoure];
+    }
 
     public void AddResource(Registry.AdvancedResources resource, int count = 1)
     {

@@ -42,6 +42,7 @@ public class InventoryUpdater : MonoBehaviour
     {
         Transform[] children = transform.GetChildrenWithComponent(typeof(ResourceSelection));
         var r = Registry.GetResources();
+        var r2 = Planet.Selected.AdvancedResources;
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
         foreach (var resource in r)
@@ -53,6 +54,17 @@ public class InventoryUpdater : MonoBehaviour
                     res.SetResource(resource);
                 if (t.TryGetComponent<ResourceSelection>(out var result))
                     result.SetResource(resource);
+            }
+        }
+        foreach(var advancedResource in r2)
+        {
+            if (advancedResource.Value > 0)
+            {
+                var t = Instantiate(_itemPrefab, transform);
+                if (t.TryGetComponent<ResourceMenu>(out var res))
+                    res.SetResource(advancedResource.Key);
+                if (t.TryGetComponent<ResourceSelection>(out var result))
+                    result.SetResource(advancedResource.Key);
             }
         }
     }

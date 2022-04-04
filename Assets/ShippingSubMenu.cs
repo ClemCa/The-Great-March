@@ -46,7 +46,7 @@ public class ShippingSubMenu : MonoBehaviour
             _rectTransform.position = _target.position;
             FacilitySubMenu.Hide();
             TransformationFacilitySubMenu.Hide();
-            ResourcesSelectionSubMenu.Hide(null);
+            ResourcesSelectionSubMenu.Hide();
         }
         else
         {
@@ -61,7 +61,7 @@ public class ShippingSubMenu : MonoBehaviour
             _rectTransform.position = _target.position;
             FacilitySubMenu.Hide();
             TransformationFacilitySubMenu.Hide();
-            ResourcesSelectionSubMenu.Hide(null);
+            ResourcesSelectionSubMenu.Hide();
         }
         else
         {
@@ -73,8 +73,8 @@ public class ShippingSubMenu : MonoBehaviour
         transform.FindDeep("ContentChoice").gameObject.SetActive(true);
         transform.FindDeep("PeopleChoice").gameObject.SetActive(false);
         transform.FindDeep("ResourcesChoice").gameObject.SetActive(false);
-        transform.GetComponentInChildren<SelectResourcesButton>(true).SetResource(null);
-        ResourcesSelectionSubMenu.Hide(null);
+        transform.GetComponentInChildren<SelectResourcesButton>(true).SetResource(null, null);
+        ResourcesSelectionSubMenu.Hide();
         _currentValue = 0;
     }
 
@@ -99,7 +99,13 @@ public class ShippingSubMenu : MonoBehaviour
             _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetPeople());
         var button = GetComponentInChildren<SelectResourcesButton>();
         if(!_mode && button.Unlocked)
-            _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.Resource));
+        {
+            if(button.IsAdvanced)
+                _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.AdvancedResource));
+            else
+                _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.Resource));
+
+        }
     }
 
     public void Reset(int value)
