@@ -14,6 +14,7 @@ public class WildcardMenu : MonoBehaviour, IPointerClickHandler
     {
         if (!_facility.HasValue && TransformationFacilityMenu.OrderedFacilities.Count <= _id)
         {
+            MenuAudioManager.Instance.PlayClick();
             TransformationFacilitySubMenu.Flip(transform.FindParentDeep("PlanetMenu").Find("Inventory Section"), this.GetInstanceID());
         }
     }

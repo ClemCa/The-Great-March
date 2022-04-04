@@ -14,6 +14,7 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
     {
         if (_orderedFacilities.FindIndex(t => t.Key == Planet.Selected && t.Value == _facility) != -1)
             return;
+        MenuAudioManager.Instance.PlayClick();
         var selected = Planet.Selected;
         OrderHandler.Instance.Queue(
             new OrderHandler.Order(

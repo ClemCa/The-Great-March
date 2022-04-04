@@ -7,6 +7,7 @@ public class ShippingCancelButton : MonoBehaviour, IPointerClickHandler
 {
     public void OnPointerClick(PointerEventData eventData)
     {
+        MenuAudioManager.Instance.PlayClick();
         ShippingSubMenu.ResetMenu();
     }
 }

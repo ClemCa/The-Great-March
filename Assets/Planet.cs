@@ -386,6 +386,7 @@ public class Planet : MonoBehaviour
             {
                 if (Input.GetMouseButtonDown(0))
                 {
+                    MenuAudioManager.Instance.PlayClick();
                     if (moveSelectionType)
                     {
                         var order = new OrderHandler.Order(

@@ -7,6 +7,7 @@ public class ShippingReturnButton : MonoBehaviour, IPointerClickHandler
 {
     public void OnPointerClick(PointerEventData eventData)
     {
+        MenuAudioManager.Instance.PlayClick();
         ShippingSubMenu.Flip(transform);
     }
 }
