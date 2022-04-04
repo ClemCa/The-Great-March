@@ -2,6 +2,7 @@ using cakeslice;
 using ClemCAddons;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -18,6 +19,9 @@ public class Planet : MonoBehaviour
     private List<float> _transformationFacilitiesProgression = new List<float>();
     private string _name;
     private int _availableWildcards;
+    private int _peopleFed = 0;
+    private List<int> _peopleOverTime = new List<int>();
+    private float _consumption = 0;
     private static Planet selected;
     private static Registry.Resources moveSelection;
     private static int moveSelectionCount;
@@ -236,7 +240,75 @@ public class Planet : MonoBehaviour
         else
             MoveSelectionMode();
         RunBasicFacilities();
-        RunTransformationFacilities(); ;
+        RunTransformationFacilities();
+        ConsumeFood();
+    }
+
+    private void ConsumeFood()
+    {
+        if(ClemCAddons.Utilities.Timer.MinimumDelay("ConsumeFood".GetHashCode(), 1000, true))
+        {
+            _peopleOverTime.Add(_people);
+            while(_peopleOverTime.Count > 60)
+            {
+                _peopleOverTime.RemoveAt(0);
+            }
+        }
+        if(_people == 0)
+        {
+            _consumption = 0;
+            return;
+        }
+        _consumption += Time.deltaTime;
+        if(_consumption > 60)
+        {
+            _peopleFed = (int)_peopleOverTime.Average();
+            int needFood = (int)Mathf.Ceil(_peopleFed / 10f);
+            int needWater = (int)Mathf.Ceil(_peopleFed / 10f);
+
+            int preparedFood = _advancedResources[Registry.AdvancedResources.PreparedFood];
+            int food = _resources[Registry.Resources.Food];
+            int animals = _resources[Registry.Resources.Water];
+            int plants = _resources[Registry.Resources.Plants];
+            int water = _resources[Registry.Resources.Water];
+            if ((needFood > 0 || needWater > 0) && preparedFood > 0)
+            {
+                if (needFood > 0)
+                    needFood -= preparedFood * 10;
+                else
+                    needWater -= preparedFood * 10;
+                preparedFood = -(int)Mathf.Ceil((needFood.Min(0) + needWater.Min(0)) / 10f); // setting to - negative or 0 value
+                _advancedResources[Registry.AdvancedResources.PreparedFood] = preparedFood;
+            }
+            if (needFood > 0 && food > 0)
+            {
+                needFood -= food;
+                food = -needFood.Min(0); // setting to - negative or 0 value
+                _resources[Registry.Resources.Food] = food;
+            }
+            if (needFood > 0 && animals > 0)
+            {
+                needFood -= animals / 2;
+                animals = -needFood.Min(0) * 2; // setting to - negative or 0 value
+                _resources[Registry.Resources.Animals] = animals;
+            }
+            if (needFood > 0 && plants > 0)
+            {
+                needFood -= plants / 2;
+                plants = -needFood.Min(0) * 2; // setting to - negative or 0 value
+                _resources[Registry.Resources.Plants] = plants;
+            }
+            if (needWater > 0 && water > 0)
+            {
+                needWater -= water;
+                water = -needWater.Min(0); // setting to - negative or 0 value
+                _resources[Registry.Resources.Water] = water;
+            }
+            var deaths = (needWater / 10).Max(needFood / 10); // floored naturally
+            _people -= deaths;
+            _consumption = 0;
+            _peopleFed = _people;
+        }
     }
 
     private void RunTransformationFacilities()
@@ -333,7 +405,7 @@ public class Planet : MonoBehaviour
                                OrderHandler.OrderType.PreparingForTrip,
                                20,
                                0.5f,
-                               20,
+                               15,
                                () => {
                                    CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelectionCount);
                                }
