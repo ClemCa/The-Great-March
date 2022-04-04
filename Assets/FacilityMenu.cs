@@ -19,7 +19,7 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
             new OrderHandler.Order(
                 OrderHandler.OrderType.Building,
                 140,
-                1.5f,
+                0.5f,
                 5,
                 () => {
                     _orderedFacilities.Remove(new KeyValuePair<Planet, Registry.Facilities>(selected, _facility));

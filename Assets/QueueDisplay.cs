@@ -19,5 +19,7 @@ public class QueueDisplay : MonoBehaviour
         v.x = (1 - _order.LengthLeft / _order.Length) * 200;
         rect.sizeDelta = v;
         transform.Find("OrderType").GetComponent<TMPro.TMP_Text>().text = Regex.Replace(_order.Type.ToString(), "[A-Z]", " $0");
+        transform.Find("Assigned").GetComponent<TMPro.TMP_Text>().text = "Assigned: " + _order.Assigned + " people";
+        transform.Find("Speed").GetComponent<TMPro.TMP_Text>().text = "Speed: x"+_order.SpeedPerPerson * _order.Assigned;
     }
 }

@@ -22,7 +22,7 @@ public class TransformationFacilityMenu : MonoBehaviour, IPointerClickHandler
             new OrderHandler.Order(
                 OrderHandler.OrderType.Building,
                 180,
-                1.5f,
+                0.25f,
                 5,
                 () => {
                     _orderedFacilities.Remove(new KeyValuePair<Planet, Registry.TransformationFacilities>(selected, _facility.Value));
