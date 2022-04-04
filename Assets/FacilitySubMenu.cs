@@ -45,6 +45,7 @@ public class FacilitySubMenu : MonoBehaviour
             _rectTransform.position = _target.position;
             GetComponentInChildren<FacilitiesSubMenuUpdater>().SelectResource(resource);
             ShippingSubMenu.Hide();
+            TransformationFacilitySubMenu.Hide();
             ResourcesSelectionSubMenu.Hide(null);
         }
     }

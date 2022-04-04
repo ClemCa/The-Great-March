@@ -91,21 +91,21 @@ MonoBehaviour:
   - {fileID: 7516994712803276884, guid: 48d94668fa63cde46a8dc3470035354a, type: 3}
   _resourceSprites:
   - Resource: 0
-    Sprite: {fileID: 21300000, guid: a4aca57f083490a4f8d21a57140f1fd2, type: 3}
+    Sprite: {fileID: 21300000, guid: 8f1b1669f44712548a9673a8e3237ded, type: 3}
   - Resource: 1
-    Sprite: {fileID: 21300000, guid: a4d7faec45961c34db864be32fe69fc4, type: 3}
+    Sprite: {fileID: 21300000, guid: fb4d269c1f42eae429557ff00ed13f8b, type: 3}
   - Resource: 2
-    Sprite: {fileID: 21300000, guid: 08fd2989c3765684dafd316e89396ffe, type: 3}
+    Sprite: {fileID: 21300000, guid: 7fe5ecabf80987a45939d378b4e31742, type: 3}
   - Resource: 3
-    Sprite: {fileID: 21300000, guid: b3378ba590980e147b90db27564ef7c0, type: 3}
+    Sprite: {fileID: 21300000, guid: 71dbfd572b3ebe744911a8c7775f5e75, type: 3}
   - Resource: 4
-    Sprite: {fileID: 21300000, guid: d7d92a62dce18474caa51b12e702946d, type: 3}
+    Sprite: {fileID: 21300000, guid: 1baaf240d4c4848469457c2f294cebf5, type: 3}
   - Resource: 5
-    Sprite: {fileID: 21300000, guid: 38185d238de9a0946adcbdb9167650fa, type: 3}
+    Sprite: {fileID: 21300000, guid: 8ca5c38c7131fd24bb1100d9dc155be6, type: 3}
   - Resource: 6
-    Sprite: {fileID: 21300000, guid: 8d81f3ef7abb59e4d80a6a8140b0d249, type: 3}
+    Sprite: {fileID: 21300000, guid: b69d753a3ef024f40a114708301e4c2b, type: 3}
   - Resource: 7
-    Sprite: {fileID: 21300000, guid: 4cce58782fa0c2d40a0e976fc24e06d4, type: 3}
+    Sprite: {fileID: 21300000, guid: 57adfe0aad8ecb447ba0a144742225c9, type: 3}
   _facilitiesInfo:
   - Facility: 0
     AssociatedResource: 3

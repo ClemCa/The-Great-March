@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 
 public class Registry : MonoBehaviour
 {
+    [SerializeField] private Sprite _wildcardSprite;
     [SerializeField] private GameObject[] _alienPlanets;
     [SerializeField] private GameObject[] _desertPlanets;
     [SerializeField] private GameObject[] _earthLikePlanets;
@@ -15,6 +16,7 @@ public class Registry : MonoBehaviour
     [SerializeField] private GameObject[] _temperatePlanets;
     [SerializeField] private GameObject[] _tundraPlanets;
     [SerializeField] private ResourceSprite[] _resourceSprites;
+    [SerializeField] private AdvancedResourceSprite[] _advancedResourceSprites;
     [SerializeField] private FacilityInfos[] _facilitiesInfo;
     [SerializeField] private TransformationFacilitiesInfos[] _transformationFacilitiesInfos;
 
@@ -32,6 +34,13 @@ public class Registry : MonoBehaviour
     public class ResourceSprite
     {
         public Resources Resource;
+        public Sprite Sprite;
+    }
+
+    [Serializable]
+    public class AdvancedResourceSprite
+    {
+        public AdvancedResources Resource;
         public Sprite Sprite;
     }
 
@@ -141,6 +150,11 @@ public class Registry : MonoBehaviour
         return Array.Find(_resourceSprites, t => t.Resource == resource).Sprite;
     }
 
+    public Sprite GetAdvancedResourceSprite(AdvancedResources resource)
+    {
+        return Array.Find(_advancedResourceSprites, t => t.Resource == resource).Sprite;
+    }
+
     public Sprite GetFacilitySprite(Facilities facility)
     {
         return Array.Find(_facilitiesInfo, t => t.Facility == facility).Sprite;
@@ -149,6 +163,11 @@ public class Registry : MonoBehaviour
     public Sprite GetTransformationFacilitySprite(TransformationFacilities facility)
     {
         return Array.Find(_transformationFacilitiesInfos, t => t.Facility == facility).Sprite;
+    }
+
+    public Sprite GetWildcardSprite()
+    {
+        return _wildcardSprite;
     }
 
     public Resources GetAssociatedResource(Facilities facility)

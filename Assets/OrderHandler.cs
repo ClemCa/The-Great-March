@@ -47,6 +47,11 @@ public class OrderHandler : MonoBehaviour
         _instance = this;
     }
 
+    void Update()
+    {
+        Process();
+    }
+
     public void Queue(Order order, Planet planet)
     {
         order.Planet = planet;
@@ -54,6 +59,13 @@ public class OrderHandler : MonoBehaviour
             _queue[planet].Add(order);
         else
             _queue.Add(planet, new List<Order>() { order });
+    }
+
+    public Order[] GetPlanetQueue(Planet planet)
+    {
+        if (!_queue.ContainsKey(planet))
+            return new Order[0];
+        return _queue[planet].ToArray();
     }
 
     private void Process()

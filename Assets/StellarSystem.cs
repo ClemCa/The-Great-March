@@ -36,6 +36,7 @@ public class StellarSystem : MonoBehaviour
         int planets = Random.Range(2,5);
         int resources = Random.Range(5, 8);
         var r = Registry.GetResources();
+        r = r.RemoveAll(Registry.Resources.Food);
         if (_doNotRegenerate)
         {
             _firstPlanet.GetComponent<Planet>().Initialize(_systemType, new Registry.Resources[] { }, true);

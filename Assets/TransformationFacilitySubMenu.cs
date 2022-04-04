@@ -9,13 +9,12 @@ public class TransformationFacilitySubMenu : MonoBehaviour
     private Transform _target;
     private bool _enabled;
     private static TransformationFacilitySubMenu _instance;
-    private Registry.TransformationFacilities _facility;
+    private int _slotID;
 
     void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _instance = this;
-        GetComponentInChildren<TransformationFacilityMenu>().SetFacility(_facility);
     }
 
     void Update()
@@ -33,20 +32,25 @@ public class TransformationFacilitySubMenu : MonoBehaviour
         _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.deltaTime * 5);
     }
 
-    private void ExecuteFlip(Transform target, Registry.TransformationFacilities facility)
+    private void ExecuteFlip(Transform target, int slotID)
     {
-        _facility = facility;
+        if (_slotID != slotID)
+            _enabled = true;
+        else
+            _enabled = !_enabled;
+        _slotID = slotID;
         _target = target;
         if (_enabled)
         {
             _rectTransform.position = _target.position;
             ShippingSubMenu.Hide();
+            FacilitySubMenu.Hide();
             ResourcesSelectionSubMenu.Hide(null);
         }
     }
-    public static void Flip(Transform target, Registry.TransformationFacilities facility)
+    public static void Flip(Transform target, int slotID)
     {
-        _instance.ExecuteFlip(target, facility);
+        _instance.ExecuteFlip(target, slotID);
     }
     public static void Hide()
     {

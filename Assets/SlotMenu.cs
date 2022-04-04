@@ -34,7 +34,8 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
         if (Planet.Selected.HasFacility(_resourceType))
         {
             transform.GetChild(1).gameObject.SetActive(true);
-            transform.GetChild(1).GetComponent<Image>().sprite = Registry.Instance.GetFacilitySprite(Planet.Selected.GetFacility(_resourceType));
+            GetComponentInChildren<Image>().sprite = Registry.Instance.GetFacilitySprite(Planet.Selected.GetFacility(_resourceType));
+            transform.GetChild(1).GetComponent<Image>().sprite = Registry.Instance.GetResourceSprite(_resourceType);
         }
         else
         {
@@ -42,6 +43,6 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
         }
         transform.GetChild(2).GetComponent<RectTransform>().sizeDelta =
                     new Vector2(transform.GetChild(2).GetComponent<RectTransform>().sizeDelta.x,
-                    GetComponent<RectTransform>().sizeDelta.y * Planet.Selected.GetFactoryProgression(_resourceType));
+                    GetComponent<RectTransform>().rect.height * Planet.Selected.GetFactoryProgression(_resourceType));
     }
 }

@@ -1,8 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TransformationFacilitiesUpdater : MonoBehaviour
+public class TransformationFacilitiesSubMenuUpdater : MonoBehaviour
 {
     [SerializeField] private GameObject _facilityPrefab;
     private Planet _target;
@@ -22,19 +23,14 @@ public class TransformationFacilitiesUpdater : MonoBehaviour
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
+        var possibilities = (Registry.TransformationFacilities[])Enum.GetValues(typeof(Registry.TransformationFacilities));
         var r = _target.TransformationFacilities;
-        foreach(var facility in r)
+        foreach(var possibility in possibilities)
         {
-            var t = Instantiate(_facilityPrefab, transform);
-            t.GetComponentInChildren<WildcardMenu>().SetFacility(facility);
-        }
-        var slots = _target.GetWildcardSlots();
-        var count = 0;
-        while (count < slots)
-        {
-            var t = Instantiate(_facilityPrefab, transform);
-            t.GetComponentInChildren<WildcardMenu>().SetID(count);
-            count++;
+            if (!r.Contains(possibility))
+            {
+                Instantiate(_facilityPrefab, transform).GetComponentInChildren<TransformationFacilityMenu>().SetFacility(possibility);
+            }
         }
     }
 }

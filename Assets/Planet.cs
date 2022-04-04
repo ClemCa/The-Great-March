@@ -32,6 +32,11 @@ public class Planet : MonoBehaviour
     public Registry.Resources[] AvailableResources { get => _availableResources;}
     public string Name { get => _name; }
 
+    public void SetWildcardSlots(int slots)
+    {
+        _availableWildcards = slots;
+    }
+
     public void SetName(string name)
     {
         _name = name;
@@ -164,7 +169,8 @@ public class Planet : MonoBehaviour
         }
         if (index == -1)
             return 0;
-        return _facilitiesProgression[index];
+        var info = Registry.Instance.GetFacilityInfo(_facilities[index]);
+        return _facilitiesProgression[index] / info.Cooldown;
     }
 
     public float GetFactoryProgression(Registry.Facilities facility)
@@ -172,7 +178,18 @@ public class Planet : MonoBehaviour
         var index = _facilities.FindIndex(t => t == facility);
         if (index == -1)
             return 0;
-        return _facilitiesProgression[index];
+        var info = Registry.Instance.GetFacilityInfo(_facilities[index]);
+        return _facilitiesProgression[index] / info.Cooldown;
+    }
+
+
+    public float GetFactoryProgression(Registry.TransformationFacilities facility)
+    {
+        var index = _transformationFacilities.FindIndex(t => t == facility);
+        if (index == -1)
+            return 0;
+        var info = Registry.Instance.GetFacilityInfo(_facilities[index]);
+        return _transformationFacilitiesProgression[index] / info.Cooldown;
     }
 
     public void SetAvailableResources(Registry.Resources[] availableResources)
@@ -187,6 +204,11 @@ public class Planet : MonoBehaviour
         moveSelectionOrigin = selected;
         moveSelectionType = true;
         selected = null;
+        var planets = FindObjectsOfType<Planet>();
+        foreach(var planet in planets)
+        {
+            planet.GetComponentInChildren<Outline>().color = 1;
+        }
     }
     public void EngageMoveSelectionMode(int count)
     {
@@ -222,7 +244,7 @@ public class Planet : MonoBehaviour
             _transformationFacilitiesProgression[i] += Time.deltaTime * (_people / 5f);
             if (_transformationFacilitiesProgression[i] > info.Cooldown)
             {
-                _facilitiesProgression[i] = 0;
+                _transformationFacilitiesProgression[i] = 0;
                 foreach(var resource in info.InputResources)
                     TakeResource(resource, info.Cost);
                 if (info.Advanced)
@@ -354,6 +376,10 @@ public class Planet : MonoBehaviour
         for (int i = 0; i < System.Enum.GetNames(typeof(Registry.Resources)).Length; i++)
         {
             _resources.Add((Registry.Resources)i, 0);
+        }
+        for (int i = 0; i < System.Enum.GetNames(typeof(Registry.AdvancedResources)).Length; i++)
+        {
+            _advancedResources.Add((Registry.AdvancedResources)i, 0);
         }
         if (_doNotRegenerate)
             return;
