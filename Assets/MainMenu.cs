@@ -13,7 +13,15 @@ public class MainMenu : MonoBehaviour
     public void Credits()
     {
         CreditsSubMenu.Flip();
+        DevelopperSubMenu.Hide();
     }
+
+    public void Developper()
+    {
+        CreditsSubMenu.Hide();
+        DevelopperSubMenu.Flip();
+    }
+
 
     public void Exit()
     {
