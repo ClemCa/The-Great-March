@@ -2,6 +2,7 @@ using ClemCAddons;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CloudMoveScript : MonoBehaviour
 {
@@ -33,6 +34,13 @@ public class CloudMoveScript : MonoBehaviour
             float diff = worldCameraCorner.x - (transform.position.x + bounds.extents.x);
             // The bounds center may not be the same as the transform position
             transform.position += Vector3.right * diff;
+        }
+
+        if (Planet.LeaderPlanet != null && GetComponent<BoxCollider>().bounds.Contains(Planet.LeaderPlanet.transform.position))
+        {
+            Planet.Unselect();  
+            Time.timeScale = 0;
+            _ = SceneManager.LoadSceneAsync("LoseMenu");
         }
     }
     public static bool LineLineIntersection(out Vector3 intersection, Vector3 linePoint1, Vector3 lineVec1, Vector3 linePoint2, Vector3 lineVec2)

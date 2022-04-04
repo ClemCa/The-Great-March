@@ -40,6 +40,7 @@ public class StarterPlanet : MonoBehaviour
         planet.SetAvailableResources(starterSlots);
         planet.SetName(starterName);
         planet.SetWildcardSlots(starterWildcards);
+        planet.HasPlayer = true;
     }
 
 }

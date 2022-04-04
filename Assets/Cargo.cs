@@ -8,7 +8,8 @@ public class Cargo : MonoBehaviour
     public enum CargoType
     {
         Resource,
-        People
+        People,
+        Leader
     }
 
     [SerializeField] private float cruiseSpeed = 2.0f;
@@ -37,6 +38,18 @@ public class Cargo : MonoBehaviour
     {
         Bounds bounds = Destination.GetComponent<Collider>().bounds;
         return gameObject.GetComponent<Collider>().bounds.Intersects(bounds);
+    }
+
+    public void Initialize(Planet origin, Planet destination)
+    {
+        Type = CargoType.Leader;
+        Origin = origin;
+
+        Origin.HasPlayer = false;
+
+        Destination = destination;
+        _innerTravel = origin.transform.parent.GetComponent<StellarSystem>() == destination.transform.parent.GetComponent<StellarSystem>();
+        // smh comparing transform doesn't work
     }
 
     public void Initialize(Planet origin, Planet destination, int amount)
@@ -142,8 +155,19 @@ public class Cargo : MonoBehaviour
         }
         if (HasArrived())
         {
-            
-            if (Type == CargoType.Resource)
+            if(Type == CargoType.Leader)
+            {
+                var order = new OrderHandler.Order(
+                    OrderHandler.OrderType.UnpackingCargo,
+                    60,
+                    0.5f,
+                    5,
+                    () => {
+                        Destination.HasPlayer = true;
+                    });
+                OrderHandler.Instance.Queue(order, Destination);
+            }
+            else if (Type == CargoType.Resource)
             {
                 var order = new OrderHandler.Order(
                     OrderHandler.OrderType.UnpackingCargo,

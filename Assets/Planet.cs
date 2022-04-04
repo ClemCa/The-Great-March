@@ -27,6 +27,8 @@ public class Planet : MonoBehaviour
     private static int moveSelectionCount;
     private static Planet moveSelectionOrigin;
     private static bool moveSelectionType;
+    private bool _hasPlayer = false;
+    private static Planet _leaderPlanet;
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
@@ -40,6 +42,13 @@ public class Planet : MonoBehaviour
     public Registry.Resources[] AvailableResources { get => _availableResources;}
 
     public string Name { get => _name; }
+    public bool HasPlayer { get => _hasPlayer; set => _hasPlayer = value; }
+    public static Planet LeaderPlanet { get => _leaderPlanet;}
+
+    public static void Unselect()
+    {
+        selected = null;
+    }
 
     public void SetWildcardSlots(int slots)
     {
@@ -231,10 +240,21 @@ public class Planet : MonoBehaviour
         moveSelectionType = false;
         selected = null;
     }
+    public void EngageMoveSelectionMode()
+    {
+        Pausing.Block();
+        moveSelectionCount = -1;
+        moveSelectionOrigin = selected;
+        moveSelectionType = false;
+        selected = null;
+    }
+
     #endregion Accessibility
     #region Routines
     void Update()
     {
+        if (_hasPlayer)
+            _leaderPlanet = this;
         if (moveSelectionCount == 0)
             StandardUpdate();
         else
@@ -387,31 +407,47 @@ public class Planet : MonoBehaviour
                 if (Input.GetMouseButtonDown(0))
                 {
                     MenuAudioManager.Instance.PlayClick();
-                    if (moveSelectionType)
+                    if(moveSelectionCount == -1)
                     {
                         var order = new OrderHandler.Order(
-                            OrderHandler.OrderType.PreparingCargo,
-                            20,
-                            0.5f,
-                            3,
-                            () => {
-                                CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelection, moveSelectionCount);
-                            }
-                        );
+                                OrderHandler.OrderType.WavingGoodbye,
+                                10,
+                                1f,
+                                1,
+                                () => {
+                                    CargoGenerator.GenerateCargo(moveSelectionOrigin, this);
+                                }
+                            );
                         OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                     }
                     else
                     {
-                        var order = new OrderHandler.Order(
-                               OrderHandler.OrderType.PreparingForTrip,
-                               20,
-                               0.5f,
-                               15,
-                               () => {
-                                   CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelectionCount);
-                               }
-                           );
-                        OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                        if (moveSelectionType)
+                        {
+                            var order = new OrderHandler.Order(
+                                OrderHandler.OrderType.PreparingCargo,
+                                20,
+                                0.5f,
+                                3,
+                                () => {
+                                    CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelection, moveSelectionCount);
+                                }
+                            );
+                            OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                        }
+                        else
+                        {
+                            var order = new OrderHandler.Order(
+                                   OrderHandler.OrderType.PreparingForTrip,
+                                   20,
+                                   0.5f,
+                                   15,
+                                   () => {
+                                       CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelectionCount);
+                                   }
+                               );
+                            OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                        }
                     }
                     moveSelectionCount = 0;
                     ShippingSubMenu.ResetMenu();

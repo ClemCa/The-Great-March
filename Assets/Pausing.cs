@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ClemCAddons;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Pausing : MonoBehaviour
 {
@@ -69,6 +70,16 @@ public class Pausing : MonoBehaviour
             transform.GetChild(0).GetComponent<Image>().color = transform.GetChild(0).GetComponent<Image>().color.SetA(_currentTransparency);
             transform.GetChild(1).GetComponent<Image>().color = transform.GetChild(1).GetComponent<Image>().color.SetA(_currentTransparency);
         }
+    }
+
+    void Start()
+    {
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+
+    private void OnSceneUnloaded(Scene current)
+    {
+        Time.timeScale = 1;
     }
 
 }

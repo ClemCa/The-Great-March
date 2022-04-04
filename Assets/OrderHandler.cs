@@ -40,6 +40,8 @@ public class OrderHandler : MonoBehaviour
         CargoResources,
         PreparingCargo,
         PreparingForTrip,
+        WavingGoodbye,
+        TriumphantArrival,
         UnpackingCargo
     }
 
