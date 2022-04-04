@@ -13,6 +13,7 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
     {
         if (!Planet.Selected.HasFacility(_resourceType))
         {
+            MenuAudioManager.Instance.PlayClick();
             FacilitySubMenu.Flip(transform.FindParentDeep("PlanetMenu").Find("Inventory Section"), _resourceType);
         }
     }

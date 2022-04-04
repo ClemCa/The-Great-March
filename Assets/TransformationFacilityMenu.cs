@@ -17,6 +17,7 @@ public class TransformationFacilityMenu : MonoBehaviour, IPointerClickHandler
             return;
         if (_orderedFacilities.FindIndex(t => t.Key == Planet.Selected && t.Value == _facility.Value) != -1)
             return;
+        MenuAudioManager.Instance.PlayClick();
         var selected = Planet.Selected;
         OrderHandler.Instance.Queue(
             new OrderHandler.Order(

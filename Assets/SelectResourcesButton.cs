@@ -19,6 +19,7 @@ public class SelectResourcesButton : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        MenuAudioManager.Instance.PlayClick();
         if (_canConfirm)
         {
             transform.GetComponentInChildren<TMPro.TMP_Text>().text = "(Planet)";

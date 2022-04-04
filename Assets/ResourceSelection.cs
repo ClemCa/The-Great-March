@@ -13,6 +13,7 @@ public class ResourceSelection : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        MenuAudioManager.Instance.PlayClick();
         if(_advancedResources)
             ResourcesSelectionSubMenu.Hide(_advancedResourceType);
         else

@@ -9,6 +9,7 @@ public class ShippingMenu : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        MenuAudioManager.Instance.PlayClick();
         if (isPeople)
         {
             ShippingSubMenu.Instance.ShowPeopleChoice();
