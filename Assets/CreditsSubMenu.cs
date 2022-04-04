@@ -43,7 +43,7 @@ public class CreditsSubMenu : MonoBehaviour
 
     public static void Flip()
     {
-        _instance._enabled = _instance.enabled;
+        _instance._enabled = !_instance._enabled;
     }
     public static void Hide()
     {
