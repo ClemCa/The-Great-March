@@ -7,19 +7,19 @@ public class ScoringWriter : MonoBehaviour
     void Start()
     {
         GetComponent<TMPro.TMP_Text>().text = "As a Leader, you helped your people"
-            + "survive { XXXXXX}"
-            + "minutes.\n"
-            + "You went through { XX}"
-            + "systems.\n"
-            + "You extracted { XXXXX}"
-            + "unit of natural\n"
-            + "resources, and produced { XXXX}\n"
-            + "advanced resources.\n"
-            + "You made { XXX}"
-            + "facilities and\n"
-            + "{ XXXX}"
-            + "transformative facilities.\n"
-            +"And all of that, over {XXXX}\n"
-            + "minutes";
+            + "survive " + Scoring.survivalTime
+            + " minutes.\n"
+            + "You went through " + Scoring.systems
+            + " systems.\n"
+            + "You extracted " + Scoring.naturalResourcesUnits
+            + " units of natural"
+            + " resources, and produced " + Scoring.advancedResourcesUnits
+            + " advanced resources.\n"
+            + "You made " + Scoring.facilitiesCount
+            + " facilities and "
+            + Scoring.transformativeFacilitiesCount
+            + " transformative facilities.\n"
+            + "And all of that, over " + Scoring.totalTime
+            + " minutes";
     }
 }

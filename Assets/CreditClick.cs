@@ -7,6 +7,7 @@ public class CreditClick : MonoBehaviour
     public string link;
     public void Click()
     {
+        MenuAudioManager.Instance.PlayClick();
         Application.OpenURL(link);
     }
 }

@@ -30,7 +30,9 @@ public class Pausing : MonoBehaviour
         Time.timeScale = 0;
 
         _instance.GetComponent<AudioSource>().Play();
-        AudioListener.volume = 0.5f;
+        _instance.GetComponent<AudioSource>().time = 0.12f;
+        _instance.GetComponent<AudioSource>().volume = 0.5f;
+        AudioListener.volume = 0.25f;
     }
 
     public static void Unpause()
@@ -39,6 +41,8 @@ public class Pausing : MonoBehaviour
         Time.timeScale = 1;
 
         _instance.GetComponent<AudioSource>().Play();
+        _instance.GetComponent<AudioSource>().volume = 0.5f * 0.25f;
+        _instance.GetComponent<AudioSource>().time = 0.12f;
         AudioListener.volume = 1f;
     }
 

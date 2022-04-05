@@ -7,8 +7,14 @@ public class Scoring : MonoBehaviour
 {
     private static Scoring _instance;
 
-    public int survivalTime;
-    public float totalTime;
+    public static int survivalTime = 0;
+    public static int totalTime = 0;
+    public static int systems = 1;
+    public static long naturalResourcesUnits = 0;
+    public static long advancedResourcesUnits = 0;
+    public static long facilitiesCount = 0;
+    public static long transformativeFacilitiesCount = 0;
+
 
     private bool checkFirst = true;
 
@@ -16,7 +22,7 @@ public class Scoring : MonoBehaviour
 
     void Start()
     {
-        if (_instance == null)
+        if (_instance != null)
         {
             Destroy(gameObject);
             return;
@@ -32,13 +38,16 @@ public class Scoring : MonoBehaviour
             if (checkFirst)
             {
                 startTime = System.DateTime.Now;
+                naturalResourcesUnits = advancedResourcesUnits = facilitiesCount = transformativeFacilitiesCount = 0;
+                systems = 1;
+                checkFirst = false;
             }
             survivalTime = (int)Time.timeSinceLevelLoad / 60;
-            totalTime = (int)System.DateTime.Now.Subtract(startTime).TotalMinutes;
+            totalTime = (int)(System.DateTime.Now.Subtract(startTime).TotalMinutes);
         }
         else
         {
-            checkFirst = false;
+            checkFirst = true;
         }
     }
 }

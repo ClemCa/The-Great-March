@@ -50,6 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 006569c3ae4afaa409740b38eacb1e3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlayer: 1
   isPeople: 0
 --- !u!1 &499575963922570249
 GameObject:
@@ -3080,6 +3081,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 006569c3ae4afaa409740b38eacb1e3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlayer: 0
   isPeople: 0
 --- !u!1 &8407405764419846645
 GameObject:
@@ -4590,6 +4592,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 006569c3ae4afaa409740b38eacb1e3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlayer: 0
   isPeople: 1
 --- !u!1 &8407405764716975896
 GameObject:

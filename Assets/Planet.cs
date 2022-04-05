@@ -70,7 +70,6 @@ public class Planet : MonoBehaviour
         return _availableWildcards;
     }
 
-
     public int GetResource(Registry.Resources resoure)
     {
         return _resources[resoure];
@@ -83,6 +82,7 @@ public class Planet : MonoBehaviour
 
     public void AddResource(Registry.AdvancedResources resource, int count = 1)
     {
+        Scoring.advancedResourcesUnits += count;
         _advancedResources[resource] += count;
     }
 
@@ -93,6 +93,7 @@ public class Planet : MonoBehaviour
 
     public void AddResource(Registry.Resources resource, int count = 1)
     {
+        Scoring.naturalResourcesUnits += count;
         _resources[resource] += count;
     }
 
@@ -103,6 +104,7 @@ public class Planet : MonoBehaviour
 
     public int GetPeople()
     {
+        Debug.Log(Name+": "+_people);
         return _people;
     }
 
@@ -118,6 +120,7 @@ public class Planet : MonoBehaviour
 
     public void RegisterBuiltFacility(Registry.Facilities facility)
     {
+        Scoring.facilitiesCount++;
         _facilities.Add(facility);
         _facilitiesProgression.Add(0);
     }
@@ -125,6 +128,7 @@ public class Planet : MonoBehaviour
 
     public void RegisterBuiltFacility(Registry.TransformationFacilities facility)
     {
+        Scoring.transformativeFacilitiesCount++;
         _transformationFacilities.Add(facility);
         _transformationFacilitiesProgression.Add(0);
     }
@@ -254,7 +258,10 @@ public class Planet : MonoBehaviour
     void Update()
     {
         if (_hasPlayer)
+        {
             _leaderPlanet = this;
+
+        }
         if (moveSelectionCount == 0)
             StandardUpdate();
         else
@@ -424,26 +431,29 @@ public class Planet : MonoBehaviour
                     {
                         if (moveSelectionType)
                         {
+                            int count = moveSelectionCount;
+                            Registry.Resources resource = moveSelection;
                             var order = new OrderHandler.Order(
                                 OrderHandler.OrderType.PreparingCargo,
                                 20,
                                 0.5f,
                                 3,
                                 () => {
-                                    CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelection, moveSelectionCount);
+                                    CargoGenerator.GenerateCargo(moveSelectionOrigin, this, resource, count);
                                 }
                             );
                             OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                         }
                         else
                         {
+                            int count = moveSelectionCount;
                             var order = new OrderHandler.Order(
                                    OrderHandler.OrderType.PreparingForTrip,
                                    20,
                                    0.5f,
                                    15,
                                    () => {
-                                       CargoGenerator.GenerateCargo(moveSelectionOrigin, this, moveSelectionCount);
+                                       CargoGenerator.GenerateCargo(moveSelectionOrigin, this, count);
                                    }
                                );
                             OrderHandler.Instance.Queue(order, moveSelectionOrigin);

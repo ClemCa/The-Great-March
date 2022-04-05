@@ -11,7 +11,7 @@ public class Cargo : MonoBehaviour
         People,
         Leader
     }
-
+    
     [SerializeField] private float cruiseSpeed = 2.0f;
     [SerializeField] private float outerSystemCruiseSpeed = 1.0f;
     [SerializeField] private float blinkingSpeed = 0.5f;
@@ -26,6 +26,18 @@ public class Cargo : MonoBehaviour
     public Planet Destination { get; private set; }
 
 
+    public static bool LeaderInTransit = false;
+
+    void Awake()
+    {
+        CargoSound.StartSound();
+    }
+
+    void OnDestroy()
+    {
+        CargoSound.StopSound();
+    }
+
     public Vector3 GetMargin(Planet origin, Planet destination)
     {
         var margin = origin.GetComponent<Collider>().bounds.extents.x;
@@ -37,11 +49,13 @@ public class Cargo : MonoBehaviour
     public bool HasArrived()
     {
         Bounds bounds = Destination.GetComponent<Collider>().bounds;
-        return gameObject.GetComponent<Collider>().bounds.Intersects(bounds);
+        return gameObject.GetComponent<Collider>().bounds.Intersects(bounds) || (!_innerTravel && _stage == 2 && _travel >= 1);
     }
 
     public void Initialize(Planet origin, Planet destination)
     {
+        LeaderInTransit = true;
+
         Type = CargoType.Leader;
         Origin = origin;
 
@@ -157,13 +171,19 @@ public class Cargo : MonoBehaviour
         {
             if(Type == CargoType.Leader)
             {
+                LeaderInTransit = false;
+                Destination.HasPlayer = true;
+                if (!_innerTravel)
+                {
+                    Scoring.systems++;
+                }
                 var order = new OrderHandler.Order(
-                    OrderHandler.OrderType.UnpackingCargo,
+                    OrderHandler.OrderType.TriumphantArrival,
                     60,
                     0.5f,
                     5,
                     () => {
-                        Destination.HasPlayer = true;
+                        
                     });
                 OrderHandler.Instance.Queue(order, Destination);
             }

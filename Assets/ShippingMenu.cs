@@ -10,12 +10,15 @@ public class ShippingMenu : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        MenuAudioManager.Instance.PlayClick();
         if (isPlayer)
         {
+            if (!Planet.Selected.HasPlayer || Cargo.LeaderInTransit)
+                return;
             Planet.Selected.EngageMoveSelectionMode();
+            MenuAudioManager.Instance.PlayClick();
             return;
         }
+        MenuAudioManager.Instance.PlayClick();
         if (isPeople)
         {
             ShippingSubMenu.Instance.ShowPeopleChoice();
