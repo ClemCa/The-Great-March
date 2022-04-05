@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using ClemCAddons.CameraAndNodes;
 using ClemCAddons.Utilities;
 using System.Threading.Tasks;
 using System.Diagnostics;
@@ -216,6 +215,8 @@ namespace ClemCAddons
         }
         #endregion Add
         #region AddValue
+#if (UNITY_STANDALONE_WIN)
+
         /// <summary>Add a value to every value in the array</summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source">The source array.</param>
@@ -268,7 +269,10 @@ namespace ClemCAddons
             }
             return source;
         }
+#endif
+
         #endregion AddValue
+
         #region Find
         /// <summary>Find the index of an item.</summary>
         /// <param name="source">The source array.</param>
@@ -331,7 +335,8 @@ namespace ClemCAddons
             return new T[] { firstObject };
         }
         #endregion ToArray
-        #region SetAt
+#region SetAt
+#if (UNITY_STANDALONE_WIN)
         /// <summary>Set the value at an index</summary>
         /// <param name="source">The source array.</param>
         /// <param name="value">New value.</param>
@@ -371,8 +376,9 @@ namespace ClemCAddons
             }
             return source;
         }
-        #endregion SetAt
-        #region Total
+#endif
+#endregion SetAt
+#region Total
         /// <summary>Adds every value together</summary>
         /// <param name="source">The source array.</param>
         public static float Total(this float[] source)
@@ -400,10 +406,10 @@ namespace ClemCAddons
                 r += source[i];
             return r;
         }
-        #endregion Total
-        #endregion ArrayAdditions
+#endregion Total
+#endregion ArrayAdditions
         //good
-        #region Dictionary Additions
+#region Dictionary Additions
         /// <summary>Add or replace a key in the dictionary</summary>
         /// <param name="dictionary">The source dictionary.</param>
         /// <param name="key">Key.</param>
@@ -418,425 +424,11 @@ namespace ClemCAddons
             dictionary.Add(key, value);
             return dictionary;
         }
-        #endregion Dictioanry Additions
+#endregion Dictioanry Additions
         //good
-        #region CopyNode
-        /// <summary>Make a copy</summary>
-        /// <param name="source">The source.</param>
-        public static NodeContent Copy(NodeContent source)
-        {
-            var target = new NodeContent
-            {
-                isFixed = source.isFixed,
-                position = source.position,
-                range = source.range,
-                rotation = new SerializableQuaternion(source.rotation.Value),
-                rotationFixed = new SerializableQuaternion(source.rotationFixed.Value),
-                type = source.type
-            };
-            return target;
-        }
-        /// <summary>Make a copy</summary>
-        /// <param name="source">The source.</param>
-        public static TPSNodeContent Copy(TPSNodeContent source)
-        {
-            var target = new TPSNodeContent
-            {
-                offset = source.offset,
-                range = source.range,
-                distance = source.distance
-            };
-            return target;
-        }
-        /// <summary>Make a copy content from one node to another</summary>
-        /// <param name="target">The target node.</param>
-        /// <param name="source">The source node.</param>
-        public static NodeContent Copy(this NodeContent target, NodeContent source)
-        {
-            target.isFixed = source.isFixed;
-            target.position = source.position;
-            target.range = source.range;
-            target.rotation = new SerializableQuaternion(source.rotation.Value);
-            target.rotationFixed = new SerializableQuaternion(source.rotationFixed.Value);
-            target.type = source.type;
-            return target;
-        }
-        /// <summary>Make a copy content from one node to another</summary>
-        /// <param name="target">The target node.</param>
-        /// <param name="source">The source node.</param>
-        public static TPSNodeContent Copy(this TPSNodeContent target, TPSNodeContent source)
-        {
-            target.offset = source.offset;
-            target.range = source.range;
-            target.distance = source.distance;
-            return target;
-        }
-        #endregion CopyNode
         // good
-        #region Casts
-        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            RaycastHit hit = new RaycastHit();
-            var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
-            if (hits.Length > 0)
-            {
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                        hit.distance += 0.2f;
-                    }
-                }
-            }
-            if (!result)
-            {
-                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                    }
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="hit">RaycastHit reference to write to.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, out RaycastHit hit, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            hit = new RaycastHit();
-            var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
-            if (hits.Length > 0)
-            {
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                        hit.distance += 0.2f;
-                    }
-                }
-            }
-            if (!result)
-            {
-                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                    }
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="radius">The specified radius of the spherecast.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            RaycastHit hit = new RaycastHit();
-            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
-            if (hits.Length > 0)
-            {
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                        hit.distance += radius;
-                    }
-                }
-            }
-            if (!result)
-            {
-                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                    }
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="hit">RaycastHit reference to write to.</param>
-        /// <param name="radius">The specified radius of the spherecast.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, out RaycastHit hit, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            hit = new RaycastHit();
-            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
-            if (hits.Length > 0)
-            {
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                        hit.distance += radius;
-                    }
-                }
-            }
-            if (!result)
-            {
-                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                    }
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts a line through all and selects the closest hit entity.</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="hit">RaycastHit reference to write to.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastToLineOnly(this Vector3 from, Vector3 to, LayerMask layer, string tag, out RaycastHit hit, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            hit = new RaycastHit();
-            RaycastHit[] hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-            for (int i = 0; i < hits.Length; i++)
-            {
-                if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                {
-                    result = true;
-                    hit = hits[i];
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts a line through all and selects the closest hit entity.</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="hit">RaycastHit reference to write to.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastToLineOnly(this Vector3 from, Vector3 to, LayerMask layer, out RaycastHit hit, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            hit = new RaycastHit();
-            RaycastHit[] hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-            for (int i = 0; i < hits.Length; i++)
-            {
-                if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
-                {
-                    result = true;
-                    hit = hits[i];
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts a spherecast through all and selects the closest hit entity.</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="radius">The specified radius of the spherecast.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastToSphereOnly(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            RaycastHit hit = new RaycastHit();
-            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
-            if (hits.Length > 0)
-            {
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                        hit.distance += radius;
-                    }
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts a spherecast through all and selects the closest hit entity.</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="hit">RaycastHit reference to write to.</param>
-        /// <param name="radius">The specified radius of the spherecast.</param>
-        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool CastToSphereOnly(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, out RaycastHit hit, bool debug = false)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            hit = new RaycastHit();
-            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
-            if (hits.Length > 0)
-            {
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                    {
-                        result = true;
-                        hit = hits[i];
-                        hit.distance += radius;
-                    }
-                }
-            }
-            if (debug)
-            {
-                Debug.DrawLine(from, to, Color.grey);
-                EditorTools.DrawLineInEditor(from, to, Color.grey);
-                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-            }
-            return result;
-        }
-        /// <summary>Casts several spherecasts of multiple radiuses (like layers of precision) through all and selects the closest hit entity.</summary>
-        /// <param name="from">The start position of the cast.</param>
-        /// <param name="to">The end position of the cast.</param>
-        /// <param name="layer">The target layer.</param>
-        /// <param name="tag">The target tag.</param>
-        /// <param name="hit">RaycastHit reference to write to.</param>
-        /// <param name="radius">An array of radius for each layer.</param>
-        /// <param name="ID">The index of the radius that hit.</param>
-        /// <returns>Whether the cast hit anything</returns>
-        public static bool MultilayerCast(this Vector3 from, Vector3 to, LayerMask layer, string tag, float[] radius, out RaycastHit hit, out int ID)
-        {
-            Ray ray = new Ray(from, (to - from).normalized);
-            bool result = false;
-            hit = new RaycastHit();
-            ID = 0;
-            for (int i = 0; i < radius.Length; i++)
-            {
-                var hits = Physics.SphereCastAll(ray, radius[i], Vector3.Distance(from, to), layer);
-                if (hits.Length > 0)
-                {
-                    for (int t = 0; t < hits.Length; t++)
-                    {
-                        if (hits[t].distance > 0 && hits[t].collider.gameObject.CompareTag(tag) && (hits[t].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[t];
-                            hit.distance += radius[i];
-                            ID = i;
-                        }
-                    }
-                }
-                if (!result)
-                {
-                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                    for (int t = 0; t < hits.Length; t++)
-                    {
-                        if (hits[t].distance > 0 && hits[t].collider.gameObject.CompareTag(tag) && (hits[t].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[t];
-                            ID = i;
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-        #endregion Casts
         // good
-        #region Texture Additions
+#region Texture Additions
         /// <summary>Rewrites and updates part of a Texture2D.</summary>
         /// <param name="texture">The source texture.</param>
         /// <param name="pos">The top left corner to edit from.</param>
@@ -857,9 +449,9 @@ namespace ClemCAddons
             }
             return texture;
         }
-        #endregion Texture Additions
+#endregion Texture Additions
         // good
-        #region Color Additions
+#region Color Additions
         /// <summary>Sets all pixels in the array to match a set color.</summary>
         /// <param name="pixels">The pixels to edit.</param>
         /// <param name="pixels">The color to use.</param>
@@ -982,10 +574,10 @@ namespace ClemCAddons
         {
             return new Color(r, g, b, a);
         }
-        #endregion Color Additions
+#endregion Color Additions
         // good
-        #region Vector3 Additions
-        #region Geometry
+#region Vector3 Additions
+#region Geometry
         /// <summary>Gets the position of a specified corner or  of a rectangular geometry. Can also be used for other purposes</summary>
         /// <param name="pos">The position of the center of the rectangle.</param>
         /// <param name="corner">The normalized direction of the target corner.</param>
@@ -994,8 +586,8 @@ namespace ClemCAddons
         {
             return pos + corner.Multiply(scale / 2);
         }
-        #endregion Geometry
-        #region Operations
+#endregion Geometry
+#region Operations
         /// <summary>Adds a value to every component of a Vector3</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="value">The value to add.</param>
@@ -1044,8 +636,8 @@ namespace ClemCAddons
         {
             return new Vector3(vector.x == 0 ? vector.x : 1 / vector.x, vector.y == 0 ? vector.y : 1 / vector.y, vector.z == 0 ? vector.z : 1 / vector.z);
         }
-        #endregion Operations
-        #region Validation
+#endregion Operations
+#region Validation
         /// <summary>Is the vector equal to (0, 0, 0)?</summary>
         /// <param name="vector">The source vector.</param>
         public static bool IsZero(this Vector3 vector)
@@ -1118,8 +710,8 @@ namespace ClemCAddons
         {
             return vector.Distance(value) <= epsilon;
         }
-        #endregion Validation
-        #region Direction
+#endregion Validation
+#region Direction
         /// <summary>Turn the vector to match the direction</summary>
         /// <param name="vector">The source vector to turn.</param>
         /// <param name="direction">The direction vector.</param>
@@ -1270,8 +862,8 @@ namespace ClemCAddons
         {
             return Vector2.Perpendicular(Vector2.Perpendicular(vector)).normalized;
         }
-        #endregion Direction
-        #region Min Max
+#endregion Direction
+#region Min Max
         /// <summary>For each parameter of the vector, returns the minimum between them and the value</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The minimum.</param>
@@ -1464,8 +1056,8 @@ namespace ClemCAddons
         {
             return new Vector3Int(vector.x.Min(min), vector.y, vector.z.Min(min));
         }
-        #endregion Min Max
-        #region Self Min Max
+#endregion Min Max
+#region Self Min Max
         /// <summary>Returns the highest parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static float Max(this Vector3 vector)
@@ -1478,8 +1070,8 @@ namespace ClemCAddons
         {
             return vector.x.Min(vector.y).Min(vector.z);
         }
-        #endregion Self Min Max
-        #region Value
+#endregion Self Min Max
+#region Value
         /// <summary>Returns the absolute of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector3 Abs(this Vector3 vector)
@@ -1492,8 +1084,8 @@ namespace ClemCAddons
         {
             return vector.x + vector.y + vector.z;
         }
-        #endregion Value
-        #region Clamp
+#endregion Value
+#region Clamp
         /// <summary>Clamps each parameter of the vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The min value.</param>
@@ -1730,8 +1322,8 @@ namespace ClemCAddons
             limit = max.x * xRatio + max.y * yRatio + max.z * zRatio;
             return vector.ClampMagnitude(limit);
         }
-        #endregion Clamp
-        #region Add
+#endregion Clamp
+#region Add
         /// <summary>Returns the sum of every vector in the array</summary>
         /// <param name="vectors">The source vectors.</param>
         public static Vector3 Sum(this Vector3[] vectors)
@@ -1743,8 +1335,8 @@ namespace ClemCAddons
             }
             return result;
         }
-        #endregion Add
-        #region isBetween
+#endregion Add
+#region isBetween
         /// <summary>Is the source vector inside the bounding vector? (positional)</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="bound">The bounding vector.</param>
@@ -1760,8 +1352,8 @@ namespace ClemCAddons
         {
             return vector.x.IsBetween(bound1.x, bound2.x) && vector.y.IsBetween(bound1.y, bound2.y) && vector.z.IsBetween(bound1.z, bound2.z);
         }
-        #endregion isBetween
-        #region Set Partial
+#endregion isBetween
+#region Set Partial
         /// <summary>Sets the x parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="x">The new x parameter.</param>
@@ -1810,16 +1402,16 @@ namespace ClemCAddons
             vector.z = (float)z;
             return vector;
         }
-        #endregion Set Partial
-        #region ToVector2
+#endregion Set Partial
+#region ToVector2
         /// <summary>Returns the vector as a Vector2. The z parameter is dropped</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector2 ToVector2(this Vector3 vector)
         {
             return vector;
         }
-        #endregion ToVector2
-        #region Random
+#endregion ToVector2
+#region Random
         /// <summary>Returns a completely random vector between 0 and 1</summary>
         /// <param name="_">The source vector.</param>
         public static Vector3 Randomize(this Vector3 _)
@@ -1875,8 +1467,8 @@ namespace ClemCAddons
             float res = Mathf.Max(0, diff - tolerance); // perc diff that matters
             return Vector3.Slerp(r, vector, res).normalized; // a + (b -a ) * x
         }
-        #endregion Random
-        #region NormalizeTo
+#endregion Random
+#region NormalizeTo
         /// <summary>Normalizes the source vector to a set length</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="n">The length to normalize to.</param>
@@ -1893,8 +1485,8 @@ namespace ClemCAddons
         {
             return vector.normalized.Multiply(n);
         }
-        #endregion NormalizeTo
-        #region Interpolation
+#endregion NormalizeTo
+#region Interpolation
         /// <summary>Interpolates between the source vector and b at a constant speed</summary>
         /// <param name="a">The source vector.</param>
         /// <param name="b">The target vector.</param>
@@ -1912,8 +1504,8 @@ namespace ClemCAddons
             Vector3 r = a + (b - a).normalized * t;
             return r.ClampTowards(b, b - a);
         }
-        #endregion Interpolation
-        #region Sign
+#endregion Interpolation
+#region Sign
         /// <summary>Returns a vector representing the sign of each parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector3 Sign(this Vector3 vector)
@@ -1927,11 +1519,11 @@ namespace ClemCAddons
         {
             return vector.Abs().Multiply(referenceVector.Sign());
         }
-        #endregion Sign
-        #endregion Vector3 Additions
+#endregion Sign
+#endregion Vector3 Additions
         // good
-        #region Vector2 Additions
-        #region Validation
+#region Vector2 Additions
+#region Validation
         /// <summary>Is approximately equal to another vector?</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="value">The vector to compare with.</param>
@@ -1947,9 +1539,9 @@ namespace ClemCAddons
         {
             return vector.Distance(value) <= epsilon;
         }
-        #endregion Validation
+#endregion Validation
         // good
-        #region Clamp
+#region Clamp
         /// <summary>Clamps each parameter of the vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The min value.</param>
@@ -2053,9 +1645,9 @@ namespace ClemCAddons
                 vector.y = target.y;
             return vector;
         }
-        #endregion Clamp
+#endregion Clamp
         // good
-        #region Value
+#region Value
         /// <summary>Returns total of every parameter in the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static float Total(this Vector2 vector)
@@ -2068,9 +1660,9 @@ namespace ClemCAddons
         {
             return new Vector2(vector.x.Abs(), vector.y.Abs());
         }
-        #endregion Value
+#endregion Value
         // good
-        #region Min Max
+#region Min Max
         /// <summary>For each parameter of the vector, returns the minimum between them and the value</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The minimum.</param>
@@ -2207,9 +1799,9 @@ namespace ClemCAddons
         {
             return new Vector2Int(vector.x, vector.y.Min(min));
         }
-        #endregion Min Max
+#endregion Min Max
         // good
-        #region Self Min Max
+#region Self Min Max
         /// <summary>Returns the highest parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static float Max(this Vector2 vector)
@@ -2222,9 +1814,9 @@ namespace ClemCAddons
         {
             return vector.x.Min(vector.y);
         }
-        #endregion Self Min Max
+#endregion Self Min Max
         // good
-        #region Geometry
+#region Geometry
         /// <summary>Given a distance and angle, returns a point relative to the source point. Will always move in the positive direction</summary>
         /// <param name="point">The source point.</param>
         /// <param name="distance">The distance.</param>
@@ -2254,9 +1846,9 @@ namespace ClemCAddons
         {
             return new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
         }
-        #endregion Geometry
+#endregion Geometry
         // good
-        #region Direction
+#region Direction
         /// <summary>Reflects a direction vector perpendicular to a normal</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="normal">The normal.</param>
@@ -2285,9 +1877,9 @@ namespace ClemCAddons
         {
             return inverse ? (from - to).normalized : (to - from).normalized;
         }
-        #endregion Direction
+#endregion Direction
         // good
-        #region isBetween
+#region isBetween
         /// <summary>Is the source vector inside the bounding vector? (positional)</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="bound">The bounding vector.</param>
@@ -2303,9 +1895,9 @@ namespace ClemCAddons
         {
             return vector.x.IsBetween(bound1.x, bound2.x) && vector.y.IsBetween(bound1.y, bound2.y);
         }
-        #endregion isBetween
+#endregion isBetween
         // good
-        #region Set Partial
+#region Set Partial
         /// <summary>Sets the x parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="x">The new x parameter.</param>
@@ -2338,9 +1930,9 @@ namespace ClemCAddons
             vector.y = (float)y;
             return vector;
         }
-        #endregion Set Partial
+#endregion Set Partial
         // good
-        #region ToVector3
+#region ToVector3
         /// <summary>Returns the vector as a Vector3. The z parameter is 0</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector3 ToVector3(this Vector2 vector)
@@ -2354,9 +1946,9 @@ namespace ClemCAddons
         {
             return new Vector3(vector.x, vector.y, z);
         }
-        #endregion ToVector3
+#endregion ToVector3
         // good
-        #region Interpolation
+#region Interpolation
         /// <summary>Interpolates from a to b at a constant speed, returns new a</summary>
         /// <param name="a">The source vector.</param>
         /// <param name="b">The destination vector.</param>
@@ -2375,9 +1967,9 @@ namespace ClemCAddons
             return r.ClampTowards(b, b - a);
         }
         // good
-        #endregion Interpolation
+#endregion Interpolation
         // good
-        #region Operations
+#region Operations
         public static Vector2 Add(this Vector2 vector, float value)
         {
             return new Vector2(vector.x + value, vector.y + value);
@@ -2416,8 +2008,8 @@ namespace ClemCAddons
         {
             return new Vector2(vector.x == 0 ? vector.x : 1 / vector.x, vector.y == 0 ? vector.y : 1 / vector.y);
         }
-        #endregion Operations
-        #region Sign
+#endregion Operations
+#region Sign
         public static Vector2 Sign(this Vector2 vector)
         {
             return vector.SetX(vector.x.Sign()).SetY(vector.y.Sign());
@@ -2426,10 +2018,10 @@ namespace ClemCAddons
         {
             return vector.Abs().Multiply(referenceVector.Sign());
         }
-        #endregion Sign
-        #endregion Vector2 Additions
-        #region float Additions
-        #region Ratio
+#endregion Sign
+#endregion Vector2 Additions
+#region float Additions
+#region Ratio
         public static float[] Ratio(this float value, params float[] values)
         {
             float total = value + values.Total();
@@ -2441,8 +2033,8 @@ namespace ClemCAddons
             }
             return r;
         }
-        #endregion Ratio
-        #region RemoveInfinity
+#endregion Ratio
+#region RemoveInfinity
         public static float RemoveInfinity(this float value, bool InfiniteToMin = false)
         {
             if (value == float.PositiveInfinity)
@@ -2451,8 +2043,8 @@ namespace ClemCAddons
                 return InfiniteToMin ? float.MaxValue : float.MinValue;
             return value;
         }
-        #endregion RemoveInfinity
-        #region GetMaxs
+#endregion RemoveInfinity
+#region GetMaxs
         public static float GetMax(this Vector3 vector, bool abs = false)
         {
             return vector.x.Max(abs, vector.y, vector.z);
@@ -2470,8 +2062,8 @@ namespace ClemCAddons
         {
             return vector.y.Max(abs, vector.z);
         }
-        #endregion GetMaxs
-        #region Min Max
+#endregion GetMaxs
+#region Min Max
         public static float Min(this float value, params float[] values)
         {
             return Mathf.Min(value, values.Min());
@@ -2508,8 +2100,8 @@ namespace ClemCAddons
             }
             return abs ? Mathf.Max(value.Abs(), values.Abs().Max()) : Mathf.Max(value, values.Max());
         }
-        #endregion Min Max
-        #region Clamp
+#endregion Min Max
+#region Clamp
         public static float Clamp(this float value, float min, float max)
         {
             return Mathf.Clamp(value, min, max);
@@ -2552,8 +2144,8 @@ namespace ClemCAddons
         {
             return value > check ? zero : value;
         }
-        #endregion Clamp
-        #region Abs, Sum, Minus
+#endregion Clamp
+#region Abs, Sum, Minus
         public static float Abs(this float f)
         {
             return Mathf.Abs(f);
@@ -2590,14 +2182,14 @@ namespace ClemCAddons
             float r = Mathf.Max(f, value) - Mathf.Min(f, value);
             return r + ((r > 180) ? -360 : (r < -180) ? 360 : 0);
         }
-        #endregion Abs, Sum
-        #region IsBetween
+#endregion Abs, Sum
+#region IsBetween
         public static bool IsBetween(this float value, float first, float second)
         {
             return value >= Mathf.Min(first, second) && value <= Mathf.Max(first, second);
         }
-        #endregion IsBetween
-        #region Round
+#endregion IsBetween
+#region Round
         public static int Round(this float _value)
         {
             return (int)Math.Round(_value);
@@ -2606,8 +2198,8 @@ namespace ClemCAddons
         {
             return (int)_value;
         }
-        #endregion Round
-        #region Angles
+#endregion Round
+#region Angles
         // saved me a lot of time man https://stackoverflow.com/a/42248572
         public static float ClampAngle(this float value, float min, float max)
         {
@@ -2622,8 +2214,8 @@ namespace ClemCAddons
         {
             return (value + 180) % (to * 2) - 180;
         }
-        #endregion Angles
-        #region Sign
+#endregion Angles
+#region Sign
         public static float Sign(this float value)
         {
             return Mathf.Sign(value);
@@ -2636,9 +2228,9 @@ namespace ClemCAddons
         {
             return Mathf.Sign(value) == 1;
         }
-        #endregion Sign
-        #endregion float Additions
-        #region int Additions
+#endregion Sign
+#endregion float Additions
+#region int Additions
         public static bool IsBetween(this int value, int first, int second)
         {
             return value >= Math.Min(first, second) && value <= Math.Max(first, second);
@@ -2651,7 +2243,7 @@ namespace ClemCAddons
         {
             return value >= limit.Min() && value <= limit.Max();
         }
-        #region Loop Around
+#region Loop Around
         public static int LoopAround(this int value, int length)
         {
             if (value < length - 1)
@@ -2669,8 +2261,8 @@ namespace ClemCAddons
                 return length + value;
             return value - length;
         }
-        #endregion Loop Around
-        #region Min Max
+#endregion Loop Around
+#region Min Max
         public static int Min(this int value, params int[] values)
         {
             return Mathf.Min(value, values.Min());
@@ -2687,9 +2279,9 @@ namespace ClemCAddons
         {
             return abs ? Mathf.Max(value.Abs(), values.Abs().Max()) : Mathf.Max(value, values.Max());
         }
-        #endregion Min Max
+#endregion Min Max
 
-        #region Abs, Sum, Minus
+#region Abs, Sum, Minus
         public static int Abs(this int f)
         {
             return Mathf.Abs(f);
@@ -2726,9 +2318,9 @@ namespace ClemCAddons
             int r = Mathf.Max(f, value) - Mathf.Min(f, value);
             return r + ((r > 180) ? -360 : (r < -180) ? 360 : 0);
         }
-        #endregion Abs, Sum
-        #endregion int Additions
-        #region Basic conversions
+#endregion Abs, Sum
+#endregion int Additions
+#region Basic conversions
         public static bool ToBool(this int value)
         {
             return value <= 0;
@@ -2738,9 +2330,9 @@ namespace ClemCAddons
             return *(Byte*)&value;
             // optimized pointer cast. Cost is basically 0 on intel cpu, 1 cycle on amd, according to my source (https://stackoverflow.com/questions/66985162/how-to-convert-bool-to-int-efficiently)
         }
-        #endregion Basic conversions
-        #region Transform Additions
-        #region Anchors
+#endregion Basic conversions
+#region Transform Additions
+#region Anchors
         public static Vector3 GetWorld(this Transform transform, Vector3 localSpace)
         {
             return transform.TransformVector(localSpace);
@@ -2757,7 +2349,7 @@ namespace ClemCAddons
         {
             return transform.InverseTransformPoint(worldSpace);
         }
-        #endregion Anchors
+#endregion Anchors
         public static int ActiveChildCount(this Transform transform)
         {
             int r = 0;
@@ -2950,8 +2542,8 @@ namespace ClemCAddons
         {
             return rectTransform.position + ((rectTransform.rect.center - (offset ? rectTransform.anchoredPosition : Vector2.zero)) * rectTransform.lossyScale).ToVector3();
         }
-        #endregion Transform Additions
-        #region Distances
+#endregion Transform Additions
+#region Distances
         public static float Distance(this Transform transform, Transform compared) // transform transform
         {
             return Vector3.Distance(transform.position, compared.position);
@@ -3246,8 +2838,8 @@ namespace ClemCAddons
             return closest;
         }
 
-        #endregion Distances
-        #region Quaternion Additions
+#endregion Distances
+#region Quaternion Additions
         public static bool IsApproximatelyEqual(this Quaternion quat, Quaternion quaternion, float range = 0.01f)
         {
             return 1 - Mathf.Abs(Quaternion.Dot(quat, quaternion)) < range;
@@ -3280,7 +2872,7 @@ namespace ClemCAddons
         {
             return Quaternion.Inverse(quaternion);
         }
-        #region Interpolation
+#region Interpolation
         public static Quaternion Slerp(this Quaternion a, Quaternion b, float t)
         {
             return Quaternion.Slerp(a, b, t);
@@ -3289,9 +2881,11 @@ namespace ClemCAddons
         {
             return Quaternion.RotateTowards(a, b, t);
         }
-        #endregion Interpolation
-        #endregion QuaternionAdditions
-        #region Class Additions
+#endregion Interpolation
+#endregion QuaternionAdditions
+#region Class Additions
+#if (UNITY_STANDALONE_WIN)
+
         public static T[] GetCopy<T>(this T[] source)
         {
             var t = new T[source.Length];
@@ -3302,15 +2896,16 @@ namespace ClemCAddons
         {
             return source.ToBytes().ToType(typeof(T));
         }
-        #endregion Class Additions
+#endif
+#endregion Class Additions
     }
-    #endregion Extensions
+#endregion Extensions
     namespace Utilities
     {
-        #region Utilities
+#region Utilities
         public class GameTools
         {
-            #region Logic
+#region Logic
             private static List<KeyValuePair<int, bool>> GateMemory = new List<KeyValuePair<int, bool>>();
             public static bool OnceIfTrue(int id, bool value)
             {
@@ -3330,8 +2925,8 @@ namespace ClemCAddons
                     return value;
                 }
             }
-            #endregion Logic
-            #region Vector3 Additions
+#endregion Logic
+#region Vector3 Additions
             public static Vector3 Rotate(Vector3 vector, float angle, Vector3 axis) // https://answers.unity.com/questions/46770/rotate-a-vector3-direction.html
             {
                 return Quaternion.AngleAxis(angle, axis) * vector;
@@ -3345,7 +2940,7 @@ namespace ClemCAddons
                 }
                 return result;
             }
-            #region Direction
+#region Direction
             public static Vector3 DirectionTo(Vector3 from, Vector3 to)
             {
                 return (to - from).normalized;
@@ -3370,8 +2965,8 @@ namespace ClemCAddons
             {
                 return vector - Vector3.Dot(vector, normal) * normal;
             }
-            #endregion Direction
-            #region Random
+#endregion Direction
+#region Random
             public static Vector3 RandomVector()
             {
                 return Random.insideUnitCircle.normalized;
@@ -3403,9 +2998,9 @@ namespace ClemCAddons
                     Random.Range(bounds.min.z, bounds.max.z)
                 );
             }
-            #endregion Random
-            #endregion Vector3 Additions
-            #region Vector2 Additions
+#endregion Random
+#endregion Vector3 Additions
+#region Vector2 Additions
             public static Vector2 Reflect(Vector2 vector, Vector2 normal)
             {
                 return vector - 2 * Vector2.Dot(vector, normal) * normal;
@@ -3414,396 +3009,8 @@ namespace ClemCAddons
             {
                 return vector - Vector2.Dot(vector, normal) * normal;
             }
-            #endregion Vector2 Additions
-            #region Ground & Wall
-            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer)
-            {
-                Ray groundRay = (new Ray(position, Vector3.down));
-                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer);
-                if (ground)
-                {
-                    return groundHit.distance - sizeCompensation;
-                }
-                return maxDistance;
-            }
-            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer, out RaycastHit hit)
-            {
-                Ray groundRay = (new Ray(position, Vector3.down));
-                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer);
-                hit = groundHit;
-                if (ground)
-                {
-                    return groundHit.distance - sizeCompensation;
-                }
-                return maxDistance;
-            }
-            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer, float defaultTo)
-            {
-                Ray groundRay = (new Ray(position, Vector3.down));
-                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer);
-                if (ground)
-                {
-                    return groundHit.distance - sizeCompensation;
-                }
-                return defaultTo;
-            }
-            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer, out RaycastHit hit, float defaultTo)
-            {
-                Ray groundRay = (new Ray(position, Vector3.down));
-                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer);
-                hit = groundHit;
-                if (ground)
-                {
-                    return groundHit.distance - sizeCompensation;
-                }
-                return defaultTo;
-            }
-            public static float FindSlope(Vector3 position, Vector3 forward, float height, float maxDistance, LayerMask layer)
-            {
-                Ray groundRayF = (new Ray(position + forward, Vector3.down));
-                Ray groundRayB = (new Ray(position + (forward * -1), Vector3.down));
-                bool groundF = Physics.Raycast(groundRayF, out RaycastHit groundHitF, height + maxDistance, layer);
-                bool groundB = Physics.Raycast(groundRayB, out RaycastHit groundHitB, height + maxDistance, layer);
-                float distF = groundF ? groundHitF.distance : height + maxDistance;
-                float distB = groundB ? groundHitB.distance : height + maxDistance;
-                return distF - distB;
-            }
-            public static float FindSlopePerc(Vector3 position, Vector3 forward, float height, float maxDistance, LayerMask layer, out float distance)
-            {
-                Ray groundRayF = (new Ray(position + forward, Vector3.down));
-                Ray groundRayB = (new Ray(position + (forward * -1), Vector3.down));
-                bool groundF = Physics.Raycast(groundRayF, out RaycastHit groundHitF, height + maxDistance, layer);
-                bool groundB = Physics.Raycast(groundRayB, out RaycastHit groundHitB, height + maxDistance, layer);
-                float distF = groundF ? groundHitF.distance : height + maxDistance;
-                float distB = groundB ? groundHitB.distance : height + maxDistance;
-                distance = (distF - distB).Abs();
-                return (distF - distB) / forward.magnitude;
-            }
-            public static KeyValuePair<Vector3, bool> CheckForWall(Vector3 position, Vector3 direction, float radius, float width, string layerName = "Wall")
-            {
-                Ray ray = new Ray(position, direction);
-                Debug.DrawRay(ray.origin, ray.direction * 5, Color.red);
-                bool r = Physics.SphereCast(ray, radius, out RaycastHit hit, width / 2 - radius, LayerMask.GetMask(layerName));
-                Vector3 res = Vector3.Cross(hit.normal, ray.direction);
-                res = Vector3.Cross(res, hit.normal);
-                return new KeyValuePair<Vector3, bool>(res, r);
-            }
-            #endregion
-            #region Geometry
-            public static bool IsInRectangle(Node node, Vector3 position)
-            {
-                var t1 = node.transform.position;
-                return position.x.IsBetween(t1.x - (node.Dimensions.x), t1.x + (node.Dimensions.x)) && position.y.IsBetween(t1.y, t1.y + (node.Dimensions.y * 2)) && position.z.IsBetween(t1.z - (node.Dimensions.z), t1.z + (node.Dimensions.z));
-            }
-            public static bool IsInRectangle(TPSNode node, Vector3 position)
-            {
-                var t1 = node.transform.position;
-                return position.x.IsBetween(t1.x - (node.Dimensions.x), t1.x + (node.Dimensions.x)) && position.y.IsBetween(t1.y, t1.y + (node.Dimensions.y * 2)) && position.z.IsBetween(t1.z - (node.Dimensions.z), t1.z + (node.Dimensions.z));
-            }
-            public static bool IsInRectangle(Vector3 rectPos, Vector3 rectScale, Vector3 position)
-            {
-                return position.x.IsBetween(rectPos.x - (rectScale.x), rectPos.x + (rectScale.x)) && position.y.IsBetween(rectPos.y, rectPos.y + (rectScale.y * 2)) && position.z.IsBetween(rectPos.z - (rectScale.z), rectPos.z + (rectScale.z));
-            }
-
-            public static Vector3 ClosestOnCube(Vector3 point, Vector3 cubePos, Vector3 cubeSize, BoxCollider box, bool debug = false)
-            {
-                box.transform.position = cubePos + new Vector3(0, cubeSize.y);
-                box.size = cubeSize * 2;
-                if (IsInRectangle(cubePos, cubeSize, point))
-                {
-                    return ClosestInCube(point, cubePos, cubeSize, debug);
-                }
-                var r = box.ClosestPointOnBounds(point);
-                return r;
-            }
-
-            public static Vector3 ClosestInCube(Vector3 point, Vector3 cubePos, Vector3 cubeSize, bool debug = false)
-            {
-                //f1 will be x+
-                //f2 will be x-
-                //f3 will be y+
-                //f4 will be y-
-                //f5 will be z+
-                //f6 will be z-
-                var f1 = cubePos;
-                f1.y += (cubeSize.y);
-                var f2 = f1;
-                var f3 = f2;
-                var f4 = f3;
-                var f5 = f4;
-                var f6 = f5;
-                f1.x += cubeSize.x;
-                f2.x -= cubeSize.x;
-                f3.y += cubeSize.y;
-                f4.y -= cubeSize.y;
-                f5.z += cubeSize.z;
-                f6.z -= cubeSize.z;
-                f1.y = f2.y = point.y;
-                f1.z = f2.z = point.z;
-                f3.z = f4.z = point.z;
-                f3.x = f4.x = point.x;
-                f5.x = f6.x = point.x;
-                f5.y = f6.y = point.y;
-                if (debug)
-                {
-                    EditorTools.DrawLineInEditor(f1, point, new Color(1, 0.5f, 0));
-                    EditorTools.DrawLineInEditor(f2, point, new Color(1, 0.5f, 0));
-                    EditorTools.DrawLineInEditor(f3, point, new Color(1, 0.5f, 0));
-                    EditorTools.DrawLineInEditor(f4, point, new Color(1, 0.5f, 0));
-                    EditorTools.DrawLineInEditor(f5, point, new Color(1, 0.5f, 0));
-                    EditorTools.DrawLineInEditor(f6, point, new Color(1, 0.5f, 0));
-                }
-                return FindClosestPoint(point, new Vector3[] { f1, f2, f3, f4, f5, f6 });
-            }
-            public static Vector3 FindClosestPoint(Vector3 reference, Vector3[] points)
-            {
-                Vector3 result = points[0];
-                float r = Vector3.Distance(result, reference);
-                for (int i = 1; i < points.Length; i++)
-                {
-                    var res = Vector3.Distance(points[i], reference);
-                    if (res < r)
-                    {
-                        result = points[i];
-                        r = res;
-                    }
-                }
-                return result;
-            }
-
-            public static Quaternion QuaternionAvoidNull(Quaternion quaternion)
-            {
-                if (quaternion.x == 0 && quaternion.y == 0 && quaternion.z == 0 && quaternion.w == 0)
-                {
-                    return Quaternion.identity;
-                }
-                return quaternion;
-            }
-            #endregion Geometry
-            #region Casts
-            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, string tag, bool debug = false)
-            {
-                Ray ray = new Ray(from, (to - from).normalized);
-                bool result = false;
-                RaycastHit hit = new RaycastHit();
-                var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
-                if (hits.Length > 0)
-                {
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit.distance += 0.2f;
-                        }
-                    }
-                }
-                if (!result)
-                {
-                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                        }
-                    }
-                }
-                if (debug)
-                {
-                    EditorTools.DrawLineInEditor(from, to, Color.grey);
-                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-                }
-                return result;
-            }
-            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, bool debug = false)
-            {
-                Ray ray = new Ray(from, (to - from).normalized);
-                bool result = false;
-                RaycastHit hit = new RaycastHit();
-                var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
-                if (hits.Length > 0)
-                {
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit.distance += 0.2f;
-                        }
-                    }
-                }
-                if (!result)
-                {
-                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                        }
-                    }
-                }
-                if (debug)
-                {
-                    EditorTools.DrawLineInEditor(from, to, Color.grey);
-                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-                }
-                return result;
-            }
-            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, bool debug = false)
-            {
-                Ray ray = new Ray(from, (to - from).normalized);
-                bool result = false;
-                RaycastHit hit = new RaycastHit();
-                var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
-                if (hits.Length > 0)
-                {
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                            hit.distance += radius;
-                        }
-                    }
-                }
-                if (!result)
-                {
-                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                        }
-                    }
-                }
-                if (debug)
-                {
-                    EditorTools.DrawLineInEditor(from, to, Color.grey);
-                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-                }
-                return result;
-            }
-
-            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, out RaycastHit hit, bool debug = false)
-            {
-                Ray ray = new Ray(from, (to - from).normalized);
-                bool result = false;
-                hit = new RaycastHit();
-                var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
-                if (hits.Length > 0)
-                {
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                            hit.distance += radius;
-                        }
-                    }
-                }
-                if (!result)
-                {
-                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                        }
-                    }
-                }
-                if (debug)
-                {
-                    EditorTools.DrawLineInEditor(from, to, Color.grey);
-                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-                }
-                return result;
-            }
-            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, float radius, out RaycastHit hit, bool debug = false)
-            {
-                Ray ray = new Ray(from, (to - from).normalized);
-                bool result = false;
-                hit = new RaycastHit();
-                var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
-                if (hits.Length > 0)
-                {
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                            hit.distance += radius;
-                        }
-                    }
-                }
-                if (!result)
-                {
-                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                        }
-                    }
-                }
-                if (debug)
-                {
-                    EditorTools.DrawLineInEditor(from, to, Color.grey);
-                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
-                }
-                return result;
-            }
-            public static bool CastTo2D(Vector2 from, Vector2 to, LayerMask layer, float radius, out RaycastHit2D hit, bool debug = false)
-            {
-                Vector2 dir = (to - from).normalized;
-                bool result = false;
-                hit = new RaycastHit2D();
-                var hits = Physics2D.CircleCastAll(from, radius, dir, Vector3.Distance(from, to), layer);
-                if (hits.Length > 0)
-                {
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                            hit.distance += radius;
-                        }
-                    }
-                }
-                if (!result)
-                {
-                    hits = Physics2D.RaycastAll(from, dir, Vector2.Distance(from, to), layer);
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
-                        {
-                            result = true;
-                            hit = hits[i];
-                        }
-                    }
-                }
-                if (debug)
-                {
-                    EditorTools.DrawLineInEditor(from, to, Color.grey);
-                    EditorTools.DrawSphereInEditor(result ? from + (dir * hit.distance) : to, 0.05f, Color.grey);
-                }
-                return result;
-            }
-            #endregion Casts
-            #region Async
+#endregion Vector2 Additions
+#region Async
             public delegate void Call();
             public static async Task DelayedCall(int delayms, Call call)
             {
@@ -3850,20 +3057,9 @@ namespace ClemCAddons
                 }
                 return;
             }
-            #endregion Async
-            #region IsInCamera
-            public static bool IsInCamera(Vector3 vector, float perc)
-            {
-                return Camera.allCameras[0].WorldToScreenPoint(vector).IsBetween(new Vector3() + (Camera.allCameras[0].pixelRect.size.ToVector3() * perc), Camera.allCameras[0].pixelRect.size - (Camera.allCameras[0].pixelRect.size * perc));
-            }
-
-            public static bool IsInCamera(Transform transform, float perc)
-            {
-                return Camera.allCameras[0].WorldToScreenPoint(transform.position).IsBetween(new Vector3() + (Camera.allCameras[0].rect.size.ToVector3() * perc), Camera.allCameras[0].rect.size - (Camera.allCameras[0].rect.size * perc));
-            }
-            #endregion IsInCamera
+#endregion Async
         }
-        #region Timer
+#region Timer
         public class RandomC
         {
             public static int RandomInt()
@@ -3926,7 +3122,7 @@ namespace ClemCAddons
                     action.Invoke(value);
                 }
             }
-            #region SetAtTimer
+#region SetAtTimer
             private static float SetAtTimer(float origin, float target, float progress)
             {
                 return Mathf.Lerp(origin, target, progress);
@@ -3943,8 +3139,8 @@ namespace ClemCAddons
             {
                 return Quaternion.Lerp(origin, target, progress);
             }
-            #endregion SetAtTimer
-            #region float
+#endregion SetAtTimer
+#region float
             private static unsafe void SetUnsafe(float* source, float value)
             {
                 *source = value;
@@ -4030,8 +3226,8 @@ namespace ClemCAddons
                 setter.Invoke(destination);
             }
 
-            #endregion float
-            #region vector
+#endregion float
+#region vector
             private static unsafe void SetUnsafe(Vector3* source, Vector3 value)
             {
                 *source = value;
@@ -4116,8 +3312,8 @@ namespace ClemCAddons
                 }
                 setter.Invoke(destination);
             }
-            #endregion vector
-            #region vector2
+#endregion vector
+#region vector2
             private static unsafe void SetUnsafe(Vector2* source, Vector2 value)
             {
                 *source = value;
@@ -4203,8 +3399,8 @@ namespace ClemCAddons
                 }
                 setter.Invoke(destination);
             }
-            #endregion vector2
-            #region quaternion
+#endregion vector2
+#region quaternion
             private static unsafe void SetUnsafe(Quaternion* source, Quaternion value)
             {
                 *source = value;
@@ -4289,7 +3485,7 @@ namespace ClemCAddons
                 }
                 setter.Invoke(destination);
             }
-            #endregion quaternion
+#endregion quaternion
         }
         public class Timer
         {
@@ -4457,446 +3653,11 @@ namespace ClemCAddons
                 EndTimer(id);
             }
         }
-        #endregion Timer
-        #region Slider
-        [Serializable]
-        public class Slider
-        {
-            [SerializeField, LabelOverride("Start Value")] private double _currentValue;
-            [SerializeField, LabelOverride("Number of tiles")] private int _tilesCount;
-            [SerializeField, LabelOverride("Tile Width")] private double _tileSize;
-            [SerializeField, LabelOverride("Scrollrect")] private ScrollRect _scrollBar;
-            [SerializeField] private double _speed;
-            [SerializeField] private double _deceleration;
-            [SerializeField] private double _deformation;
-            [SerializeField] private bool _limitDeformation = true;
-            private double _currentSpeed;
-
-            public double CurrentValue { get => _currentValue; set => _currentValue = value; }
-            public int TileCount { get => _tilesCount; set => _tilesCount = value; }
-            public double TileSize { get => _tileSize; set => _tileSize = value; }
-            public ScrollRect ScrollBar { get => _scrollBar; set => _scrollBar = value; }
-            public double Speed { get => _speed; set => _speed = value; }
-            public double Deceleration { get => _deceleration; set => _deceleration = value; }
-            public double Deformation { get => _deformation; set => _deformation = value; }
-            public double CurrentSpeed { get => _currentSpeed; }
-
-            public bool LimitDeformation { get => _limitDeformation; set => _limitDeformation = value; }
-
-            public double TilesPerScreen
-            {
-                get
-                {
-                    return _scrollBar.viewport.parent.GetComponent<RectTransform>().sizeDelta.x / _tileSize;
-                }
-            }
-
-            public float IdealSize
-            {
-                get
-                {
-                    return (float)((_tilesCount + TilesPerScreen - 1) * _tileSize);
-                }
-            }
-
-            public void ExternalInitialize()
-            {
-                _scrollBar.horizontalNormalizedPosition = (float)_currentValue;
-            }
-
-            public Slider(ScrollRect scrollbar, double speed, double deceleration, double tileSize, int tilesCount, double deformation, double startValue = 0.5, bool limitDeformation = true)
-            {
-                _scrollBar = scrollbar;
-                _speed = speed;
-                _deceleration = deceleration;
-                _tileSize = tileSize;
-                _tilesCount = tilesCount;
-                _deformation = deformation;
-                _currentValue = startValue;
-                _scrollBar.horizontalNormalizedPosition = (float)startValue;
-                _limitDeformation = limitDeformation;
-            }
-            public int GetCurrentItem()
-            {
-                return (int)Math.Round((_tilesCount - 1) * _currentValue);
-            }
-            public double GetSlide()
-            {
-                return _currentValue;
-            }
-            public double GetSlidingSpeed()
-            {
-                return _currentSpeed;
-            }
-            public void Slide(double impulse)
-            {
-                _currentSpeed = Math.Max(-1, Math.Min(1, _currentSpeed + (impulse * _speed)));
-            }
-            public double[] GetTileSizes()
-            {
-                KeyValuePair<int, double>[] res = new KeyValuePair<int, double>[_tilesCount];
-                if (res.Length > 1)
-                {
-                    for (int i = 0; i < res.Length; i++)
-                    {
-                        res[i] = new KeyValuePair<int, double>(i, Math.Abs(_tileSize * (i - ((res.Length - 1) * _currentValue))));
-                    }
-                    res = res.OrderBy(t => t.Value).ToArray();
-                    KeyValuePair<int, double>[] result = new KeyValuePair<int, double>[_tilesCount];
-                    for (int i = 0; i < res.Length; i++)
-                    {
-                        result[i] = new KeyValuePair<int, double>(res[i].Key, _tileSize * (_limitDeformation ? Math.Max(_deformation, Math.Pow(_deformation, res[i].Value / _tileSize)) : Math.Pow(_deformation, res[i].Value / _tileSize)));
-                    }
-                    result = result.OrderBy(t => t.Key).ToArray();
-                    return result.Select(t => t.Value).ToArray();
-                }
-                else
-                {
-                    return _tileSize.MakeArray();
-                }
-
-            }
-            public void Update()
-            {
-                if (_currentSpeed != 0)
-                {
-                    _scrollBar.horizontalNormalizedPosition = (float)_currentValue;
-                }
-                else
-                {
-                    if (_scrollBar.horizontalNormalizedPosition != _currentValue)
-                    {
-                        _currentValue = _scrollBar.horizontalNormalizedPosition;
-                    }
-                }
-                _currentValue = Math.Max(0, Math.Min(1, _currentValue + (_currentSpeed * Time.smoothDeltaTime)));
-                if (_currentSpeed > 0)
-                {
-                    _currentSpeed = Math.Max(0, _currentSpeed - (_deceleration * Time.smoothDeltaTime));
-                }
-                else
-                {
-                    _currentSpeed = Math.Min(0, _currentSpeed + (_deceleration * Time.smoothDeltaTime));
-                }
-            }
-        }
-        #endregion Slider
-        #endregion Utilities
-        #region EditorTools
-        public class EditorTools
-        {
-            #region Drawers
-            public static void DrawLineInEditor(Vector3 from, Vector3 to, Color color)
-            {
-#if (UNITY_EDITOR)
-                if (!Application.isPlaying)
-                {
-                    Gizmos.color = color;
-                    Gizmos.DrawLine(from, to);
-                }
-#endif
-            }
-            public static void DrawSphereInEditor(Vector3 position, float radius, Color color)
-            {
-#if (UNITY_EDITOR)
-                if (!Application.isPlaying)
-                {
-                    Gizmos.color = color;
-                    Gizmos.DrawSphere(position, radius);
-                }
-#endif
-            }
-            public static void DrawCubeInEditor(Vector3 position, Vector3 dimensions, Color color)
-            {
-#if (UNITY_EDITOR)
-                if (!Application.isPlaying)
-                {
-                    Gizmos.color = color;
-                    Gizmos.DrawCube(position, dimensions * 2);
-                }
-#endif
-            }
-            #endregion Drawers
-        }
-        #endregion EditorTools
-        #region Serializable
-        namespace Serializable
-        {
-            [Serializable]
-            public struct SerializableVector3
-            {
-                /// <summary>
-                /// x component
-                /// </summary>
-                public float x;
-
-                /// <summary>
-                /// y component
-                /// </summary>
-                public float y;
-
-                /// <summary>
-                /// z component
-                /// </summary>
-                public float z;
-
-                /// <summary>
-                /// Constructor
-                /// </summary>
-                /// <param name="rX"></param>
-                /// <param name="rY"></param>
-                /// <param name="rZ"></param>
-                public SerializableVector3(float rX, float rY, float rZ)
-                {
-                    x = rX;
-                    y = rY;
-                    z = rZ;
-                }
-
-                /// <summary>
-                /// Returns a string representation of the object
-                /// </summary>
-                /// <returns></returns>
-                public override string ToString()
-                {
-                    return String.Format("[{0}, {1}, {2}]", x, y, z);
-                }
-
-                /// <summary>
-                /// Automatic conversion from SerializableVector3 to Vector3
-                /// </summary>
-                /// <param name="rValue"></param>
-                /// <returns></returns>
-                public static implicit operator Vector3(SerializableVector3 rValue)
-                {
-                    return new Vector3(rValue.x, rValue.y, rValue.z);
-                }
-
-                /// <summary>
-                /// Automatic conversion from Vector3 to SerializableVector3
-                /// </summary>
-                /// <param name="rValue"></param>
-                /// <returns></returns>
-                public static implicit operator SerializableVector3(Vector3 rValue)
-                {
-                    return new SerializableVector3(rValue.x, rValue.y, rValue.z);
-                }
-            }
-
-            [Serializable]
-            public struct SerializableQuaternion
-            {
-                /// <summary>
-                /// x component
-                /// </summary>
-                public float x;
-
-                /// <summary>
-                /// y component
-                /// </summary>
-                public float y;
-
-                /// <summary>
-                /// z component
-                /// </summary>
-                public float z;
-
-                /// <summary>
-                /// w component
-                /// </summary>
-                public float w;
-
-                /// <summary>
-                /// Constructor
-                /// </summary>
-                /// <param name="rX"></param>
-                /// <param name="rY"></param>
-                /// <param name="rZ"></param>
-                /// <param name="rW"></param>
-                public SerializableQuaternion(float rX, float rY, float rZ, float rW)
-                {
-                    x = rX;
-                    y = rY;
-                    z = rZ;
-                    w = rW;
-                }
-
-                /// <summary>
-                /// Returns a string representation of the object
-                /// </summary>
-                /// <returns></returns>
-                public override string ToString()
-                {
-                    return String.Format("[{0}, {1}, {2}, {3}]", x, y, z, w);
-                }
-
-                /// <summary>
-                /// Automatic conversion from SerializableQuaternion to Quaternion
-                /// </summary>
-                /// <param name="rValue"></param>
-                /// <returns></returns>
-                public static implicit operator Quaternion(SerializableQuaternion rValue)
-                {
-                    return new Quaternion(rValue.x, rValue.y, rValue.z, rValue.w);
-                }
-
-                /// <summary>
-                /// Automatic conversion from Quaternion to SerializableQuaternion
-                /// </summary>
-                /// <param name="rValue"></param>
-                /// <returns></returns>
-                public static implicit operator SerializableQuaternion(Quaternion rValue)
-                {
-                    return new SerializableQuaternion(rValue.x, rValue.y, rValue.z, rValue.w);
-                }
-            }
-        }
-        #endregion Serializable
+#endregion Timer
+#endregion Utilities
     }
-    namespace CameraAndNodes
-    {
-        public class Nodes
-        {
-            #region Camera Nodes
-            public static KeyValuePair<Vector3, Quaternion> CalculateNode(Vector3 defaultPos, Quaternion defaultRot, Vector3 playerPos, NodeContent node)
-            {
-                Vector3 pos = new Vector3();
-                Quaternion rot = new Quaternion();
-                if (node.type == NodeType.Relative)
-                {
-                    pos = defaultPos + node.position;
-                    rot = defaultRot * node.rotation.Value;
-                }
-                else if (node.type == NodeType.AbsolutePosition)
-                {
-                    pos = playerPos + node.position;
-                    rot = defaultRot * node.rotation.Value;
-                }
-                else if (node.type == NodeType.AbsoluteRotation)
-                {
-                    pos = defaultPos + node.position;
-                    rot = node.rotation.Value;
-                }
-                else if (node.type == NodeType.Absolute)
-                {
-                    pos = playerPos + node.position;
-                    rot = node.rotation.Value;
-                }
-                else if (node.type == NodeType.Coordinates)
-                {
-                    pos = node.position;
-                    rot = node.rotation.Value;
-                }
-                return new KeyValuePair<Vector3, Quaternion>(pos, rot);
-            }
-
-            public static KeyValuePair<Vector3, NodeContent> FindNodes(Vector3 pos)
-            {
-                var r = UnityEngine.Object.FindObjectsOfType<Node>();
-                for (int i = r.Length - 1; i >= 0; i--)
-                {
-                    if (Vector3.Distance(r[i].transform.position, pos) > r[i].Content.range)
-                    {
-                        r.RemoveAt(i);
-                    }
-                }
-                return new KeyValuePair<Vector3, NodeContent>();
-            }
-
-            public static KeyValuePair<Vector3[], Node[]> FindNodes(Vector3 pos, float range)
-            {
-                var r = UnityEngine.Object.FindObjectsOfType<Node>();
-                for (int i = r.Length - 1; i >= 0; i--)
-                {
-                    if (Vector3.Distance(r[i].transform.position, pos) > range)
-                    {
-                        r.RemoveAt(i);
-                    }
-                }
-                return new KeyValuePair<Vector3[], Node[]>(r.Select(t => t.transform.position).ToArray(), r);
-            }
-            #endregion Camera Nodes
-
-        }
-        #region Definitions
-        [Serializable]
-        public struct NodeContent
-        {
-            public NodeType type;
-            public Vector3 position;
-            public SerializableQuaternion rotation;
-            public float range;
-            public bool isFixed;
-            public SerializableQuaternion rotationFixed;
-            public void Update()
-            {
-                rotation.Update();
-                rotationFixed.Update();
-            }
-            public void Default()
-            {
-                rotation = new SerializableQuaternion();
-                rotationFixed = new SerializableQuaternion();
-            }
-        }
-        [Serializable]
-        public struct TPSNodeContent
-        {
-            public Vector2 offset;
-            public float fakeMiddle;
-            public float distance;
-            public float range;
-            public void Default()
-            {
-                offset = new Vector2();
-                distance = 2;
-                range = 1;
-            }
-        }
-
-        [Serializable]
-        public enum NodeType
-        {
-            Relative,
-            AbsolutePosition,
-            AbsoluteRotation,
-            Absolute,
-            Coordinates
-        }
-
-        [Serializable]
-        public struct NodeHelpSettings
-        {
-            public bool ShowRange;
-            public bool ShowSafeRange;
-            public bool ShowCamPreview;
-            public bool ShowNodes;
-            public bool ShowNodeDirection;
-            public bool ShowNodePredictiveDirection;
-            public bool ShowNodePaths;
-            public bool AlwaysShowNodeDirection;
-            public bool ShowSelection;
-            public bool ShowRectangularDebug;
-            public bool ShowCameraBoom;
-            public NodeHelpSettings(bool showRange = true, bool showSafeRange = true, bool showCamPreview = true, bool showNodes = true, bool showNodeDirection = true, bool showNodePredictiveDirection = true, bool showNodePaths = true, bool alwaysShowNodeDirection = false, bool showSelection = true, bool showRectangularDebug = false, bool showCameraBoom = false)
-            {
-                ShowRange = showRange;
-                ShowSafeRange = showSafeRange;
-                ShowCamPreview = showCamPreview;
-                ShowNodes = showNodes;
-                ShowNodeDirection = showNodeDirection;
-                ShowNodePredictiveDirection = showNodePredictiveDirection;
-                ShowNodePaths = showNodePaths;
-                AlwaysShowNodeDirection = alwaysShowNodeDirection;
-                ShowSelection = showSelection;
-                ShowRectangularDebug = showRectangularDebug;
-                ShowCameraBoom = showCameraBoom;
-            }
-        }
-        #endregion Definitions
-    }
-    #region Definitions
-    #region Serializable Quaternion
+#region Definitions
+#region Serializable Quaternion
     [Serializable]
     public class SerializableQuaternion
     {
@@ -4951,6 +3712,6 @@ namespace ClemCAddons
             _q = Quaternion.Euler(Angle);
         }
     }
-    #endregion Serializable Quaternion
-    #endregion Definitions
+#endregion Serializable Quaternion
+#endregion Definitions
 }
