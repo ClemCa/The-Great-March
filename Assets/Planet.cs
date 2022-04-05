@@ -104,7 +104,6 @@ public class Planet : MonoBehaviour
 
     public int GetPeople()
     {
-        Debug.Log(Name+": "+_people);
         return _people;
     }
 
@@ -537,7 +536,10 @@ public class Planet : MonoBehaviour
         var rnd = new System.Random();
         char a = (char)rnd.Next('a', 'z');
         char b = (char)rnd.Next('a', 'z');
-        int num = rnd.Next(100, 9999);
+        int num = rnd.Next(100, 999);
+        int maybe = rnd.Next(0, 100);
+        if (maybe < 10) // critical role!
+            _people = 1;
         _name = string.Concat(a, b, num);
         _availableResources = resources;
         Destroy(GetComponent<MeshRenderer>());

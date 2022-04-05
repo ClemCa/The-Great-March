@@ -319,7 +319,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'As a Leader, you helped your people survive {XXXXXX} minutes.
+  m_text: 'As a leader, you helped your people survive {XXXXXX} minutes.
 
     You
     went through {XX} systems.
@@ -1413,9 +1413,12 @@ MonoBehaviour:
     Though somewhere, in these dark
     clouds,
 
-    there must be some kind of trace of your
+    there must be some kind of trace of the
 
-    heroic deeds.'
+    heroic deeds of the
+    one that was once
+
+    called: President.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5aa42c989de6d834b89eb7fb10f7e2fd, type: 2}
   m_sharedMaterial: {fileID: 9148068213965569378, guid: 5aa42c989de6d834b89eb7fb10f7e2fd, type: 2}

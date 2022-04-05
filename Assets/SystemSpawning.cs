@@ -25,5 +25,7 @@ public class SystemSpawning : MonoBehaviour
             Destroy(_spawned[0]);
             _spawned.RemoveAt(0);
         }
+        if (Planet.LeaderPlanet != null)
+            transform.position = transform.position.SetX(Mathf.Lerp(transform.position.x, Planet.LeaderPlanet.transform.parent.position.x, Time.deltaTime));
     }
 }

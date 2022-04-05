@@ -6,7 +6,7 @@ public class ScoringWriter : MonoBehaviour
 {
     void Start()
     {
-        GetComponent<TMPro.TMP_Text>().text = "As a Leader, you helped your people"
+        GetComponent<TMPro.TMP_Text>().text = "As a leader, you helped your people"
             + "survive " + Scoring.survivalTime
             + " minutes.\n"
             + "You went through " + Scoring.systems
