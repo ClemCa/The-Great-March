@@ -13,6 +13,11 @@ public class ButtonSlider : MonoBehaviour
     private bool _extended;
     private bool _extendedSave;
 
+    void Awake()
+    {
+        transform.Find("Prompt").GetChild(0).GetComponent<TMPro.TMP_Text>().text = Settings.ShowPrompt ? "Hide Help" : "Show Help";
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -54,6 +59,15 @@ public class ButtonSlider : MonoBehaviour
         {
             button.gameObject.SetActive(_extended);
         }
+    }
+
+    public void ShowPrompt(TMPro.TMP_Text text)
+    {
+        Settings.ShowPrompt = !Settings.ShowPrompt;
+        if (Settings.ShowPrompt == true)
+            text.text = "Hide Help";
+        else
+            text.text = "Show Help";
     }
 
     public void Exit()

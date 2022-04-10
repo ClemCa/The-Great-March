@@ -34,11 +34,11 @@ public class PlanetMenu : MonoBehaviour
                 _target = Planet.Selected.transform;
                 _rectTransform.position = Camera.main.WorldToScreenPoint(Planet.Selected.transform.position);
             }
-            _rectTransform.position = Vector3.Lerp(_rectTransform.position, Camera.main.WorldToScreenPoint(_target.position), Time.deltaTime * 5);
+            _rectTransform.position = Vector3.Lerp(_rectTransform.position, Camera.main.WorldToScreenPoint(_target.position), Time.unscaledDeltaTime * 5);
         }
         else
         {
-            _rectTransform.anchoredPosition = Vector3.Lerp(_rectTransform.anchoredPosition, new Vector3(1920-_rectTransform.sizeDelta.x, 0), Time.deltaTime * 5);
+            _rectTransform.anchoredPosition = Vector3.Lerp(_rectTransform.anchoredPosition, new Vector3(1920-_rectTransform.sizeDelta.x, 0), Time.unscaledDeltaTime * 5);
         }
     }
 }

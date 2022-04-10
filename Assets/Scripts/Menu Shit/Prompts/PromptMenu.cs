@@ -22,11 +22,11 @@ public class PromptMenu : MonoBehaviour
     void Update()
     {
         _canvasGroup.alpha = _visibility;
-        if (!_enabled)
+        if (!_enabled || !Settings.ShowPrompt)
         {
             if(_visibility > 0)
             {
-                _visibility -= Time.deltaTime * 5;
+                _visibility -= Time.unscaledDeltaTime * 5;
                 transform.position = Input.mousePosition - new Vector3(1, 1);
             }
             else
