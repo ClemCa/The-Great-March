@@ -110,36 +110,52 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 57adfe0aad8ecb447ba0a144742225c9, type: 3}
   _advancedResourceSprites: []
   _facilitiesInfo:
-  - Facility: 0
+  - Name: Hydrogen Extractor
+    Description: Extracts Hydrogen from the atmosphere
+    Facility: 0
     AssociatedResource: 3
-    Sprite: {fileID: 21300000, guid: 93ba2c93715d0a7479a72cc2fba9d082, type: 3}
+    Sprite: {fileID: 21300000, guid: 81ed0f26477535b4686c59c35a706149, type: 3}
     Cooldown: 30
-  - Facility: 1
+  - Name: Mine
+    Description: Mines Metal from deposits
+    Facility: 1
     AssociatedResource: 0
-    Sprite: {fileID: 21300000, guid: c9c745596add5c2439cf747002a84df9, type: 3}
+    Sprite: {fileID: 21300000, guid: 990cd71e07864514580560d70651c4f6, type: 3}
     Cooldown: 30
-  - Facility: 2
+  - Name: Oil Extractor
+    Description: Pumps oil out of the ground
+    Facility: 2
     AssociatedResource: 4
-    Sprite: {fileID: 21300000, guid: 18e82de5053043e48b4a95d89e3f261b, type: 3}
+    Sprite: {fileID: 21300000, guid: 31d282b2f78efef408d10d50819d7c25, type: 3}
     Cooldown: 30
-  - Facility: 3
+  - Name: Gas Extractor
+    Description: Pumps natural gas out of the ground
+    Facility: 3
     AssociatedResource: 5
-    Sprite: {fileID: 21300000, guid: 397d15713383a284a9af3383757cbefb, type: 3}
+    Sprite: {fileID: 21300000, guid: c219914d766a51e4e8cca0adb68595c6, type: 3}
     Cooldown: 30
-  - Facility: 4
+  - Name: Water Pump
+    Description: There is water on this planet?
+    Facility: 4
     AssociatedResource: 1
-    Sprite: {fileID: 21300000, guid: 9c26d808ede49a84b9c64351f9b7d4fe, type: 3}
+    Sprite: {fileID: 21300000, guid: 3ee2169e0ee2c1346bc2ff4caef49de4, type: 3}
     Cooldown: 30
-  - Facility: 5
+  - Name: Animal Kidnapping Center
+    Description: It isn't kidnapping if they aren't human
+    Facility: 5
     AssociatedResource: 6
-    Sprite: {fileID: 21300000, guid: cad2f9215cf4b744381c2703fa95460d, type: 3}
+    Sprite: {fileID: 21300000, guid: fcd073b6d58333d4f9fdf5905600a6e6, type: 3}
     Cooldown: 30
-  - Facility: 6
+  - Name: Super Growth Greenhosue
+    Description: Local plants grow faster here
+    Facility: 6
     AssociatedResource: 7
-    Sprite: {fileID: 21300000, guid: 1636d8ae2c5f9b14fa3c716b61ba3381, type: 3}
+    Sprite: {fileID: 21300000, guid: 7313d821a26e0c548a775cfd718a201a, type: 3}
     Cooldown: 30
   _transformationFacilitiesInfos:
-  - Advanced: 0
+  - Name: Type 1 Farm
+    Description: Did you know that if you put water in plants, they grow?
+    Advanced: 0
     Facility: 0
     InputResources: 0700000001000000
     OutputResource: 7
@@ -148,7 +164,10 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 1
     Production: 2
-  - Advanced: 0
+  - Name: Type 2 Farm
+    Description: Feeding animals might seem useless, but turns out it's a good way
+      to multiply them
+    Advanced: 0
     Facility: 1
     InputResources: 0600000002000000
     OutputResource: 6
@@ -157,7 +176,9 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 1
     Production: 2
-  - Advanced: 0
+  - Name: Type 1 Kitchen
+    Description: Cooking plants might make for tastier stuff
+    Advanced: 0
     Facility: 2
     InputResources: 07000000
     OutputResource: 2
@@ -166,7 +187,9 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 1
     Production: 2
-  - Advanced: 0
+  - Name: Type 2 Kitchen
+    Description: Turns out cooking is a good way to make animal corpses edible
+    Advanced: 0
     Facility: 3
     InputResources: 06000000
     OutputResource: 2
@@ -175,7 +198,10 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 1
     Production: 2
-  - Advanced: 1
+  - Name: Hell's Kitchen
+    Description: Idiot sandwhich have never been easier to make since we learned
+      Animals weren't smart
+    Advanced: 1
     Facility: 4
     InputResources: 0700000006000000
     OutputResource: 2
@@ -184,7 +210,9 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 5
     Production: 1
-  - Advanced: 1
+  - Name: Type 1 Raffinery
+    Description: Raffined oil is up to 10 times as efficient as Oil
+    Advanced: 1
     Facility: 5
     InputResources: 04000000
     OutputResource: 0
@@ -193,7 +221,9 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 5
     Production: 1
-  - Advanced: 1
+  - Name: Type 2 Raffinery
+    Description: Raffined gas is up to 10 times as efficient as Gas
+    Advanced: 1
     Facility: 6
     InputResources: 05000000
     OutputResource: 0
@@ -202,7 +232,10 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 10
     Production: 2
-  - Advanced: 1
+  - Name: Battery Factory
+    Description: Turning hydrogen into battery form has never been easier. For some
+      reason, the quantity of Hydrogen just happens to be multiplied by 10
+    Advanced: 1
     Facility: 7
     InputResources: 0000000003000000
     OutputResource: 0
@@ -211,6 +244,46 @@ MonoBehaviour:
     Cooldown: 30
     Cost: 3
     Production: 1
+  _resourcesNames:
+  - Resource: 0
+    Name: Metal
+    Description: Somewhere, someone once said it was hard
+  - Resource: 1
+    Name: Water
+    Description: Quenches thirst and maintains life. It takes a few billion years
+      to create life though.
+  - Resource: 2
+    Name: Food
+    Description: Organic matter that helps people survive
+  - Resource: 3
+    Name: Hydrogen
+    Description: Hydrogen can be found in many atmospheres
+  - Resource: 4
+    Name: Oil
+    Description: History says it pollutes, but you don't have enough time to verify
+      it
+  - Resource: 5
+    Name: Gas
+    Description: Natural Gas might be a good source of energy, according to someone.
+      The problem is that you can't find "someone"
+  - Resource: 6
+    Name: Animals
+    Description: You feed them live and eat them dead
+  - Resource: 7
+    Name: Plants
+    Description: I heard they are pretty good at multiplying
+  _advancedResourcesNames:
+  - Resource: 0
+    Name: High Efficiency Fuel
+    Description: More efficient than the fuel it's made from. Called black magic
+      in some cultures
+  - Resource: 1
+    Name: Hydrogen Battery
+    Description: Put hydrogen in a battery, and turns out it works better. Maybe
+      the fact that hydrogen batteries don't leak constantly might help
+  - Resource: 2
+    Name: Prepared Food
+    Description: Prepared food? And why not fair elections, to go with it?
 --- !u!82 &7399917606416848091
 AudioSource:
   m_ObjectHideFlags: 0

@@ -12,6 +12,10 @@ public class ResourceMenu : MonoBehaviour, IPointerClickHandler
     private Registry.AdvancedResources _advancedResourceType;
     private bool _advancedResources;
 
+    public bool AdvancedResources { get => _advancedResources; }
+    public Registry.Resources ResourceType { get => _resourceType; }
+    public Registry.AdvancedResources AdvancedResourceType { get => _advancedResourceType;  }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log("Nothing to do on resource click");

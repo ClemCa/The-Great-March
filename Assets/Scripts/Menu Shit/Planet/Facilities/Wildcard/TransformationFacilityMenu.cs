@@ -10,6 +10,8 @@ public class TransformationFacilityMenu : MonoBehaviour, IPointerClickHandler
     private Registry.TransformationFacilities? _facility;
 
     public static List<KeyValuePair<Planet, Registry.TransformationFacilities>> OrderedFacilities { get => _orderedFacilities; }
+    public Registry.TransformationFacilities? Facility { get => _facility; }
+
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -38,6 +40,7 @@ public class TransformationFacilityMenu : MonoBehaviour, IPointerClickHandler
         _facility = facility;
     }
 
+     
     void Update()
     {
         if (Planet.Selected == null)

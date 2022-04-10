@@ -9,6 +9,7 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
     private static List<KeyValuePair<Planet, Registry.Facilities>> _orderedFacilities = new List<KeyValuePair<Planet, Registry.Facilities>>();
     private Registry.Facilities _facility;
 
+    public Registry.Facilities Facility { get => _facility; }
 
     public void OnPointerClick(PointerEventData eventData)
     {

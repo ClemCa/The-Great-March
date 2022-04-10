@@ -19,6 +19,8 @@ public class Registry : MonoBehaviour
     [SerializeField] private AdvancedResourceSprite[] _advancedResourceSprites;
     [SerializeField] private FacilityInfos[] _facilitiesInfo;
     [SerializeField] private TransformationFacilitiesInfos[] _transformationFacilitiesInfos;
+    [SerializeField] private ResourceInfo[] _resourcesNames;
+    [SerializeField] private AdvancedResourceInfo[] _advancedResourcesNames;
 
     private static Registry _instance;
 
@@ -29,6 +31,21 @@ public class Registry : MonoBehaviour
         return (Resources[])Enum.GetValues(typeof(Resources));
     }
 
+    [Serializable]
+    public class ResourceInfo
+    {
+        public Resources Resource;
+        public string Name;
+        public string Description;
+    }
+
+    [Serializable]
+    public class AdvancedResourceInfo
+    {
+        public AdvancedResources Resource;
+        public string Name;
+        public string Description;
+    }
 
     [Serializable]
     public class ResourceSprite
@@ -47,6 +64,8 @@ public class Registry : MonoBehaviour
     [Serializable]
     public class FacilityInfos
     {
+        public string Name;
+        public string Description;
         public Facilities Facility;
         public Resources AssociatedResource;
         public Sprite Sprite;
@@ -56,6 +75,8 @@ public class Registry : MonoBehaviour
     [Serializable]
     public class TransformationFacilitiesInfos
     {
+        public string Name;
+        public string Description;
         public bool Advanced;
         public TransformationFacilities Facility;
         public Resources[] InputResources;
@@ -134,6 +155,25 @@ public class Registry : MonoBehaviour
         _instance = this;
     }
 
+    public string GetResourceName(Resources resource)
+    {
+        return _resourcesNames.First(t => t.Resource == resource).Name;
+    }
+
+    public string GetResourceDescription(Resources resource)
+    {
+        return _resourcesNames.First(t => t.Resource == resource).Description;
+    }
+
+    public string GetResourceName(AdvancedResources resource)
+    {
+        return _advancedResourcesNames.First(t => t.Resource == resource).Name;
+    }
+
+    public string GetResourceDescription(AdvancedResources resource)
+    {
+        return _advancedResourcesNames.First(t => t.Resource == resource).Description;
+    }
 
     public TransformationFacilitiesInfos GetFacilityInfo(TransformationFacilities facility)
     {

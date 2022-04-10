@@ -162,6 +162,7 @@ GameObject:
   - component: {fileID: 1182696062334034995}
   - component: {fileID: 1182696062334034994}
   - component: {fileID: 5646574000500865614}
+  - component: {fileID: 2619222458833153509}
   m_Layer: 5
   m_Name: Facility
   m_TagString: Untagged
@@ -225,6 +226,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b0dfa2d9e06d4140b03ad83293ec02c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2619222458833153509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1182696062334034992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae797d5daee311646a349ff96b0fd656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _data:
+    Title: 
+    Description: 
+    FacilityMenu: {fileID: 0}
+    TransformationFacilityMenu: {fileID: 0}
+    ResourceSelection: {fileID: 0}
+    ResourceMenu: {fileID: 0}
+    SlotMenu: {fileID: 5646574000500865614}
 --- !u!1 &3972786256253389822
 GameObject:
   m_ObjectHideFlags: 0

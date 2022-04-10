@@ -9,6 +9,13 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
 {
     private Registry.Resources _resourceType;
 
+    public Registry.Resources ResourceType { get => _resourceType; }
+
+    public bool HasFacility()
+    {
+        return Planet.Selected.HasFacility(_resourceType);
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (!Planet.Selected.HasFacility(_resourceType))

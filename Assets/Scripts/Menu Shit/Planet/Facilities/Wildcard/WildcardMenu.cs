@@ -10,6 +10,9 @@ public class WildcardMenu : MonoBehaviour, IPointerClickHandler
     private Registry.TransformationFacilities? _facility;
     private int _id = 0;
 
+    public Registry.TransformationFacilities? Facility { get => _facility; }
+
+    
     public void OnPointerClick(PointerEventData eventData)
     {
         if (!_facility.HasValue && TransformationFacilityMenu.OrderedFacilities.Count <= _id)

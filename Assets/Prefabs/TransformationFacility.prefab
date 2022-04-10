@@ -237,6 +237,7 @@ GameObject:
   - component: {fileID: 1250227105391882596}
   - component: {fileID: 1182696062334034995}
   - component: {fileID: 1182696062334034994}
+  - component: {fileID: 3595692898478315897}
   m_Layer: 5
   m_Name: TransformationFacility
   m_TagString: Untagged
@@ -303,6 +304,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding: {x: 0, y: 0, z: 0, w: 0}
   m_Softness: {x: 0, y: 0}
+--- !u!114 &3595692898478315897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1182696062334034992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae797d5daee311646a349ff96b0fd656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _data:
+    Title: 
+    Description: 
+    FacilityMenu: {fileID: 0}
+    TransformationFacilityMenu: {fileID: 0}
+    ResourceSelection: {fileID: 0}
+    ResourceMenu: {fileID: 0}
+    SlotMenu: {fileID: 0}
+    WildcardMenu: {fileID: 1250227105391882596}
 --- !u!1 &3618194143002963356
 GameObject:
   m_ObjectHideFlags: 0
