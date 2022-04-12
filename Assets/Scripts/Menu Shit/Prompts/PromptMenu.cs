@@ -27,7 +27,7 @@ public class PromptMenu : MonoBehaviour
             if(_visibility > 0)
             {
                 _visibility -= Time.unscaledDeltaTime * 5;
-                transform.position = Input.mousePosition - new Vector3(1, 1);
+                SetPosition(Input.mousePosition - new Vector3(1, 1));
             }
             else
             {
@@ -36,7 +36,7 @@ public class PromptMenu : MonoBehaviour
             return;
         }
         _visibility = 1;
-        transform.position = Input.mousePosition - new Vector3(1,1);
+        SetPosition(Input.mousePosition - new Vector3(1,1));
         var rect = transform.FindDeep("Description").GetComponent<RectTransform>();
 
         if (_data.FacilityMenu != null)
@@ -147,6 +147,12 @@ public class PromptMenu : MonoBehaviour
         transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
         transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "";
         rect.anchorMin = rect.anchorMin.SetY(0);
+    }
+
+    private void SetPosition(Vector2 position)
+    {
+        var size = _rectTransform.sizeDelta * _rectTransform.lossyScale;
+        _rectTransform.position = position.Clamp(new Vector2(size.x, size.y / 2), new Vector2(Screen.width, Screen.height - size.y / 2));
     }
 
     public static void Show(Prompt.PromptData data)
