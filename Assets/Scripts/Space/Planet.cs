@@ -20,7 +20,9 @@ public class Planet : MonoBehaviour
     private string _name;
     private int _availableWildcards;
     private int _peopleFed = 0;
-    private List<int> _peopleOverTime = new List<int>();
+    private List<int> _peopleOverTime = new List<int>(new int[60]);
+    private List<int> _resourcesOverTime = new List<int>(new int[60]);
+    private List<int> _facilitiesOverTime = new List<int>(new int[60]);
     private float _consumption = 0;
     private static Planet selected;
     private static Registry.Resources moveSelection;
@@ -44,6 +46,9 @@ public class Planet : MonoBehaviour
     public string Name { get => _name; }
     public bool HasPlayer { get => _hasPlayer; set => _hasPlayer = value; }
     public static Planet LeaderPlanet { get => _leaderPlanet;}
+    public List<int> PeopleOverTime { get => _peopleOverTime; }
+    public List<int> ResourcesOverTime { get => _resourcesOverTime; }
+    public List<int> FacilitiesOverTime { get => _facilitiesOverTime; }
 
     public static void Unselect()
     {
@@ -265,21 +270,36 @@ public class Planet : MonoBehaviour
             StandardUpdate();
         else
             MoveSelectionMode();
+        UpdateGraph();
         RunBasicFacilities();
         RunTransformationFacilities();
         ConsumeFood();
     }
 
-    private void ConsumeFood()
+    private void UpdateGraph()
     {
-        if(ClemCAddons.Utilities.Timer.MinimumDelay("ConsumeFood".GetHashCode(), 1000, true))
+        if (ClemCAddons.Utilities.Timer.MinimumDelay("UpdateGraph".GetHashCode(), 1000, true))
         {
             _peopleOverTime.Add(_people);
-            while(_peopleOverTime.Count > 60)
+            while (_peopleOverTime.Count > 60)
             {
                 _peopleOverTime.RemoveAt(0);
             }
+            _resourcesOverTime.Add(_resources.Sum(t => t.Value) + _advancedResources.Sum(t => t.Value));
+            while (_resourcesOverTime.Count > 60)
+            {
+                _resourcesOverTime.RemoveAt(0);
+            }
+            _facilitiesOverTime.Add(_facilities.Count() + _transformationFacilities.Count());
+            while (_facilitiesOverTime.Count > 60)
+            {
+                _facilitiesOverTime.RemoveAt(0);
+            }
         }
+    }
+
+    private void ConsumeFood()
+    {
         if(_people == 0)
         {
             _consumption = 0;
