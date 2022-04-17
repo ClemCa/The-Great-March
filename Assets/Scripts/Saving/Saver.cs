@@ -20,7 +20,13 @@ public class Saver : MonoBehaviour
     public class SystemSave
     {
         public StellarSystem System;
-        public GameObject[] Planets;
+        public PlanetSave[] Planets;
+    }
+
+    public class PlanetSave
+    {
+        public GameObject Planet;
+        public GameObject[] Children;
     }
 
     public void Save()
@@ -57,7 +63,14 @@ public class Saver : MonoBehaviour
             var system = systems[i];
             var save = new SystemSave();
             save.System = system.GetComponent<StellarSystem>();
-            save.Planets = system.transform.GetChildrenWithComponent(typeof(Planet)).Select(t => t.gameObject).ToArray();
+            var planets = system.transform.GetChildrenWithComponent(typeof(Planet)).Select(t => t.gameObject).ToArray();
+            var planet = new PlanetSave[planets.Length];
+            for(int r = 0; r < planet.Length; r++)
+            {
+                planet[r].Planet = planets[r];
+                planet[r].Children = planets[r].transform.GetChildrenWithComponent(typeof(Transform)).Select(t => t.gameObject).ToArray();
+            }
+            save.Planets = planet;
             data.Systems.SetOrCreateAt(save, i);
         }
         return data;
