@@ -10,6 +10,10 @@ public class CloudMoveScript : MonoBehaviour
 
     private float speed;
 
+    private static CloudMoveScript instance;
+
+    public static CloudMoveScript Instance { get => instance; }
+
     // Start is called before the first frame update
     void Start()
     {

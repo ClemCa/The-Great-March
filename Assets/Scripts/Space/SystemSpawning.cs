@@ -13,6 +13,11 @@ public class SystemSpawning : MonoBehaviour
 
     private float _last = 0;
 
+    private static SystemSpawning _instance;
+
+    public List<GameObject> Spawned { get => _spawned; }
+    public static SystemSpawning Instance { get => _instance; }
+
     void Update()
     {
         if(transform.position.x + _every * _howManyBeforehand > _last)

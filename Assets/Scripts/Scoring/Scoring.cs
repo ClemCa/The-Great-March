@@ -16,9 +16,20 @@ public class Scoring : MonoBehaviour
     public static long transformativeFacilitiesCount = 0;
 
 
+
     private bool checkFirst = true;
 
     private System.DateTime startTime;
+    private System.DateTime lastTime;
+
+    public static Scoring Instance { get => _instance; }
+
+    public void Loading()
+    {
+        startTime = startTime.Add(System.DateTime.Now.Subtract(lastTime));
+        lastTime = System.DateTime.Now;
+        // update time to match ours
+    }
 
     void Start()
     {
@@ -43,7 +54,8 @@ public class Scoring : MonoBehaviour
                 checkFirst = false;
             }
             survivalTime = (int)Time.timeSinceLevelLoad / 60;
-            totalTime = (int)(System.DateTime.Now.Subtract(startTime).TotalMinutes);
+            lastTime = System.DateTime.Now;
+            totalTime = (int)(lastTime.Subtract(startTime).TotalMinutes);
         }
         else
         {
