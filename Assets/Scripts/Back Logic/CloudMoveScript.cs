@@ -17,6 +17,7 @@ public class CloudMoveScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        instance = this;
         var r = Camera.main.ViewportToWorldPoint(Vector3.zero);
         speed = (r.x - transform.position.x) / timeToCenter;
     }

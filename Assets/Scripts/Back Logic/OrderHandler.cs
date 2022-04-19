@@ -8,19 +8,22 @@ using ClemCAddons;
 public class OrderHandler : MonoBehaviour
 {
     private static OrderHandler _instance;
-    private Dictionary<Planet, List<Order>> _queue = new Dictionary<Planet, List<Order>>();
+    private Dictionary<string, List<Order>> _queue = new Dictionary<string, List<Order>>();
 
     public static OrderHandler Instance { get => _instance; }
+    public Dictionary<string, List<Order>> QueueData { get => _queue; set => _queue = value; }
 
+    [Serializable]
     public class Order
     {
-        public Planet Planet;
+        public string Planet;
         public int Assigned;
         public OrderType Type;
         public float Length;
         public float LengthLeft;
         public float SpeedPerPerson;
         public int MaxPeople;
+        [NonSerialized]
         public Action Execution;
         public Order(OrderType type, float length, float speedPerPerson, int maxPeople, Action execution)
         {
@@ -57,18 +60,18 @@ public class OrderHandler : MonoBehaviour
 
     public void Queue(Order order, Planet planet)
     {
-        order.Planet = planet;
-        if (_queue.ContainsKey(planet))
-            _queue[planet].Add(order);
+        order.Planet = planet.Name;
+        if (_queue.ContainsKey(planet.Name))
+            _queue[planet.Name].Add(order);
         else
-            _queue.Add(planet, new List<Order>() { order });
+            _queue.Add(planet.Name, new List<Order>() { order });
     }
 
     public Order[] GetPlanetQueue(Planet planet)
     {
-        if (!_queue.ContainsKey(planet))
+        if (!_queue.ContainsKey(planet.Name))
             return new Order[0];
-        return _queue[planet].ToArray();
+        return _queue[planet.Name].ToArray();
     }
 
     private void Process()
@@ -93,7 +96,8 @@ public class OrderHandler : MonoBehaviour
         var array = _queue.Keys.ToArray();
         foreach (var r in array)
         {
-            int distribution = r.GetPeople();
+            var planet = FindObjectsOfType<Planet>().First(t => t.Name == r);
+            int distribution = planet.GetPeople();
             foreach(var t in _queue[r])
             {
                 if(distribution > 0)

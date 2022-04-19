@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,6 +24,8 @@ public class Scoring : MonoBehaviour
     private System.DateTime lastTime;
 
     public static Scoring Instance { get => _instance; }
+    public DateTime StartTime { get => startTime; set => startTime = value; }
+    public DateTime LastTime { get => lastTime; set => lastTime = value; }
 
     public void Loading()
     {

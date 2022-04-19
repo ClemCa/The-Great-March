@@ -6,126 +6,107 @@ using System.Security.Cryptography;
 using UnityEngine;
 using ClemCAddons;
 using System.Linq;
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+using Newtonsoft.Json;
 
 public class Saver : MonoBehaviour
 {
+    private static Saver instance;
+
+    public static Saver Instance { get => instance; }
+    
+    [Serializable]
     public class SaveData
     {
-        public SystemSave[] Systems;
-        public Scoring Scoring;
-        public Vector3 CloudPosition;
-        public OrderHandler Queue;
+        //public SystemSave[] Systems;
+        public ScoringData Scoring;
+        public string CloudPosition;
+        public Dictionary<string, List<OrderHandler.Order>> Queue;
     }
 
+    [Serializable]
+    public class ScoringData
+    {
+        public int SurvivalTime = 0;
+        public int TotalTime = 0;
+        public int Systems = 1;
+        public long NaturalResourcesUnits = 0;
+        public long AdvancedResourcesUnits = 0;
+        public long FacilitiesCount = 0;
+        public long TransformativeFacilitiesCount = 0;
+        public System.DateTime StartTime;
+        public System.DateTime LastTime;
+        public ScoringData(int survivalTime, int totalTime, int systems, long naturalResourcesUnits, long advancedResourcesUnits, long facilitiesCount, long transformativeFacilitiesCount, DateTime startTime, DateTime lastTime)
+        {
+            SurvivalTime = survivalTime;
+            TotalTime = totalTime;
+            Systems = systems;
+            NaturalResourcesUnits = naturalResourcesUnits;
+            AdvancedResourcesUnits = advancedResourcesUnits;
+            FacilitiesCount = facilitiesCount;
+            TransformativeFacilitiesCount = transformativeFacilitiesCount;
+            StartTime = startTime;
+            LastTime = lastTime;
+        }
+    }
+
+    [Serializable]
     public class SystemSave
     {
         public StellarSystem System;
         public PlanetSave[] Planets;
     }
 
+    [Serializable]
     public class PlanetSave
     {
         public GameObject Planet;
         public GameObject[] Children;
     }
 
-    public void Save()
+    void Start()
     {
-        var save = new SaveData();
-
-        save = SetCloud(save);
-        save = SetQueue(save);
-        save = SetScoring(save);
-        save = SetSystems(save);
-
-        SaveSave(save);
-    }
-
-    public void Load()
-    {
-        //if (File.Exists(Application.persistentDataPath
-        //           + "/MySaveData.dat"))
-        //{
-        //    BinaryFormatter bf = new BinaryFormatter();
-        //    FileStream file =
-        //               File.Open(Application.persistentDataPath
-        //               + "/MySaveData.dat", FileMode.Open);
-        //    SaveData data = (SaveData)bf.Deserialize(file);
-        //    file.Close();
-        //}
-    }
-
-    private SaveData SetSystems(SaveData data)
-    {
-        var systems = SystemSpawning.Instance.Spawned;
-        for(int i = 0; i < systems.Count; i++)
+        if (instance != null)
         {
-            var system = systems[i];
-            var save = new SystemSave();
-            save.System = system.GetComponent<StellarSystem>();
-            var planets = system.transform.GetChildrenWithComponent(typeof(Planet)).Select(t => t.gameObject).ToArray();
-            var planet = new PlanetSave[planets.Length];
-            for(int r = 0; r < planet.Length; r++)
-            {
-                planet[r].Planet = planets[r];
-                planet[r].Children = planets[r].transform.GetChildrenWithComponent(typeof(Transform)).Select(t => t.gameObject).ToArray();
-            }
-            save.Planets = planet;
-            data.Systems.SetOrCreateAt(save, i);
+            Destroy(gameObject);
+            return;
         }
-        return data;
+        instance = this;
+        DontDestroyOnLoad(this);
     }
 
-    private SaveData SetQueue(SaveData data)
+    public bool Load()
     {
-        data.Queue = OrderHandler.Instance;
-        return data;
+        var save = LoadSave();
+        if (save == null)
+            return false; // failed
+        CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
+        LoadScoring(save.Scoring);
+        LoadQueue(save.Queue);
+        return true;
     }
 
-    private SaveData SetCloud(SaveData data)
+    private void LoadQueue(Dictionary<string, List<OrderHandler.Order>> queue)
     {
-        data.CloudPosition = CloudMoveScript.Instance.transform.position;
-        return data;
+        OrderHandler.Instance.QueueData = queue;
     }
 
-    private SaveData SetScoring(SaveData data)
+    private void LoadScoring(ScoringData data)
     {
-        data.Scoring = Scoring.Instance;
-        return data;
+        Scoring.survivalTime = data.SurvivalTime;
+        Scoring.totalTime = data.TotalTime;
+        Scoring.systems = data.Systems;
+        Scoring.naturalResourcesUnits = data.NaturalResourcesUnits;
+        Scoring.advancedResourcesUnits = data.AdvancedResourcesUnits;
+        Scoring.facilitiesCount = data.FacilitiesCount;
+        Scoring.transformativeFacilitiesCount = data.TransformativeFacilitiesCount;
+        Scoring.Instance.StartTime = data.StartTime;
+        Scoring.Instance.LastTime = data.LastTime;
+        Scoring.Instance.Loading();
     }
 
-    private void SaveSave(SaveData save)
-    {
-        // most of the structure is from https://videlais.com/2021/02/28/encrypting-game-data-with-unity/
-        Aes iAes = Aes.Create();
-
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath
-                     + "/MarchSave.dat");
-
-
-        byte[] savedKey = iAes.Key;
-
-        PlayerPrefs.SetString("saveKey", System.Convert.ToBase64String(savedKey));
-
-        byte[] inputIV = iAes.IV;
-
-        file.Write(inputIV, 0, inputIV.Length);
-
-        CryptoStream iStream = new CryptoStream(
-              file,
-              iAes.CreateEncryptor(iAes.Key, iAes.IV),
-              CryptoStreamMode.Write);
-
-        StreamWriter sWriter = new StreamWriter(iStream);
-
-        var data = save.ToBytes();
-
-        sWriter.Write(data);
-        sWriter.Close();
-        iStream.Close();
-        file.Close();
-    }
 
     private SaveData LoadSave()
     {
@@ -136,7 +117,7 @@ public class Saver : MonoBehaviour
         {
             // Update key based on PlayerPrefs
             // (Convert the String into a Base64 byte[] array.)
-            byte[] savedKey = System.Convert.FromBase64String(PlayerPrefs.GetString("key"));
+            byte[] savedKey = Convert.FromBase64String(PlayerPrefs.GetString("saveKey"));
 
             // Create FileStream for opening files.
             var file = new FileStream(Application.persistentDataPath
@@ -157,13 +138,121 @@ public class Saver : MonoBehaviour
                    oAes.CreateDecryptor(savedKey, outputIV),
                    CryptoStreamMode.Read);
 
-            // Create a StreamReader, wrapping CryptoStream
-            using (var memoryStream = new MemoryStream())
-            {
-                oStream.CopyTo(memoryStream);
-                return memoryStream.ToArray().ToType(typeof(SaveData));
-            }
+            var reader = new StreamReader(oStream);
+            var str = reader.ReadToEnd();
+            return JsonConvert.DeserializeObject<SaveData>(str);
         }
         return null;
+    }
+    #region Save
+
+    public void Save()
+    {
+        var save = new SaveData();
+
+        save = SetCloud(save);
+        save = SetQueue(save);
+        save = SetScoring(save);
+
+        //save = SetSystems(save);
+
+        SaveSave(save);
+    }
+
+    private SaveData SetSystems(SaveData data)
+    {
+        var systems = SystemSpawning.Instance.Spawned;
+        for(int i = 0; i < systems.Count; i++)
+        {
+            var system = systems[i];
+            var save = new SystemSave();
+            save.System = system.GetComponent<StellarSystem>();
+            var planets = system.transform.GetChildrenWithComponent(typeof(Planet)).Select(t => t.gameObject).ToArray();
+            var planet = new PlanetSave[planets.Length];
+            for(int r = 0; r < planet.Length; r++)
+            {
+                planet[r].Planet = planets[r];
+                planet[r].Children = planets[r].transform.GetChildrenWithComponent(typeof(Transform)).Select(t => t.gameObject).ToArray();
+            }
+            save.Planets = planet;
+            //data.Systems.SetOrCreateAt(save, i);
+        }
+        return data;
+    }
+
+    private SaveData SetQueue(SaveData data)
+    {
+        data.Queue = OrderHandler.Instance.QueueData;
+        return data;
+    }
+
+    private SaveData SetCloud(SaveData data)
+    {
+        data.CloudPosition = JsonUtility.ToJson(new SerializableVector3(CloudMoveScript.Instance.transform.position));
+        return data;
+    }
+
+    private SaveData SetScoring(SaveData data)
+    {
+        data.Scoring = new ScoringData(
+            Scoring.survivalTime,
+            Scoring.totalTime,
+            Scoring.systems,
+            Scoring.naturalResourcesUnits,
+            Scoring.advancedResourcesUnits,
+            Scoring.facilitiesCount,
+            Scoring.transformativeFacilitiesCount,
+            Scoring.Instance.StartTime,
+            Scoring.Instance.LastTime);
+        return data;
+    }
+
+    private void SaveSave(SaveData save)
+    {
+        // most of the structure is from https://videlais.com/2021/02/28/encrypting-game-data-with-unity/
+        Aes iAes = Aes.Create();
+
+        FileStream file = File.Create(Application.persistentDataPath
+                     + "/MarchSave.dat");
+
+
+        byte[] savedKey = iAes.Key;
+
+        PlayerPrefs.SetString("saveKey", System.Convert.ToBase64String(savedKey));
+
+        byte[] inputIV = iAes.IV;
+
+        file.Write(inputIV, 0, inputIV.Length);
+
+        CryptoStream iStream = new CryptoStream(
+              file,
+              iAes.CreateEncryptor(iAes.Key, iAes.IV),
+              CryptoStreamMode.Write);
+
+        StreamWriter sWriter = new StreamWriter(iStream);
+
+        var data = JsonConvert.SerializeObject(save);
+
+        sWriter.Write(data);
+        sWriter.Close();
+        iStream.Close();
+        file.Close();
+    }
+
+    #endregion Save
+
+
+    public static void Replace<T>(T x, T y)
+    where T : class
+    {
+        // replaces 'x' with 'y'
+        if (x == null) throw new ArgumentNullException("x");
+        if (y == null) throw new ArgumentNullException("y");
+
+        var size = Marshal.SizeOf(typeof(T));
+        var ptr = Marshal.AllocHGlobal(size);
+        Marshal.StructureToPtr(y, ptr, false);
+        Marshal.PtrToStructure(ptr, x);
+        Marshal.FreeHGlobal(ptr);
     }
 }

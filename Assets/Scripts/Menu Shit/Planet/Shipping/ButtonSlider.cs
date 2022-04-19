@@ -74,4 +74,14 @@ public class ButtonSlider : MonoBehaviour
     {
         Application.Quit();
     }
+
+    public void Save()
+    {
+        Saver.Instance.Save();
+    }
+
+    public void Load()
+    {
+        Saver.Instance.Load();
+    }
 }

@@ -18,6 +18,11 @@ public class SystemSpawning : MonoBehaviour
     public List<GameObject> Spawned { get => _spawned; }
     public static SystemSpawning Instance { get => _instance; }
 
+    void Start()
+    {
+        _instance = this;
+    }
+
     void Update()
     {
         if(transform.position.x + _every * _howManyBeforehand > _last)
