@@ -220,8 +220,29 @@ public class Registry : MonoBehaviour
         return _facilitiesInfo.Where(t => t.AssociatedResource == resource).Select(t => t.Facility).ToArray();
     }
 
+    public GameObject GetPlanet(PlanetType planetType, int id)
+    {
+        switch (planetType)
+        {
+            case PlanetType.Alien:
+                return _alienPlanets[id];
+            case PlanetType.Desert:
+                return _desertPlanets[id];
+            case PlanetType.Earth:
+                return _earthLikePlanets[id];
+            case PlanetType.Frozen:
+                return _frozenPlanets[id];
+            case PlanetType.Temperate:
+                return _temperatePlanets[id];
+            case PlanetType.Tundra:
+                return _tundraPlanets[id];
+            default:
+                Debug.LogError("A case is missing, returning starting planet instead");
+                return _earthLikePlanets[0];
+        }
+    }
 
-    public GameObject GetRandomPlanet(PlanetType planetType = PlanetType.None)
+    public int GetRandomPlanet(PlanetType planetType = PlanetType.None)
     {
         while (planetType == PlanetType.None)
             planetType = (PlanetType)Random.Range(0, Enum.GetNames(typeof(PlanetType)).Length);
@@ -229,20 +250,19 @@ public class Registry : MonoBehaviour
         switch (planetType)
         {
             case PlanetType.Alien:
-                return _alienPlanets[Random.Range(0, _alienPlanets.Length - 1)];
+                return Random.Range(0, _alienPlanets.Length - 1);
             case PlanetType.Desert:
-                return _desertPlanets[Random.Range(0, _desertPlanets.Length - 1)];
+                return Random.Range(0, _desertPlanets.Length - 1);
             case PlanetType.Earth:
-                return _earthLikePlanets[Random.Range(0, _earthLikePlanets.Length - 1)];
+                return Random.Range(0, _earthLikePlanets.Length - 1);
             case PlanetType.Frozen:
-                return _frozenPlanets[Random.Range(0, _frozenPlanets.Length - 1)];
+                return Random.Range(0, _frozenPlanets.Length - 1);
             case PlanetType.Temperate:
-                return _temperatePlanets[Random.Range(0, _temperatePlanets.Length - 1)];
+                return Random.Range(0, _temperatePlanets.Length - 1);
             case PlanetType.Tundra:
-                return _tundraPlanets[Random.Range(0, _tundraPlanets.Length - 1)];
+                return Random.Range(0, _tundraPlanets.Length - 1);
             default:
-                Debug.LogError("A case is missing, returning starting planet instead");
-                return _earthLikePlanets[0];
+                return 0;
         }
     }
 }

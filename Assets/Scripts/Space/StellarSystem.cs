@@ -13,6 +13,14 @@ public class StellarSystem : MonoBehaviour
     [SerializeField] private Registry.SystemType _systemType;
     [SerializeField] private bool _doNotRegenerate = false;
     private Lane[] _lanes;
+
+    private bool _block;
+    public bool Block { get => _block; set => _block = value; }
+    public bool RanStart = false;
+    public GameObject FirstPlanet { get => _firstPlanet; set => _firstPlanet = value; }
+    public Registry.SystemType SystemType { get => _systemType; set => _systemType = value; }
+    public GameObject Sun { get => _sun; set => _sun = value; }
+
     private struct Lane
     {
         public GameObject Planet;
@@ -29,9 +37,13 @@ public class StellarSystem : MonoBehaviour
         _systemType = systemType;
     }
 
-    void Awake()
+    void Start()
     {
-        while (_systemType == Registry.SystemType.None)
+        if (Block)
+        {
+            return;
+        }
+        while (_systemType == Registry.SystemType.None && !_doNotRegenerate)
             _systemType = (Registry.SystemType)Random.Range(0, System.Enum.GetNames(typeof(Registry.SystemType)).Length - 1);
         int planets = Random.Range(2,5);
         int resources = Random.Range(5, 8);

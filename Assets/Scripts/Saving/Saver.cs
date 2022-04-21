@@ -20,10 +20,11 @@ public class Saver : MonoBehaviour
     [Serializable]
     public class SaveData
     {
-        //public SystemSave[] Systems;
+        public SystemSave[] Systems;
         public ScoringData Scoring;
         public string CloudPosition;
         public Dictionary<string, List<OrderHandler.Order>> Queue;
+        public string SelectedPlanet;
     }
 
     [Serializable]
@@ -55,15 +56,39 @@ public class Saver : MonoBehaviour
     [Serializable]
     public class SystemSave
     {
-        public StellarSystem System;
-        public PlanetSave[] Planets;
+        public string Position;
+        public string System;
+        public string[] Planets;
+        public string[] PlanetPositions;
+        public Registry.SystemType SystemType;
+        public int[] TemperateType;
+        public int[] Roll;
     }
 
     [Serializable]
     public class PlanetSave
     {
-        public GameObject Planet;
-        public GameObject[] Children;
+        public string Planet;
+    }
+
+    public class PlanetStorage
+    {
+        public string _resources;
+        public string _advancedResources;
+        public int _people;
+        public Registry.Resources[] _availableResources;
+        public List<Registry.Facilities> _facilities;
+        public List<float> _facilitiesProgression;
+        public List<Registry.TransformationFacilities> _transformationFacilities;
+        public List<float> _transformationFacilitiesProgression;
+        public string _name;
+        public int _availableWildcards;
+        public int _peopleFed = 0;
+        public List<int> _peopleOverTime;
+        public List<int> _resourcesOverTime;
+        public List<int> _facilitiesOverTime;
+        public float _consumption;
+        public bool _hasPlayer;
     }
 
     void Start()
@@ -85,7 +110,13 @@ public class Saver : MonoBehaviour
         CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
         LoadScoring(save.Scoring);
         LoadQueue(save.Queue);
+        LoadSystems(save.Systems, save.SelectedPlanet);
         return true;
+    }
+
+    private void LoadSystems(SystemSave[] systems, string selectedPlanet)
+    {
+        SystemSpawning.Instance.Respawn(systems, selectedPlanet);
     }
 
     private void LoadQueue(Dictionary<string, List<OrderHandler.Order>> queue)
@@ -153,8 +184,8 @@ public class Saver : MonoBehaviour
         save = SetCloud(save);
         save = SetQueue(save);
         save = SetScoring(save);
-
-        //save = SetSystems(save);
+        save = SetSystems(save);
+        save.SelectedPlanet = Planet.Selected == null ? "" : Planet.Selected.Name;
 
         SaveSave(save);
     }
@@ -166,16 +197,25 @@ public class Saver : MonoBehaviour
         {
             var system = systems[i];
             var save = new SystemSave();
-            save.System = system.GetComponent<StellarSystem>();
-            var planets = system.transform.GetChildrenWithComponent(typeof(Planet)).Select(t => t.gameObject).ToArray();
+            save.SystemType = system.GetComponent<StellarSystem>().SystemType;
+            save.Position = JsonUtility.ToJson(new SerializableVector3(system.transform.position));
+            save.System = JsonUtility.ToJson(system.GetComponent<StellarSystem>());
+            var planets = system.transform.GetComponentsInChildren<Planet>();
             var planet = new PlanetSave[planets.Length];
-            for(int r = 0; r < planet.Length; r++)
+            var temperate = new int[planets.Length];
+            var roll = new int[planets.Length];
+            for (int r = 0; r < planet.Length; r++)
             {
-                planet[r].Planet = planets[r];
-                planet[r].Children = planets[r].transform.GetChildrenWithComponent(typeof(Transform)).Select(t => t.gameObject).ToArray();
+                planet[r] = new PlanetSave();
+                planet[r].Planet = JsonUtility.ToJson(planets[r].GetPlanetStorage());
+                temperate[r] = planets[r].TemperateType;
+                roll[r] = planets[r].Roll;
             }
-            save.Planets = planet;
-            //data.Systems.SetOrCreateAt(save, i);
+            save.Planets = planet.Select(t => JsonUtility.ToJson(t)).ToArray();
+            save.PlanetPositions = planets.Select(t => JsonUtility.ToJson(new SerializableVector3(t.transform.localPosition))).ToArray();
+            save.TemperateType = temperate;
+            save.Roll = roll;
+            data.Systems = data.Systems.SetOrCreateAt(save, i);
         }
         return data;
     }

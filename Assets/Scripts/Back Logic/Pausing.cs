@@ -26,8 +26,11 @@ public class Pausing : MonoBehaviour
 
     public static void Pause()
     {
+        if (Time.timeScale != 1)
+            return;
+
         _paused = true;
-        Time.timeScale = 0;
+        ClemCAddons.Utilities.Lerper.ConstantLerp(Time.timeScale, 0.01f, 1.5f, (f) => { Time.timeScale = f; });
 
         _instance.GetComponent<AudioSource>().Play();
         _instance.GetComponent<AudioSource>().time = 0.12f;
@@ -37,8 +40,12 @@ public class Pausing : MonoBehaviour
 
     public static void Unpause()
     {
+        if (Time.timeScale != 0.01f)
+            return;
+
         _paused = false;
-        Time.timeScale = 1;
+
+        ClemCAddons.Utilities.Lerper.ConstantLerp(Time.timeScale, 1, 1.5f   , (f) => { Time.timeScale = f; });
 
         _instance.GetComponent<AudioSource>().Play();
         _instance.GetComponent<AudioSource>().volume = 0.5f * 0.25f;

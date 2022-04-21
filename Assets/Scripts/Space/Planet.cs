@@ -1,5 +1,6 @@
 using cakeslice;
 using ClemCAddons;
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,8 @@ public class Planet : MonoBehaviour
     private static bool moveSelectionType;
     private bool _hasPlayer = false;
     private static Planet _leaderPlanet;
+    private int _roll = -1;
+    private int _temperateType = -1;
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
@@ -49,10 +52,59 @@ public class Planet : MonoBehaviour
     public List<int> PeopleOverTime { get => _peopleOverTime; }
     public List<int> ResourcesOverTime { get => _resourcesOverTime; }
     public List<int> FacilitiesOverTime { get => _facilitiesOverTime; }
+    public int TemperateType { get => _temperateType; set => _temperateType = value; }
+    public int Roll { get => _roll; set => _roll = value; }
+
+    public static void Select(Planet planet)
+    {
+        selected = planet;
+    }
 
     public static void Unselect()
     {
         selected = null;
+    }
+
+    public Saver.PlanetStorage GetPlanetStorage()
+    {
+        var storage = new Saver.PlanetStorage();
+        storage._resources = JsonConvert.SerializeObject(_resources);
+        storage._advancedResources = JsonConvert.SerializeObject(_advancedResources);
+        storage._people = _people;
+        storage._availableResources = _availableResources;
+        storage._facilities = _facilities;
+        storage._facilitiesProgression = _facilitiesProgression;
+        storage._transformationFacilities = _transformationFacilities;
+        storage._transformationFacilitiesProgression = _transformationFacilitiesProgression;
+        storage._name = _name;
+        storage._availableWildcards = _availableWildcards;
+        storage._peopleFed = _peopleFed;
+        storage._peopleOverTime = _peopleOverTime;
+        storage._resourcesOverTime = _resourcesOverTime;
+        storage._facilitiesOverTime = _facilitiesOverTime;
+        storage._consumption = _consumption;
+        storage._hasPlayer = _hasPlayer;
+        return storage;
+    }
+
+    public void SetPlanetStorage(Saver.PlanetStorage planetStorage)
+    {
+        _resources = JsonConvert.DeserializeObject<Dictionary<Registry.Resources, int>>(planetStorage._resources);
+        _advancedResources = JsonConvert.DeserializeObject<Dictionary<Registry.AdvancedResources, int>>(planetStorage._advancedResources);
+        _people = planetStorage._people;
+        _availableResources = planetStorage._availableResources;
+        _facilities = planetStorage._facilities;
+        _facilitiesProgression = planetStorage._facilitiesProgression;
+        _transformationFacilities = planetStorage._transformationFacilities;
+        _transformationFacilitiesProgression = planetStorage._transformationFacilitiesProgression;
+        _name = planetStorage._name;
+        _availableWildcards = planetStorage._availableWildcards;
+        _peopleFed = planetStorage._peopleFed;
+        _peopleOverTime = planetStorage._peopleOverTime;
+        _resourcesOverTime = planetStorage._resourcesOverTime;
+        _facilitiesOverTime = planetStorage._facilitiesOverTime;
+        _consumption = planetStorage._consumption;
+        _hasPlayer = planetStorage._hasPlayer;
     }
 
     public void SetWildcardSlots(int slots)
@@ -510,7 +562,7 @@ public class Planet : MonoBehaviour
 
             foreach (var r in results)
             {
-                if (r.gameObject.name == "Menu" || r.gameObject.FindParentDeep("Menu"))
+                if (r.gameObject.name == "Menu" || r.gameObject.FindParentDeep("Menu") || r.gameObject.FindParentDeep("PauseCanvas"))
                     return;
             }
 
@@ -541,8 +593,9 @@ public class Planet : MonoBehaviour
     }
     #endregion Routines
     #region Generation
-    public void Initialize(Registry.SystemType systemType, Registry.Resources[] resources, bool _doNotRegenerate = false)
+    public void Initialize(Registry.SystemType systemType, Registry.Resources[] resources, bool _doNotRegenerate = false, int temperate = -1, int roll = 0)
     {
+
         for (int i = 0; i < System.Enum.GetNames(typeof(Registry.Resources)).Length; i++)
         {
             _resources.Add((Registry.Resources)i, 0);
@@ -567,33 +620,59 @@ public class Planet : MonoBehaviour
         {
             Destroy(transform.GetChild(i).gameObject); // might have cloned too late, after the original spawned a new planet inside
         }
+        int r;
+        _temperateType = -1;
         switch (systemType)
         {
             case Registry.SystemType.Alien:
-                Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Alien), transform)
+                r = Registry.Instance.GetRandomPlanet(Registry.PlanetType.Alien);
+                _roll = r;
+                Instantiate(Registry.Instance.GetPlanet(Registry.PlanetType.Alien, r), transform)
                      .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             case Registry.SystemType.Cold:
-                Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Frozen), transform)
+                r = Registry.Instance.GetRandomPlanet(Registry.PlanetType.Frozen);
+                _roll = r;
+                Instantiate(Registry.Instance.GetPlanet(Registry.PlanetType.Frozen, r), transform)
                      .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             case Registry.SystemType.Hot:
-                Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Desert), transform)
+                r = Registry.Instance.GetRandomPlanet(Registry.PlanetType.Desert);
+                _roll = r;
+                Instantiate(Registry.Instance.GetPlanet(Registry.PlanetType.Desert, r), transform)
                      .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             case Registry.SystemType.Temperate:
-                if (Random.Range(0, 1) == 0)
-                    Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Temperate), transform)
-                        .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
+                if (temperate == 0 || (temperate == -1 && Random.Range(0, 1) == 0))
+                {
+                    r = Registry.Instance.GetRandomPlanet(Registry.PlanetType.Temperate);
+                    _roll = r;
+                    Instantiate(Registry.Instance.GetPlanet(Registry.PlanetType.Temperate, r), transform)
+                            .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
+                    _temperateType = 0;
+                }
                 else
-                    Instantiate(Registry.Instance.GetRandomPlanet(Registry.PlanetType.Earth), transform)
-                        .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
+                {
+                    r = Registry.Instance.GetRandomPlanet(Registry.PlanetType.Earth);
+                    _roll = r;
+                    Instantiate(Registry.Instance.GetPlanet(Registry.PlanetType.Earth, r), transform)
+                            .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
+                    _temperateType = 1;
+                }
                 break;
             default:
-                Debug.Log(systemType);
+                if (temperate == -1)
+                    break;
+                _temperateType = temperate;
+                _roll = roll;
+                if (temperate == 0)
+                    Instantiate(Registry.Instance.GetPlanet(Registry.PlanetType.Temperate, roll), transform)
+                        .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
+                else
+                    Instantiate(Registry.Instance.GetPlanet(Registry.PlanetType.Earth, roll), transform)
+                        .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
         }
-
     }
     #endregion Generation
 }

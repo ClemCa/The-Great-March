@@ -1,39 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &1733142332
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5639594937130279835}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07bdac752a6398a47a294f40c0a4363f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  starterName: zx96
-  starterPeople: 15
-  starterWildcards: 3
-  starterResources:
-  - Ressource: 0
-    Quantity: 5
-  - Ressource: 1
-    Quantity: 10
-  - Ressource: 2
-    Quantity: 10
-  - Ressource: 3
-    Quantity: 3
-  - Ressource: 4
-    Quantity: 0
-  - Ressource: 5
-    Quantity: 0
-  - Ressource: 6
-    Quantity: 1
-  - Ressource: 7
-    Quantity: 1
-  starterFacilities: 040000000000000006000000
-  starterSlots: 00000000010000000300000004000000050000000600000007000000
 --- !u!1001 &5639594938066859525
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -99,6 +65,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 4081625173673550577, guid: 3776b5ecf5e1d3f4db5673b1852dc7b0, type: 3}
+      propertyPath: _systemType
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4081625173673550577, guid: 3776b5ecf5e1d3f4db5673b1852dc7b0, type: 3}
       propertyPath: _doNotRegenerate
       value: 1
       objectReference: {fileID: 0}
@@ -152,13 +122,50 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3776b5ecf5e1d3f4db5673b1852dc7b0, type: 3}
---- !u!1 &5639594937130279835 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4081625174203010250, guid: 3776b5ecf5e1d3f4db5673b1852dc7b0, type: 3}
-  m_PrefabInstance: {fileID: 8567823204290424657}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5639594937130279831 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4081625174203010246, guid: 3776b5ecf5e1d3f4db5673b1852dc7b0, type: 3}
   m_PrefabInstance: {fileID: 8567823204290424657}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5639594937130279835 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4081625174203010250, guid: 3776b5ecf5e1d3f4db5673b1852dc7b0, type: 3}
+  m_PrefabInstance: {fileID: 8567823204290424657}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1733142332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5639594937130279835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07bdac752a6398a47a294f40c0a4363f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  starterName: zx96
+  starterPeople: 15
+  starterWildcards: 3
+  starterResources:
+  - Ressource: 0
+    Quantity: 5
+  - Ressource: 1
+    Quantity: 10
+  - Ressource: 2
+    Quantity: 10
+  - Ressource: 3
+    Quantity: 3
+  - Ressource: 4
+    Quantity: 0
+  - Ressource: 5
+    Quantity: 0
+  - Ressource: 6
+    Quantity: 1
+  - Ressource: 7
+    Quantity: 1
+  starterFacilities: 040000000000000006000000
+  starterTransformationFacilities: 
+  starterSlots: 00000000010000000300000004000000050000000600000007000000
+  roll: 0
+  temperateType: 0

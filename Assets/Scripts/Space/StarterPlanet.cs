@@ -12,6 +12,8 @@ public class StarterPlanet : MonoBehaviour
     [SerializeField] private Registry.Facilities[] starterFacilities = new Registry.Facilities[] { };
     [SerializeField] private Registry.TransformationFacilities[] starterTransformationFacilities = new Registry.TransformationFacilities[] { };
     [SerializeField] private Registry.Resources[] starterSlots = new Registry.Resources[] { };
+    [SerializeField] private int roll = 0;
+    [SerializeField] private int temperateType = -1;
 
     [Serializable]
     public class StarterResource
@@ -41,6 +43,8 @@ public class StarterPlanet : MonoBehaviour
         planet.SetName(starterName);
         planet.SetWildcardSlots(starterWildcards);
         planet.HasPlayer = true;
+        planet.TemperateType = temperateType;
+        planet.Roll = roll;
     }
 
 }
