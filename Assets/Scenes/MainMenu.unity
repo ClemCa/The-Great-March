@@ -485,7 +485,7 @@ MonoBehaviour:
     Description: Music
     URL: https://www.youtube.com/watch?v=GpGhwDrzDZ4
   - Name: Kenney
-    Description: Sounds & Icons from Kenney Aame Assets 3
+    Description: Most Sounds & Icons from Kenney Aame Assets 3
     URL: https://kenney.itch.io/kenney-game-assets-3
   - Name: Cadson Demak
     Description: Font - Chakra Petch
@@ -1145,7 +1145,7 @@ MonoBehaviour:
   _creditPrefab: {fileID: 1469725132735434380, guid: 3a55e17b14194a9439ef0a2caea5461e, type: 3}
   _credits:
   - Name: ClemCa
-    Description: Main Developer, Game Design
+    Description: Main Developer, Game Design, Icon edits
     URL: https://clementcatorc.com
   - Name: Bluenix
     Description: Developer, The Asset Guy

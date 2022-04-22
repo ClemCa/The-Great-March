@@ -28,6 +28,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.9508052, y: -4.2950625, z: 6.389293}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -44,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d0fd679580b3d2419100c248f911dea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wildcardSprite: {fileID: 0}
+  _wildcardSprite: {fileID: 21300000, guid: c1429b6a590579a469ed96a2a7205f8b, type: 3}
   _alienPlanets:
   - {fileID: 1345651076695995216, guid: 642454a265967e1468360a08fc66db60, type: 3}
   - {fileID: 1771551219379481457, guid: 177ffad0c8fd19146974e0fbc8614e5f, type: 3}
@@ -108,7 +109,13 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: b69d753a3ef024f40a114708301e4c2b, type: 3}
   - Resource: 7
     Sprite: {fileID: 21300000, guid: 57adfe0aad8ecb447ba0a144742225c9, type: 3}
-  _advancedResourceSprites: []
+  _advancedResourceSprites:
+  - Resource: 0
+    Sprite: {fileID: 21300000, guid: d59f30ea3bae0584f944a4cc829574b5, type: 3}
+  - Resource: 1
+    Sprite: {fileID: 21300000, guid: 9b9a657bb72dca045b1aa34e498490ad, type: 3}
+  - Resource: 2
+    Sprite: {fileID: 21300000, guid: 286b18650725f7241b10333d7b531b02, type: 3}
   _facilitiesInfo:
   - Name: Hydrogen Extractor
     Description: Extracts Hydrogen from the atmosphere
@@ -160,7 +167,7 @@ MonoBehaviour:
     InputResources: 0700000001000000
     OutputResource: 7
     OutputResourceTransformation: 0
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 679eb488e4e24154da96504ecd1bb8c9, type: 3}
     Cooldown: 30
     Cost: 1
     Production: 2
@@ -172,7 +179,7 @@ MonoBehaviour:
     InputResources: 0600000002000000
     OutputResource: 6
     OutputResourceTransformation: 0
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 679eb488e4e24154da96504ecd1bb8c9, type: 3}
     Cooldown: 30
     Cost: 1
     Production: 2
@@ -183,7 +190,7 @@ MonoBehaviour:
     InputResources: 07000000
     OutputResource: 2
     OutputResourceTransformation: 0
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: d2df941868934bb4792df2bd80872440, type: 3}
     Cooldown: 30
     Cost: 1
     Production: 2
@@ -194,7 +201,7 @@ MonoBehaviour:
     InputResources: 06000000
     OutputResource: 2
     OutputResourceTransformation: 0
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: d2df941868934bb4792df2bd80872440, type: 3}
     Cooldown: 30
     Cost: 1
     Production: 2
@@ -206,7 +213,7 @@ MonoBehaviour:
     InputResources: 0700000006000000
     OutputResource: 2
     OutputResourceTransformation: 2
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: d2df941868934bb4792df2bd80872440, type: 3}
     Cooldown: 30
     Cost: 5
     Production: 1
@@ -217,7 +224,7 @@ MonoBehaviour:
     InputResources: 04000000
     OutputResource: 0
     OutputResourceTransformation: 0
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 7ea4e6fab3522d84ba32d42455558fbb, type: 3}
     Cooldown: 30
     Cost: 5
     Production: 1
@@ -228,7 +235,7 @@ MonoBehaviour:
     InputResources: 05000000
     OutputResource: 0
     OutputResourceTransformation: 0
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 7ea4e6fab3522d84ba32d42455558fbb, type: 3}
     Cooldown: 30
     Cost: 10
     Production: 2
@@ -240,7 +247,7 @@ MonoBehaviour:
     InputResources: 0000000003000000
     OutputResource: 0
     OutputResourceTransformation: 1
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: abb60d25ddba84048b1d618ec1c7b29c, type: 3}
     Cooldown: 30
     Cost: 3
     Production: 1
