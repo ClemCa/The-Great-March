@@ -27,10 +27,7 @@ public class TransformationFacilityMenu : MonoBehaviour, IPointerClickHandler
                 180,
                 0.25f,
                 5,
-                () => {
-                    _orderedFacilities.Remove(new KeyValuePair<Planet, Registry.TransformationFacilities>(selected, _facility.Value));
-                    selected.RegisterBuiltFacility(_facility.Value);
-                }), selected);
+                new OrderHandler.OrderExec(selected, _facility.Value)), selected);
         _orderedFacilities.Add(new KeyValuePair<Planet, Registry.TransformationFacilities>(Planet.Selected, _facility.Value));
         TransformationFacilitySubMenu.Hide();
     }

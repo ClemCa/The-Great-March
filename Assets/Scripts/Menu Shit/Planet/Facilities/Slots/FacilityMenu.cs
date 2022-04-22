@@ -9,6 +9,8 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
     private static List<KeyValuePair<Planet, Registry.Facilities>> _orderedFacilities = new List<KeyValuePair<Planet, Registry.Facilities>>();
     private Registry.Facilities _facility;
 
+    public static List<KeyValuePair<Planet, Registry.Facilities>> OrderedFacilities { get => _orderedFacilities; set => _orderedFacilities = value; }
+
     public Registry.Facilities Facility { get => _facility; }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -23,10 +25,7 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
                 140,
                 0.5f,
                 5,
-                () => {
-                    _orderedFacilities.Remove(new KeyValuePair<Planet, Registry.Facilities>(selected, _facility));
-                    selected.RegisterBuiltFacility(_facility);
-                }),
+                new OrderHandler.OrderExec(selected, _facility)),
             Planet.Selected);
         _orderedFacilities.Add(new KeyValuePair<Planet, Registry.Facilities>(Planet.Selected, _facility));
         FacilitySubMenu.Hide();

@@ -9,6 +9,8 @@ public class ButtonSlider : MonoBehaviour
 {
     [SerializeField] private Button _extensionButton;
     [SerializeField] private Button[] _buttons;
+    [SerializeField] private GameObject _saveSlots;
+    [SerializeField] private GameObject _loadSlots;
 
     private bool _extended;
     private bool _extendedSave;
@@ -41,8 +43,12 @@ public class ButtonSlider : MonoBehaviour
         if(_extended)
             _extensionButton.GetComponentInChildren<TMPro.TMP_Text>().text = ">";
         else
+        {
             _extensionButton.GetComponentInChildren<TMPro.TMP_Text>().text = "<";
-        foreach(var button in _buttons)
+            _saveSlots.SetActive(false);
+            _loadSlots.SetActive(false);
+        }
+        foreach (var button in _buttons)
         {
             button.gameObject.SetActive(_extended);
         }
@@ -54,7 +60,11 @@ public class ButtonSlider : MonoBehaviour
         if (_extended)
             _extensionButton.GetComponentInChildren<TMPro.TMP_Text>().text = ">";
         else
+        {
             _extensionButton.GetComponentInChildren<TMPro.TMP_Text>().text = "<";
+            _saveSlots.SetActive(false);
+            _loadSlots.SetActive(false);
+        }
         foreach (var button in _buttons)
         {
             button.gameObject.SetActive(_extended);
@@ -75,13 +85,31 @@ public class ButtonSlider : MonoBehaviour
         Application.Quit();
     }
 
-    public void Save()
+    public void Save(int slot = -1)
     {
-        Saver.Instance.Save();
+        if(slot == -1)
+        {
+            _saveSlots.SetActive(!_saveSlots.activeSelf);
+            _loadSlots.SetActive(false);
+            return;
+        }
+        _saveSlots.SetActive(false);
+        Saver.Instance.Save(slot);
     }
 
-    public void Load()
+    public void Load(int slot = -1)
     {
-        Saver.Instance.Load();
+        if (slot == -1)
+        {
+            _loadSlots.SetActive(!_loadSlots.activeSelf);
+            _saveSlots.SetActive(false);
+            for(int i = 0; i < _loadSlots.transform.childCount; i++)
+            {
+                _loadSlots.transform.GetChild(i).GetComponentInChildren<Button>().interactable = Saver.Instance.SlotUsed(i+1);
+            }
+            return;
+        }
+        _loadSlots.SetActive(false);
+        Saver.Instance.Load(slot);
     }
 }

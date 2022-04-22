@@ -23,9 +23,8 @@ public class OrderHandler : MonoBehaviour
         public float LengthLeft;
         public float SpeedPerPerson;
         public int MaxPeople;
-        [NonSerialized]
-        public Action Execution;
-        public Order(OrderType type, float length, float speedPerPerson, int maxPeople, Action execution)
+        public OrderExec Execution;
+        public Order(OrderType type, float length, float speedPerPerson, int maxPeople, OrderExec execution)
         {
             Assigned = 0;
             Type = type;
@@ -37,10 +36,137 @@ public class OrderHandler : MonoBehaviour
         }
     }
 
+    [Serializable]
+    public class OrderExec
+    {
+        public string Planet;
+        public ActionType Type;
+        public string Destination;
+        public int Count;
+        public Registry.Resources Resource;
+        public Registry.Facilities Facility;
+        public Registry.TransformationFacilities TransformationFacility;
+
+
+        public OrderExec(Planet planet, Planet destination)
+        {
+            Planet = planet.Name;
+            Destination = destination.Name;
+            Type = ActionType.CargoLeader;
+        }
+        public OrderExec(Planet planet, Planet destination, int count)
+        {
+            Planet = planet.Name;
+            Destination = destination.Name;
+            Count = count;
+            Type = ActionType.CargoPeople;
+        }
+        public OrderExec(Planet planet, Planet destination, Registry.Resources resource, int count)
+        {
+            Planet = planet.Name;
+            Destination = destination.Name;
+            Count = count;
+            Resource = resource;
+            Type = ActionType.CargoResources;
+        }
+        public OrderExec(Planet planet, Registry.Resources resource, int count)
+        {
+            Planet = planet.Name;
+            Resource = resource;
+            Count = count;
+            Type = ActionType.Resources;
+        }
+
+        public OrderExec(Planet planet, Registry.Facilities facility)
+        {
+            Planet = planet.Name;
+            Facility = facility;    
+            Type = ActionType.Facility;
+        }
+
+        public OrderExec(Planet planet, Registry.TransformationFacilities facility)
+        {
+            Planet = planet.Name;
+            TransformationFacility = facility;
+            Type = ActionType.TransformationFacility;
+        }
+
+        public OrderExec() { }
+
+        public void Invoke()
+        {
+            var planets = FindObjectsOfType<Planet>();
+            var planet = Array.Find(planets, t => t.Name == Planet);
+            if (planet == null)
+                return;
+            switch (Type)
+            {
+                case ActionType.CargoLeader:
+                    var destination = Array.Find(planets, t => t.Name == Destination);
+                    if (destination == null)
+                        return;
+                    CargoGenerator.GenerateCargo(planet, destination);
+                    break;
+                case ActionType.CargoPeople:
+                    var destination3 = Array.Find(planets, t => t.Name == Destination);
+                    if (destination3 == null)
+                        return;
+                    CargoGenerator.GenerateCargo(planet, destination3, Count);
+                    break;
+                case ActionType.CargoResources:
+                    var destination2 = Array.Find(planets, t => t.Name == Destination);
+                    if (destination2 == null)
+                        return;
+                    CargoGenerator.GenerateCargo(planet, destination2, Resource, Count);
+                    break;
+                case ActionType.Resources:
+                    planet.AddResource(Resource, Count);
+                    break;
+                case ActionType.Facility:
+                    FacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.Facilities>(planet, Facility));
+                    planet.RegisterBuiltFacility(Facility);
+                    break;
+                case ActionType.TransformationFacility:
+                    TransformationFacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.TransformationFacilities>(planet, TransformationFacility));
+                    planet.RegisterBuiltFacility(TransformationFacility);
+                    break;
+                default:
+                    break;
+            }
+        }
+        public void Cancel()
+        {
+            var planets = FindObjectsOfType<Planet>();
+            var planet = Array.Find(planets, t => t.Name == Planet);
+            if (planet == null)
+                return;
+            switch (Type)
+            {
+                case ActionType.Facility:
+                    FacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.Facilities>(planet, Facility));
+                    break;
+                case ActionType.TransformationFacility:
+                    TransformationFacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.TransformationFacilities>(planet, TransformationFacility));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public enum ActionType
+    {
+        CargoLeader,
+        CargoPeople,
+        CargoResources,
+        Resources,
+        Facility,
+        TransformationFacility
+    }
+
     public enum OrderType
     {
         Building,
-        CargoResources,
         PreparingCargo,
         PreparingForTrip,
         WavingGoodbye,
@@ -72,6 +198,19 @@ public class OrderHandler : MonoBehaviour
         if (!_queue.ContainsKey(planet.Name))
             return new Order[0];
         return _queue[planet.Name].ToArray();
+    }
+
+    public void Clear(Order order)
+    {
+        var i = _queue.Values.ToList().FindIndex(t => t.FindIndex(r => r == order) != -1);
+        if (i == -1)
+            return;
+        if(order.Execution != null)
+            order.Execution.Cancel();
+        var k = _queue.ElementAt(i).Key;
+        var v = _queue.ElementAt(i).Value;
+        v.Remove(order);
+        _queue[k] = v;
     }
 
     private void Process()
@@ -139,6 +278,7 @@ public class OrderHandler : MonoBehaviour
 
     private void Execute(Order order)
     {
-        order.Execution.Invoke();
+        if(order != null)
+            order.Execution.Invoke();
     }
 }

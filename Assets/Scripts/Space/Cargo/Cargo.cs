@@ -182,9 +182,7 @@ public class Cargo : MonoBehaviour
                     60,
                     0.5f,
                     5,
-                    () => {
-                        
-                    });
+                    null);
                 OrderHandler.Instance.Queue(order, Destination);
             }
             else if (Type == CargoType.Resource)
@@ -194,9 +192,7 @@ public class Cargo : MonoBehaviour
                     20,
                     0.5f,
                     3,
-                    () => {
-                        Destination.AddResource(Resource.Value, Amount);
-                    });
+                    new OrderHandler.OrderExec(Destination, Resource.Value, Amount));
                 OrderHandler.Instance.Queue(order, Destination);
             }
             else

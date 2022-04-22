@@ -492,9 +492,7 @@ public class Planet : MonoBehaviour
                                 10,
                                 1f,
                                 1,
-                                () => {
-                                    CargoGenerator.GenerateCargo(moveSelectionOrigin, this);
-                                }
+                                new OrderHandler.OrderExec(moveSelectionOrigin, this)
                             );
                         OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                     }
@@ -509,9 +507,7 @@ public class Planet : MonoBehaviour
                                 20,
                                 0.5f,
                                 3,
-                                () => {
-                                    CargoGenerator.GenerateCargo(moveSelectionOrigin, this, resource, count);
-                                }
+                                new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count)
                             );
                             OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                         }
@@ -523,9 +519,7 @@ public class Planet : MonoBehaviour
                                    20,
                                    0.5f,
                                    15,
-                                   () => {
-                                       CargoGenerator.GenerateCargo(moveSelectionOrigin, this, count);
-                                   }
+                                   new OrderHandler.OrderExec(moveSelectionOrigin, this, count)
                                );
                             OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                         }

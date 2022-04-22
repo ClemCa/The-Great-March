@@ -102,16 +102,25 @@ public class Saver : MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
-    public bool Load()
+    public bool Load(int slot)
     {
-        var save = LoadSave();
+        var save = LoadSave(slot);
         if (save == null)
             return false; // failed
-        CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
+        CloudMoveScript.Instance.enabled = false; // disable losing
         LoadScoring(save.Scoring);
         LoadQueue(save.Queue);
         LoadSystems(save.Systems, save.SelectedPlanet);
+        CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
+        CloudMoveScript.Instance.enabled = true;
         return true;
+    }
+
+    public bool SlotUsed(int slot)
+    {
+        return
+            File.Exists(Application.persistentDataPath
+                     + "/MarchSave" + slot + ".dat");
     }
 
     private void LoadSystems(SystemSave[] systems, string selectedPlanet)
@@ -139,20 +148,20 @@ public class Saver : MonoBehaviour
     }
 
 
-    private SaveData LoadSave()
+    private SaveData LoadSave(int slot)
     {
         // most of the structure is from https://videlais.com/2021/02/28/encrypting-game-data-with-unity/
 
         if (File.Exists(Application.persistentDataPath
-                     + "/MarchSave.dat") && PlayerPrefs.HasKey("saveKey"))
+                     + "/MarchSave" + slot +".dat") && PlayerPrefs.HasKey("saveKey"+slot))
         {
             // Update key based on PlayerPrefs
             // (Convert the String into a Base64 byte[] array.)
-            byte[] savedKey = Convert.FromBase64String(PlayerPrefs.GetString("saveKey"));
+            byte[] savedKey = Convert.FromBase64String(PlayerPrefs.GetString("saveKey"+slot));
 
             // Create FileStream for opening files.
             var file = new FileStream(Application.persistentDataPath
-                     + "/MarchSave.dat", FileMode.Open);
+                     + "/MarchSave" + slot + ".dat", FileMode.Open);
 
             // Create new AES instance.
             Aes oAes = Aes.Create();
@@ -177,7 +186,7 @@ public class Saver : MonoBehaviour
     }
     #region Save
 
-    public void Save()
+    public void Save(int slot)
     {
         var save = new SaveData();
 
@@ -187,7 +196,7 @@ public class Saver : MonoBehaviour
         save = SetSystems(save);
         save.SelectedPlanet = Planet.Selected == null ? "" : Planet.Selected.Name;
 
-        SaveSave(save);
+        SaveSave(save, slot);
     }
 
     private SaveData SetSystems(SaveData data)
@@ -247,18 +256,18 @@ public class Saver : MonoBehaviour
         return data;
     }
 
-    private void SaveSave(SaveData save)
+    private void SaveSave(SaveData save, int slot)
     {
         // most of the structure is from https://videlais.com/2021/02/28/encrypting-game-data-with-unity/
         Aes iAes = Aes.Create();
 
         FileStream file = File.Create(Application.persistentDataPath
-                     + "/MarchSave.dat");
+                     + "/MarchSave" + slot + ".dat");
 
 
         byte[] savedKey = iAes.Key;
 
-        PlayerPrefs.SetString("saveKey", System.Convert.ToBase64String(savedKey));
+        PlayerPrefs.SetString("saveKey"+slot, System.Convert.ToBase64String(savedKey));
 
         byte[] inputIV = iAes.IV;
 
