@@ -17,6 +17,9 @@ public class Cargo : MonoBehaviour
     [SerializeField] private float blinkingSpeed = 0.5f;
     [SerializeField] private float downTime = 1;
 
+    private Vector3[] _path = new Vector3[] { };
+
+
     public CargoType Type { get; private set; }
 
     public int Amount { get; private set; }
@@ -116,7 +119,6 @@ public class Cargo : MonoBehaviour
         }
         else
         {
-
             if (_blinkStep)
             {
                 _blink += Time.unscaledDeltaTime * blinkingSpeed;
@@ -125,7 +127,6 @@ public class Cargo : MonoBehaviour
             {
                 _blink -= Time.unscaledDeltaTime * blinkingSpeed;
             }
-            GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.red * (_blink * 20 - 10));
             if (!_blink.IsBetween(0, 1))
             {
                 _blink = 0;
@@ -133,9 +134,7 @@ public class Cargo : MonoBehaviour
                 _downTime = true;
             }
         }
-
-
-
+        GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.red * (_blink * 20 - 10));
         if (_innerTravel)
         {
             _travel += Time.deltaTime / Origin.transform.Distance(Destination.transform) * cruiseSpeed;
@@ -150,19 +149,28 @@ public class Cargo : MonoBehaviour
                     NextStage();
                     break;
                 case 1:
-                    var stageWorld = (Vector3.Lerp(Origin.transform.position + GetMargin(Origin, Destination), Destination.transform.position, 0.8f));
-                    _stage1 = stageWorld - Origin.transform.parent.position;
-                    _travel += Time.deltaTime / Origin.transform.localPosition.Distance(_stage1) * outerSystemCruiseSpeed;
-                    _position = Origin.transform.parent.position + (Vector3.Slerp(Origin.transform.localPosition + GetMargin(Origin, Destination), _stage1, _travel));
-                    if (_travel >= 0.5f || transform.position.Distance(Destination.transform.position) < transform.position.Distance(Origin.transform.position))
+                    _travel += Time.deltaTime
+                        / Origin.transform.position.Distance(Destination.transform.position)
+                        * outerSystemCruiseSpeed;
+                    _position = ExitingPath();
+                    if (_travel >= 0.5f || transform.position.Distance(Origin.transform.position) > 3 || transform.position.Distance(Destination.transform.position) < transform.position.Distance(Origin.transform.position))
+                    {
+                        _stage1 = _position;
+                        NextStage();
+                    }
+                    break;
+                case 2:
+                    _travel += Time.deltaTime / _stage1.Distance(Destination.transform.position) * outerSystemCruiseSpeed;
+                    _position = Vector3.Lerp(_stage1, Destination.transform.position, _travel);
+                    if(transform.position.Distance(Destination.transform.parent.position) < 5 || transform.position.Distance(Destination.transform.position) < 3)
                     {
                         _stage1 = _position - Origin.transform.parent.position;
                         NextStage();
                     }
                     break;
-                case 2:
+                case 3:
                     _travel += Time.deltaTime / _stage1.Distance(Destination.transform.localPosition) * outerSystemCruiseSpeed;
-                    _position = Destination.transform.parent.position + (Vector3.Slerp(_stage1, Destination.transform.localPosition, _travel));
+                    _position = EnteringPath();
                     break;
             }
             transform.position = Vector3.Lerp(transform.position, _position, Time.deltaTime * 3);
@@ -201,6 +209,12 @@ public class Cargo : MonoBehaviour
             }
             Destroy(gameObject);
         }
+
+        if (_path.Length == 0 || _path[_path.Length - 1].Distance(transform.position) >= 0.5f)
+        {
+            _path = _path.Add(transform.position);
+            GetComponentInChildren<DottedLineRenderer>().SetDottedLine(_path);
+        }
     }
 
     private void NextStage()
@@ -212,6 +226,8 @@ public class Cargo : MonoBehaviour
                 _position = transform.position;
                 break;
             case 1:
+                break;
+            case 2:
                 _stage1 = Origin.transform.parent.position + _stage1;
                 _stage1 = _stage1 - Destination.transform.parent.position;
                 break;
@@ -220,5 +236,47 @@ public class Cargo : MonoBehaviour
         }
         _stage++;
         _travel = 0;
+    }
+
+    private Vector3 ExitingPath()
+    {
+        Vector3 point = Origin.transform.position;
+        Vector3 nextPoint;
+        bool done = false;
+        for (int i = 0; i < 100; i++)
+        {
+            nextPoint = Origin.transform.parent.position + Vector3.Slerp(Origin.transform.localPosition + GetMargin(Origin, Destination), Destination.transform.position - Origin.transform.parent.position, i/100f);
+            Debug.DrawLine(point, nextPoint, Color.red);
+            if (!done && (i / 100f >= 0.5f || point.Distance(Origin.transform.position) > 3 || point.Distance(Destination.transform.position) < point.Distance(Origin.transform.position)))
+            {
+                _stage1 = point;
+                Debug.DrawLine(transform.position, _stage1, Color.green);
+                done = true;
+            }
+            point = nextPoint;
+
+        }
+        return Origin.transform.parent.position + Vector3.Slerp(Origin.transform.localPosition + GetMargin(Origin, Destination), Destination.transform.position - Origin.transform.parent.position, _travel);
+    }
+
+    private Vector3 EnteringPath()
+    {
+        var stageWorld = Destination.transform.position - Origin.transform.parent.position;
+        Vector3 point = Origin.transform.position;
+        Vector3 nextPoint;
+        for (int i = 0; i < 100; i++)
+        {
+            nextPoint = Origin.transform.parent.position + Vector3.Slerp(Origin.transform.localPosition + GetMargin(Origin, Destination), stageWorld, i / 100f);
+            Debug.DrawLine(point, nextPoint, Color.red);
+            point = nextPoint;
+        }
+        point = Destination.transform.parent.position + _stage1;
+        for (int i = 0; i < 100; i++)
+        {
+            nextPoint = Destination.transform.parent.position + (Vector3.Slerp(_stage1, Destination.transform.localPosition, i / 100f));
+            Debug.DrawLine(point, nextPoint, Color.blue);
+            point = nextPoint;
+        }
+        return Destination.transform.parent.position + (Vector3.Slerp(_stage1, Destination.transform.localPosition, _travel));
     }
 }
