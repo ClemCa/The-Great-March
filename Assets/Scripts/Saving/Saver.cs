@@ -25,6 +25,8 @@ public class Saver : MonoBehaviour
         public string CloudPosition;
         public Dictionary<string, List<OrderHandler.Order>> Queue;
         public string SelectedPlanet;
+        public Cargo.CargoSave[] CargoSave;
+        public bool LeaderInTransit;
     }
 
     [Serializable]
@@ -111,6 +113,7 @@ public class Saver : MonoBehaviour
         LoadScoring(save.Scoring);
         LoadQueue(save.Queue);
         LoadSystems(save.Systems, save.SelectedPlanet);
+        LoadCargo(save.CargoSave, save.LeaderInTransit);
         CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
         CloudMoveScript.Instance.enabled = true;
         return true;
@@ -190,6 +193,7 @@ public class Saver : MonoBehaviour
     {
         var save = new SaveData();
 
+        save = SetCargo(save);
         save = SetCloud(save);
         save = SetQueue(save);
         save = SetScoring(save);
@@ -197,6 +201,28 @@ public class Saver : MonoBehaviour
         save.SelectedPlanet = Planet.Selected == null ? "" : Planet.Selected.Name;
 
         SaveSave(save, slot);
+    }
+
+    private SaveData SetCargo(SaveData save)
+    {
+        save.CargoSave = new Cargo.CargoSave[] { };
+        var cargos = FindObjectsOfType<Cargo>();
+        foreach(var cargo in cargos)
+        {
+            save.CargoSave = save.CargoSave.Add(cargo.GetSave());
+        }
+        save.LeaderInTransit = Cargo.LeaderInTransit;
+        return save;
+    }
+
+    private void LoadCargo(Cargo.CargoSave[] cargos, bool leaderInTransit)
+    {
+        foreach(var cargo in cargos)
+        {
+            var r = CargoGenerator.GenerateCargo();
+            r.LoadSave(cargo);
+        }
+        Cargo.LeaderInTransit = leaderInTransit;
     }
 
     private SaveData SetSystems(SaveData data)

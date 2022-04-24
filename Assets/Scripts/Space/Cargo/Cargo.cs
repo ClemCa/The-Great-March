@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ClemCAddons;
+using System;
 
 public class Cargo : MonoBehaviour
 {
@@ -31,6 +32,20 @@ public class Cargo : MonoBehaviour
 
     public static bool LeaderInTransit = false;
 
+    public class CargoSave
+    {
+        public SerializableVector3 Position;
+        public string Origin;
+        public string Destination;
+        public int Stage;
+        public SerializableVector3 Stage1;
+        public float Travel;
+        public bool InnerTravel;
+        public CargoType Type;
+        public int Amount;
+        public Registry.Resources? Resource;
+    }
+
     void Awake()
     {
         CargoSound.StartSound();
@@ -39,6 +54,40 @@ public class Cargo : MonoBehaviour
     void OnDestroy()
     {
         CargoSound.StopSound();
+    }
+
+    public CargoSave GetSave()
+    {
+        var save = new CargoSave();
+
+        save.Position = new SerializableVector3(transform.position);
+        save.Origin = Origin.Name;
+        save.Destination = Destination.Name;
+        save.Stage = _stage;
+        save.Stage1 = new SerializableVector3(_stage1);
+        save.Travel = _travel;
+        save.InnerTravel = _innerTravel;
+        save.Type = Type;
+        save.Amount = Amount;
+        save.Resource = Resource;
+
+        return save;
+    }
+
+    public void LoadSave(CargoSave save)
+    {
+        transform.position = save.Position.Value;
+        var planets = FindObjectsOfType<Planet>();
+        Origin = Array.Find(planets, t => t.Name == save.Origin);
+        Destination = Array.Find(planets, t => t.Name == save.Destination);
+        _stage = save.Stage;
+        _stage1 = save.Stage1.Value;
+        _travel = save.Travel;
+        _innerTravel = save.InnerTravel;
+        Type = save.Type;
+        Amount = save.Amount;
+        Resource = save.Resource;
+
     }
 
     public Vector3 GetMargin(Planet origin, Planet destination)

@@ -32,11 +32,12 @@ public class CloudMoveScript : MonoBehaviour
 
         Bounds bounds = gameObject.GetComponent<Collider>().bounds;
 
-        LineLineIntersection(out Vector3 worldCameraCorner, ray.origin, ray.direction, Camera.main.transform.position.SetZ(0), Vector3.left);
+        var cameraCorner = ray.direction * 20 / ray.direction.z; // resize to 20 of length in Z direction;
+        cameraCorner = ray.origin + cameraCorner;
 
-        if (worldCameraCorner.x > transform.position.x + bounds.extents.x)
+        if (cameraCorner.x > transform.position.x + bounds.extents.x)
         {
-            float diff = worldCameraCorner.x - (transform.position.x + bounds.extents.x);
+            float diff = cameraCorner.x - (transform.position.x + bounds.extents.x);
             // The bounds center may not be the same as the transform position
             transform.position += Vector3.right * diff;
         }
@@ -48,6 +49,8 @@ public class CloudMoveScript : MonoBehaviour
             _ = SceneManager.LoadSceneAsync("LoseMenu");
         }
     }
+
+
     public static bool LineLineIntersection(out Vector3 intersection, Vector3 linePoint1, Vector3 lineVec1, Vector3 linePoint2, Vector3 lineVec2)
     {
         Vector3 lineVec3 = linePoint2 - linePoint1;

@@ -11,9 +11,16 @@ public class CreditSpawner : MonoBehaviour
     [Serializable]
     private class Credit
     {
-        public string Name;
-        public string Description;
-        public string URL;
+        public string Name = "";
+        public string Description = "";
+        public string URL = "";
+
+        public Credit(string name, string description, string url)
+        {
+            Name = name;
+            Description = description;
+            URL = url;
+        }
     }
 
     void Start()
