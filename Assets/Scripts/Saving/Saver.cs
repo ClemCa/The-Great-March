@@ -25,7 +25,7 @@ public class Saver : MonoBehaviour
         public string CloudPosition;
         public Dictionary<string, List<OrderHandler.Order>> Queue;
         public string SelectedPlanet;
-        public Cargo.CargoSave[] CargoSave;
+        public string CargoSave;
         public bool LeaderInTransit;
     }
 
@@ -113,7 +113,7 @@ public class Saver : MonoBehaviour
         LoadScoring(save.Scoring);
         LoadQueue(save.Queue);
         LoadSystems(save.Systems, save.SelectedPlanet);
-        LoadCargo(save.CargoSave, save.LeaderInTransit);
+        LoadCargo(JsonConvert.DeserializeObject<string[]>(save.CargoSave), save.LeaderInTransit);
         CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
         CloudMoveScript.Instance.enabled = true;
         return true;
@@ -205,22 +205,28 @@ public class Saver : MonoBehaviour
 
     private SaveData SetCargo(SaveData save)
     {
-        save.CargoSave = new Cargo.CargoSave[] { };
+        var s = new string[] { };
         var cargos = FindObjectsOfType<Cargo>();
         foreach(var cargo in cargos)
         {
-            save.CargoSave = save.CargoSave.Add(cargo.GetSave());
+            s = s.Add(JsonUtility.ToJson(cargo.GetSave()));
         }
+        save.CargoSave = JsonConvert.SerializeObject(s);
         save.LeaderInTransit = Cargo.LeaderInTransit;
         return save;
     }
 
-    private void LoadCargo(Cargo.CargoSave[] cargos, bool leaderInTransit)
+    private void LoadCargo(string[] cargos, bool leaderInTransit)
     {
+        var t = FindObjectsOfType<Cargo>();
+        foreach(var toDestroy in t)
+        {
+            Destroy(toDestroy.gameObject); // clear all current cargo
+        }
         foreach(var cargo in cargos)
         {
             var r = CargoGenerator.GenerateCargo();
-            r.LoadSave(cargo);
+            r.LoadSave(JsonUtility.FromJson<Cargo.CargoSave>(cargo));
         }
         Cargo.LeaderInTransit = leaderInTransit;
     }

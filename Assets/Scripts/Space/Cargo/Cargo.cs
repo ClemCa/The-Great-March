@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ClemCAddons;
 using System;
+using System.Linq;
 
 public class Cargo : MonoBehaviour
 {
@@ -32,6 +33,7 @@ public class Cargo : MonoBehaviour
 
     public static bool LeaderInTransit = false;
 
+    [Serializable]
     public class CargoSave
     {
         public SerializableVector3 Position;
@@ -44,6 +46,7 @@ public class Cargo : MonoBehaviour
         public CargoType Type;
         public int Amount;
         public Registry.Resources? Resource;
+        public SerializableVector3[] Path;
     }
 
     void Awake()
@@ -70,6 +73,7 @@ public class Cargo : MonoBehaviour
         save.Type = Type;
         save.Amount = Amount;
         save.Resource = Resource;
+        save.Path = _path.Select(t => new SerializableVector3(t)).ToArray();
 
         return save;
     }
@@ -77,7 +81,7 @@ public class Cargo : MonoBehaviour
     public void LoadSave(CargoSave save)
     {
         transform.position = save.Position.Value;
-        var planets = FindObjectsOfType<Planet>();
+        var planets = FindObjectsOfType<Planet>(false);
         Origin = Array.Find(planets, t => t.Name == save.Origin);
         Destination = Array.Find(planets, t => t.Name == save.Destination);
         _stage = save.Stage;
@@ -87,6 +91,7 @@ public class Cargo : MonoBehaviour
         Type = save.Type;
         Amount = save.Amount;
         Resource = save.Resource;
+        _path = save.Path.Select(t => t.Value).ToArray();
 
     }
 
