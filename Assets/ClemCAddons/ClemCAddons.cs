@@ -337,30 +337,15 @@ namespace ClemCAddons
             return new T[] { firstObject };
         }
         #endregion ToArray
-#region SetAt
+        #region SetAt
 #if (UNITY_STANDALONE_WIN)
+
         /// <summary>Set the value at an index</summary>
         /// <param name="source">The source array.</param>
         /// <param name="value">New value.</param>
         /// <param name="index">Index to replace at.</param>
         public static T[] SetAt<T>(this T[] source, T value, int index)
         {
-            dynamic result = source;
-            result[index] = value;
-            return result;
-        }
-        /// <summary>Set the value at an index, extends the array if it doesn't exist</summary>
-        /// <param name="source">The source array.</param>
-        /// <param name="value">New value.</param>
-        /// <param name="index">Index to replace at.</param>
-        public static T[] SetOrCreateAt<T>(this T[] source, T value, int index)
-        {
-            if (source == null)
-                source = new T[0];
-            if (source.Length <= index)
-            {
-                Array.Resize(ref source, index + 1);
-            }
             dynamic result = source;
             result[index] = value;
             return result;
@@ -381,8 +366,25 @@ namespace ClemCAddons
             return source;
         }
 #endif
-#endregion SetAt
-#region Total
+
+        /// <summary>Set the value at an index, extends the array if it doesn't exist</summary>
+        /// <param name="source">The source array.</param>
+        /// <param name="value">New value.</param>
+        /// <param name="index">Index to replace at.</param>
+        public static T[] SetOrCreateAt<T>(this T[] source, T value, int index)
+        {
+            if (source == null)
+                source = new T[0];
+            if (source.Length <= index)
+            {
+                Array.Resize(ref source, index + 1);
+            }
+            T[] result = source;
+            result[index] = value;
+            return result;
+        }
+        #endregion SetAt
+        #region Total
         /// <summary>Adds every value together</summary>
         /// <param name="source">The source array.</param>
         public static float Total(this float[] source)
