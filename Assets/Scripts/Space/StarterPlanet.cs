@@ -9,6 +9,8 @@ public class StarterPlanet : MonoBehaviour
     [SerializeField] private int starterPeople = 0;
     [SerializeField] private int starterWildcards = 0;
     [SerializeField] private StarterResource[] starterResources = new StarterResource[] { };
+    [SerializeField] private StarterAdvancedResource[] starterAdvancedResources = new StarterAdvancedResource[] { };
+
     [SerializeField] private Registry.Facilities[] starterFacilities = new Registry.Facilities[] { };
     [SerializeField] private Registry.TransformationFacilities[] starterTransformationFacilities = new Registry.TransformationFacilities[] { };
     [SerializeField] private Registry.Resources[] starterSlots = new Registry.Resources[] { };
@@ -22,11 +24,21 @@ public class StarterPlanet : MonoBehaviour
         public int Quantity;
     }
 
+    [Serializable]
+    public class StarterAdvancedResource
+    {
+        public Registry.AdvancedResources Ressource;
+        public int Quantity;
+    }
 
     void Start()
     {
         var planet = GetComponent<Planet>();
         foreach(var starter in starterResources)
+        {
+            planet.AddResource(starter.Ressource, starter.Quantity);
+        }
+        foreach (var starter in starterAdvancedResources)
         {
             planet.AddResource(starter.Ressource, starter.Quantity);
         }

@@ -23,7 +23,10 @@ public class SelectResourcesButton : MonoBehaviour, IPointerClickHandler
         if (_canConfirm)
         {
             transform.GetComponentInChildren<TMPro.TMP_Text>().text = "(Planet)";
-            Planet.Selected.EngageMoveSelectionMode(_resource, ShippingSubMenu.Instance.GetValue());
+            if(_isAdvanced)
+                Planet.Selected.EngageMoveSelectionMode(_advancedResource, ShippingSubMenu.Instance.GetValue());
+            else
+                Planet.Selected.EngageMoveSelectionMode(_resource, ShippingSubMenu.Instance.GetValue());
         }
         if (ResourcesSelectionSubMenu.Instance.Enabled)
         {

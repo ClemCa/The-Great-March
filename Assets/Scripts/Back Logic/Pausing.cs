@@ -11,6 +11,7 @@ public class Pausing : MonoBehaviour
 
     private static bool _paused;
     private static bool _blocked;
+    private static float _timeTarget = 1;
 
     public static bool Paused { get => _paused; }
 
@@ -26,11 +27,8 @@ public class Pausing : MonoBehaviour
 
     public static void Pause()
     {
-        if (Time.timeScale != 1)
-            return;
-
         _paused = true;
-        ClemCAddons.Utilities.Lerper.ConstantLerp(Time.timeScale, 0.01f, 1.5f, (f) => { Time.timeScale = f; });
+        _timeTarget = 0.01f;
 
         _instance.GetComponent<AudioSource>().Play();
         _instance.GetComponent<AudioSource>().time = 0.12f;
@@ -40,12 +38,9 @@ public class Pausing : MonoBehaviour
 
     public static void Unpause()
     {
-        if (Time.timeScale != 0.01f)
-            return;
-
         _paused = false;
 
-        ClemCAddons.Utilities.Lerper.ConstantLerp(Time.timeScale, 1, 1.5f   , (f) => { Time.timeScale = f; });
+        _timeTarget = 1f;
 
         _instance.GetComponent<AudioSource>().Play();
         _instance.GetComponent<AudioSource>().volume = 0.5f * 0.25f;
@@ -70,10 +65,14 @@ public class Pausing : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        var dir = (_timeTarget - Time.timeScale).Sign();
+        Time.timeScale = (Time.timeScale + dir * Time.unscaledDeltaTime).Clamp(Time.timeScale.Min(_timeTarget), Time.timeScale.Max(_timeTarget));
+
         if (Input.GetKeyDown(KeyCode.Escape) && !_blocked)
         {
             FlipPause();
         }
+
         if ((!_paused).OnceIfTrueGate("Pause".GetHashCode()))
         {
             transform.GetChild(0).GetComponent<Image>().color = transform.GetChild(0).GetComponent<Image>().color.SetA(0);

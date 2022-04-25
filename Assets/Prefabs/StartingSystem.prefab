@@ -164,8 +164,11 @@ MonoBehaviour:
     Quantity: 1
   - Ressource: 7
     Quantity: 1
+  starterAdvancedResources:
+  - Ressource: 2
+    Quantity: 5
   starterFacilities: 040000000000000006000000
-  starterTransformationFacilities: 
+  starterTransformationFacilities: 0000000001000000
   starterSlots: 00000000010000000300000004000000050000000600000007000000
   roll: 0
   temperateType: 0

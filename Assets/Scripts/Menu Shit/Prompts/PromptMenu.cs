@@ -11,12 +11,15 @@ public class PromptMenu : MonoBehaviour
     private RectTransform _rectTransform;
     private float _visibility;
     private CanvasGroup _canvasGroup;
+    private Vector2 _baseSize;
+    [SerializeField] private Vector2 _extendedSize;
 
     void Start()
     {
         _instance = this;
         _rectTransform = GetComponent<RectTransform>();
         _canvasGroup = GetComponent<CanvasGroup>();
+        _baseSize = _rectTransform.sizeDelta;
     }
 
     void Update()
@@ -47,11 +50,20 @@ public class PromptMenu : MonoBehaviour
             transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces 1 " + Registry.Instance.GetResourceName(info.AssociatedResource) + " every " + info.Cooldown.ToString()+"s";
             transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
             rect.anchorMin = rect.anchorMin.SetY(0.15);
+            _rectTransform.sizeDelta = _baseSize;
             return;
         }
         if (_data.TransformationFacilityMenu != null)
         {
             var info = Registry.Instance.GetFacilityInfo(_data.TransformationFacilityMenu.Facility.Value);
+            if(_data.TransformationFacilityMenu.Facility.Value == Registry.TransformationFacilities.Factory)
+            {
+                _rectTransform.sizeDelta = _extendedSize;
+            }
+            else
+            {
+                _rectTransform.sizeDelta = _baseSize;
+            }
             transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = info.Name;
             transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = info.Description;
             string content = "";
@@ -69,9 +81,11 @@ public class PromptMenu : MonoBehaviour
             rect.anchorMin = rect.anchorMin.SetY(0.25);
             return;
         }
+        _rectTransform.sizeDelta = _baseSize;
         if (_data.ResourceSelection != null)
         {
-            transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = Registry.Instance.GetResourceName(_data.ResourceSelection.GetResource());
+            var name = _data.ResourceSelection.GetResourceType() ? _data.ResourceSelection.GetAdvancedResource().ToString() : _data.ResourceSelection.GetResource().ToString();
+            transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = name + " (" + (_data.ResourceSelection.GetResourceType() ? Planet.Selected.GetResource(_data.ResourceSelection.GetAdvancedResource()) : Planet.Selected.GetResource(_data.ResourceSelection.GetResource())) + ")";
             transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = Registry.Instance.GetResourceDescription(_data.ResourceSelection.GetResource());
             transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
             transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "";
@@ -82,7 +96,7 @@ public class PromptMenu : MonoBehaviour
         {
             var name = _data.ResourceMenu.AdvancedResources ? Registry.Instance.GetResourceName(_data.ResourceMenu.AdvancedResourceType) : Registry.Instance.GetResourceName(_data.ResourceMenu.ResourceType);
             var description = _data.ResourceMenu.AdvancedResources ? Registry.Instance.GetResourceDescription(_data.ResourceMenu.AdvancedResourceType) : Registry.Instance.GetResourceDescription(_data.ResourceMenu.ResourceType);
-            transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = name;
+            transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = name + " ("+(_data.ResourceMenu.AdvancedResources ? Planet.Selected.GetResource(_data.ResourceMenu.AdvancedResourceType) : Planet.Selected.GetResource(_data.ResourceMenu.ResourceType))+")";
             transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = description;
             transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
             transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "";

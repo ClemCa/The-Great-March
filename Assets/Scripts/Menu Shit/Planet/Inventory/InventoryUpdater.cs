@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ClemCAddons;
+using System;
 
 public class InventoryUpdater : MonoBehaviour
 {
@@ -16,13 +17,26 @@ public class InventoryUpdater : MonoBehaviour
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
         var r = Registry.GetResources();
-        foreach(var resource in r)
+        
+        foreach (var resource in r)
         {
             var t = Instantiate(_itemPrefab, transform);
             if(t.TryGetComponent<ResourceMenu>(out var res))
                 res.SetResource(resource);
             if (t.TryGetComponent<ResourceSelection>(out var result))
                 result.SetResource(resource);
+        }
+        if (_showEmptyResources)
+        {
+            var r2 = Enum.GetNames(typeof(Registry.AdvancedResources)).Length;
+            for(int i = 0; i < r2; i++)
+            {
+                var t = Instantiate(_itemPrefab, transform);
+                if (t.TryGetComponent<ResourceMenu>(out var res))
+                    res.SetResource((Registry.AdvancedResources)i);
+                if (t.TryGetComponent<ResourceSelection>(out var result))
+                    result.SetResource((Registry.AdvancedResources)i);
+            }
         }
     }
     void Update()

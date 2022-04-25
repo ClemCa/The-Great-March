@@ -26,7 +26,8 @@ public class Planet : MonoBehaviour
     private List<int> _facilitiesOverTime = new List<int>(new int[60]);
     private float _consumption = 0;
     private static Planet selected;
-    private static Registry.Resources moveSelection;
+    private static int moveSelection;
+    private static bool moveSelectionAdv;
     private static int moveSelectionCount;
     private static Planet moveSelectionOrigin;
     private static bool moveSelectionType;
@@ -281,13 +282,29 @@ public class Planet : MonoBehaviour
     public void EngageMoveSelectionMode(Registry.Resources resource, int count)
     {
         Pausing.Block();
-        moveSelection = resource;
+        moveSelection = (int)resource;
+        moveSelectionAdv = false;
         moveSelectionCount = count;
         moveSelectionOrigin = selected;
         moveSelectionType = true;
         selected = null;
         var planets = FindObjectsOfType<Planet>();
         foreach(var planet in planets)
+        {
+            planet.GetComponentInChildren<Outline>().color = 1;
+        }
+    }
+    public void EngageMoveSelectionMode(Registry.AdvancedResources resource, int count)
+    {
+        Pausing.Block();
+        moveSelection = (int)resource;
+        moveSelectionAdv = true;
+        moveSelectionCount = count;
+        moveSelectionOrigin = selected;
+        moveSelectionType = true;
+        selected = null;
+        var planets = FindObjectsOfType<Planet>();
+        foreach (var planet in planets)
         {
             planet.GetComponentInChildren<Outline>().color = 1;
         }
@@ -501,15 +518,30 @@ public class Planet : MonoBehaviour
                         if (moveSelectionType)
                         {
                             int count = moveSelectionCount;
-                            Registry.Resources resource = moveSelection;
-                            var order = new OrderHandler.Order(
-                                OrderHandler.OrderType.PreparingCargo,
-                                20,
-                                0.5f,
-                                3,
-                                new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count)
-                            );
-                            OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                            if (moveSelectionAdv)
+                            {
+                                Registry.AdvancedResources resource = (Registry.AdvancedResources)moveSelection;
+                                var order = new OrderHandler.Order(
+                                    OrderHandler.OrderType.PreparingCargo,
+                                    20,
+                                    0.5f,
+                                    3,
+                                    new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count)
+                                );
+                                OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                            }
+                            else
+                            {
+                                Registry.Resources resource = (Registry.Resources)moveSelection;
+                                var order = new OrderHandler.Order(
+                                    OrderHandler.OrderType.PreparingCargo,
+                                    20,
+                                    0.5f,
+                                    3,
+                                    new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count)
+                                );
+                                OrderHandler.Instance.Queue(order, moveSelectionOrigin);
+                            }
                         }
                         else
                         {

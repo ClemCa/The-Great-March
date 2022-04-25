@@ -10,6 +10,7 @@ public class Cargo : MonoBehaviour
     public enum CargoType
     {
         Resource,
+        AdvancedResource,
         People,
         Leader
     }
@@ -26,6 +27,8 @@ public class Cargo : MonoBehaviour
 
     public int Amount { get; private set; }
     public Registry.Resources? Resource { get; private set; }
+    public Registry.AdvancedResources? AdvancedResource { get; private set; }
+
 
     public Planet Origin { get; private set; }
     public Planet Destination { get; private set; }
@@ -46,6 +49,7 @@ public class Cargo : MonoBehaviour
         public CargoType Type;
         public int Amount;
         public Registry.Resources? Resource;
+        public Registry.AdvancedResources? AdvancedResource;
         public SerializableVector3[] Path;
     }
 
@@ -73,6 +77,7 @@ public class Cargo : MonoBehaviour
         save.Type = Type;
         save.Amount = Amount;
         save.Resource = Resource;
+        save.AdvancedResource = AdvancedResource;
         save.Path = _path.Select(t => new SerializableVector3(t)).ToArray();
 
         return save;
@@ -91,6 +96,7 @@ public class Cargo : MonoBehaviour
         Type = save.Type;
         Amount = save.Amount;
         Resource = save.Resource;
+        AdvancedResource = save.AdvancedResource;
         _path = save.Path.Select(t => t.Value).ToArray();
 
     }
@@ -143,6 +149,19 @@ public class Cargo : MonoBehaviour
         origin.TakeResource(resource, amount);
         Amount = amount;
         Resource = resource;
+
+        Origin = origin;
+        Destination = destination;
+        _innerTravel = origin.transform.parent.GetComponent<StellarSystem>() == destination.transform.parent.GetComponent<StellarSystem>();
+        // smh comparing transform doesn't work
+    }
+    public void Initialize(Planet origin, Planet destination, int amount, Registry.AdvancedResources resource)
+    {
+        Type = CargoType.AdvancedResource;
+
+        origin.TakeResource(resource, amount);
+        Amount = amount;
+        AdvancedResource = resource;
 
         Origin = origin;
         Destination = destination;
@@ -231,35 +250,44 @@ public class Cargo : MonoBehaviour
         }
         if (HasArrived())
         {
-            if(Type == CargoType.Leader)
+            switch (Type)
             {
-                LeaderInTransit = false;
-                Destination.HasPlayer = true;
-                if (!_innerTravel)
-                {
-                    Scoring.systems++;
-                }
-                var order = new OrderHandler.Order(
-                    OrderHandler.OrderType.TriumphantArrival,
-                    60,
-                    0.5f,
-                    5,
-                    null);
-                OrderHandler.Instance.Queue(order, Destination);
-            }
-            else if (Type == CargoType.Resource)
-            {
-                var order = new OrderHandler.Order(
+                case CargoType.Leader:
+                    LeaderInTransit = false;
+                    Destination.HasPlayer = true;
+                    if (!_innerTravel)
+                    {
+                        Scoring.systems++;
+                    }
+                    var orderL = new OrderHandler.Order(
+                        OrderHandler.OrderType.TriumphantArrival,
+                        60,
+                        0.5f,
+                        5,
+                        null);
+                    OrderHandler.Instance.Queue(orderL, Destination);
+                    break;
+                case CargoType.Resource:
+                    var orderR = new OrderHandler.Order(
                     OrderHandler.OrderType.UnpackingCargo,
                     20,
                     0.5f,
                     3,
                     new OrderHandler.OrderExec(Destination, Resource.Value, Amount));
-                OrderHandler.Instance.Queue(order, Destination);
-            }
-            else
-            {
-                Destination.AddPeople(Amount);
+                    OrderHandler.Instance.Queue(orderR, Destination);
+                    break;
+                case CargoType.AdvancedResource:
+                    var orderAR = new OrderHandler.Order(
+                    OrderHandler.OrderType.UnpackingCargo,
+                    20,
+                    0.5f,
+                    3,
+                    new OrderHandler.OrderExec(Destination, AdvancedResource.Value, Amount));
+                    OrderHandler.Instance.Queue(orderAR, Destination);
+                    break;
+                case CargoType.People:
+                    Destination.AddPeople(Amount);
+                    break;
             }
             Destroy(gameObject);
         }

@@ -23,7 +23,7 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
             new OrderHandler.Order(
                 OrderHandler.OrderType.Building,
                 140,
-                0.5f,
+                1.5f,
                 5,
                 new OrderHandler.OrderExec(selected, _facility)),
             Planet.Selected);

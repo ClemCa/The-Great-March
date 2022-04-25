@@ -41,16 +41,10 @@ public class SlotMenu : MonoBehaviour, IPointerClickHandler
             return;
         if (Planet.Selected.HasFacility(_resourceType))
         {
-            transform.GetChild(1).gameObject.SetActive(true);
             GetComponentInChildren<Image>().sprite = Registry.Instance.GetFacilitySprite(Planet.Selected.GetFacility(_resourceType));
-            transform.GetChild(1).GetComponent<Image>().sprite = Registry.Instance.GetResourceSprite(_resourceType);
         }
-        else
-        {
-            transform.GetChild(1).gameObject.SetActive(false);
-        }
-        transform.GetChild(2).GetComponent<RectTransform>().sizeDelta =
-                    new Vector2(transform.GetChild(2).GetComponent<RectTransform>().sizeDelta.x,
+        transform.GetChild(1).GetComponent<RectTransform>().sizeDelta =
+                    new Vector2(transform.GetChild(1).GetComponent<RectTransform>().sizeDelta.x,
                     GetComponent<RectTransform>().rect.height * Planet.Selected.GetFactoryProgression(_resourceType));
     }
 }

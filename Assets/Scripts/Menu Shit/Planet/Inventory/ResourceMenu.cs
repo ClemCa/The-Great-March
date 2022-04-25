@@ -8,6 +8,7 @@ using System.Linq;
 
 public class ResourceMenu : MonoBehaviour, IPointerClickHandler
 {
+    [SerializeField] private bool _outline;
     private Registry.Resources _resourceType;
     private Registry.AdvancedResources _advancedResourceType;
     private bool _advancedResources;
@@ -30,6 +31,15 @@ public class ResourceMenu : MonoBehaviour, IPointerClickHandler
     {
         _advancedResourceType = resourceType;
         _advancedResources = true;
+    }
+
+    void Awake()
+    {
+        if (!_outline)
+            return;
+        var txt = GetComponentInChildren<TMPro.TMP_Text>();
+        txt.outlineColor = Color.white;
+        txt.outlineWidth = 5;
     }
 
     void Start()

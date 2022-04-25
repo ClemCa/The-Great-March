@@ -23,9 +23,18 @@ public class ResourceSelection : MonoBehaviour, IPointerClickHandler
     {
         return _resourceType;
     }
+    public bool GetResourceType()
+    {
+        return _advancedResources;
+    }
+    public Registry.AdvancedResources GetAdvancedResource()
+    {
+        return _advancedResourceType;
+    }
     public void SetResource(Registry.Resources resourceType)
     {
         _resourceType = resourceType;
+        _advancedResources = false;
     }
 
     public void SetResource(Registry.AdvancedResources resourceType)

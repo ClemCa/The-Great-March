@@ -44,6 +44,7 @@ public class OrderHandler : MonoBehaviour
         public string Destination;
         public int Count;
         public Registry.Resources Resource;
+        public Registry.AdvancedResources AdvancedResource;
         public Registry.Facilities Facility;
         public Registry.TransformationFacilities TransformationFacility;
 
@@ -75,6 +76,23 @@ public class OrderHandler : MonoBehaviour
             Resource = resource;
             Count = count;
             Type = ActionType.Resources;
+        }
+
+        public OrderExec(Planet planet, Planet destination, Registry.AdvancedResources resource, int count)
+        {
+            Planet = planet.Name;
+            Destination = destination.Name;
+            Count = count;
+            AdvancedResource = resource;
+            Type = ActionType.CargoAdvancedResources;
+        }
+
+        public OrderExec(Planet planet, Registry.AdvancedResources resource, int count)
+        {
+            Planet = planet.Name;
+            AdvancedResource = resource;
+            Count = count;
+            Type = ActionType.AdvancedResources;
         }
 
         public OrderExec(Planet planet, Registry.Facilities facility)
@@ -122,6 +140,15 @@ public class OrderHandler : MonoBehaviour
                 case ActionType.Resources:
                     planet.AddResource(Resource, Count);
                     break;
+                case ActionType.CargoAdvancedResources:
+                    var destination4 = Array.Find(planets, t => t.Name == Destination);
+                    if (destination4 == null)
+                        return;
+                    CargoGenerator.GenerateCargo(planet, destination4, AdvancedResource, Count);
+                    break;
+                case ActionType.AdvancedResources:
+                    planet.AddResource(AdvancedResource, Count);
+                    break;
                 case ActionType.Facility:
                     FacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.Facilities>(planet, Facility));
                     planet.RegisterBuiltFacility(Facility);
@@ -159,7 +186,9 @@ public class OrderHandler : MonoBehaviour
         CargoLeader,
         CargoPeople,
         CargoResources,
+        CargoAdvancedResources,
         Resources,
+        AdvancedResources,
         Facility,
         TransformationFacility
     }

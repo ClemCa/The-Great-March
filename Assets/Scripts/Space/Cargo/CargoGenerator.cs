@@ -18,6 +18,11 @@ public class CargoGenerator : MonoBehaviour
         var r = Instantiate(_cargoPrefab);
         r.GetComponent<Cargo>().Initialize(origin, destination, quantity, resource);
     }
+    private void CreateCargo(Registry.AdvancedResources resource, int quantity, Planet origin, Planet destination)
+    {
+        var r = Instantiate(_cargoPrefab);
+        r.GetComponent<Cargo>().Initialize(origin, destination, quantity, resource);
+    }
     private void CreateCargoPeople(int quantity, Planet origin, Planet destination)
     {
         var r = Instantiate(_cargoPrefab);
@@ -33,6 +38,10 @@ public class CargoGenerator : MonoBehaviour
         return Instantiate(_cargoPrefab).GetComponent<Cargo>();
     }
     public static void GenerateCargo(Planet origin, Planet destination, Registry.Resources resource, int quantity)
+    {
+        _instance.CreateCargo(resource, quantity, origin, destination);
+    }
+    public static void GenerateCargo(Planet origin, Planet destination, Registry.AdvancedResources resource, int quantity)
     {
         _instance.CreateCargo(resource, quantity, origin, destination);
     }
