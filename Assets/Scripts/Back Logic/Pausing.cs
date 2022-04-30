@@ -36,6 +36,17 @@ public class Pausing : MonoBehaviour
         AudioListener.volume = 0.25f;
     }
 
+    public static void InstantPause()
+    {
+        _paused = true;
+        Time.timeScale = 0;
+        _timeTarget = 0;
+        _instance.GetComponent<AudioSource>().Play();
+        _instance.GetComponent<AudioSource>().time = 0.12f;
+        _instance.GetComponent<AudioSource>().volume = 0.5f;
+        AudioListener.volume = 0.25f;
+    }
+
     public static void Unpause()
     {
         _paused = false;

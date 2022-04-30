@@ -1,0 +1,65 @@
+title: Intro_Start
+position: -172,-34
+---
+<<SetSpeed Talk 2>>
+Unknown: What do we do?
+Unknown: Tell the President!
+Unknown: But he's sleeping!<br>What can we do about it?
+Unknown: I don't know!
+<<SetSpeed Talk 1.5>>
+Unknown: What to do. What to do...
+<<SetSpeed Talk 1>>
+<<SkipAhead Talk>>
+Lira: Oh, President.<br>You're awake.
+-> President: What's happening?
+    President: What's happening?
+    <<jump What>>
+-> President: Huh?
+    President: Huh?
+    <<jump Huh>>
+===
+title: What
+position: 35,-74
+---
+Lira: Oh.
+President: So?
+Lira: Sorry, I was surprised.<br>You're not usually that reactive after the third nap.
+Lira: I'll let our scientist in chief explain it.
+<<jump Explanation>>
+===
+title: Huh
+position: 34,9
+---
+Lira: Do you need a Choke Zero?
+President: Hmmm...
+Unknown: President!
+<<SetSpeed Talk 1.5>>
+Lira: Wait, wait!<br>It's important, he didn't mean to interrupt your sleep!
+<<SetSpeed Talk 1>>
+Lira: Please let him talk before executing him.
+<<SetSpeed Talk 0.5>>
+President: Fine.
+<<jump Explanation>>
+===
+title: Explanation
+position: 239,-31
+---
+<<SetSpeed Talk 1>>
+President: Make it short.
+Scientist: A few hours earlier, some of our astronomers discovered that stars were disappearing in our sky.
+Scientist: After confirmation by several independent study groups, we have concluded that-
+<<SetSpeed Talk 1.5>>
+President: I said make it short.
+<<SetSpeed Talk 1>>
+Scientist: An unknown body of darkness is swallowing everything.<br>It's a maximum level emergency.
+<<SetSpeed Talk 0.02>>
+President: ...
+<<SetSpeed Talk 1>>
+President: Is it a threat to life?
+Scientist: Not even light seems to escape it.<br>It's unlikely for anything to be able to survive in it.
+President: Lira, engage procedure L.
+Lira: Yes, President.
+President: Also, execute that man.<br>He made my waking up unpleasant.
+Lira: As you wish.
+President: Oh, and get me a can of Choke.
+===
