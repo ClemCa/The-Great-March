@@ -1,0 +1,38 @@
+﻿title: Tutorial_Start
+tags:
+---
+todo: In the form of a "simulator training" in-lore. Explains what procedure L is ("Let's get the fuck out of here". It's all about leaving with specialists and experts in many fields, and the president)
+todo: Shows that Lira actually has a strong grip on the President by having someone beg Lira to have him listen
+todo: Show current objective
+todo: Step 1: Select the main planet, and see the information available (name, people, Facilities, Storage
+===
+title: Tutorial_Opened
+position: 351,86
+---
+todo: Step 2: Explain what facilities are, and how to build them
+===
+title: Tutorial_QueueExplanation
+position: 350,21
+---
+todo: Step 3: Explain the Queue
+todo: Step 4: Ask the President to scroll down, and see the Transformation Facilities, which can be built on any planet, but require a wildcard slot. Ask them to build it
+===
+title: Tutorial_TransformationBuilt
+position: 351,-46
+---
+todo: Step 5: Tell the President how to move resources from Planet to Planet. (in-lore, it's planned to be for when seeking an exoplanet fit to host human life)
+===
+title: Tutorial_ResourcesMoved
+position: 351,-112
+---
+todo: Step 6: Tell them that to unpack resources they need people
+todo: Step 7: Have the president say they won't leave last, they need someone to wave goodbye to
+todo: Step 8: Have Lira say, fine.
+todo: Step 9: The president say they also need Lira to be here to welcome them when they arrive.
+todo: Step 10: Lira: Oh, you...
+===
+title: Tutorial_Completion
+position: 350,125
+---
+Lira: On other matters, this is all for your simulator training, President. It might be just a preventive measure, but I hope we never have to use procedure L.
+===

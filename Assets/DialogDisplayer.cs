@@ -15,9 +15,13 @@ public class DialogDisplayer : MonoBehaviour
     [SerializeField] private float _speed = 1;
     private bool _visible = true;
     private string[] _choicesText;
+    private static DialogDisplayer _instance;
     
     private Action[] _choices;
     private Action _followUp;
+
+    public static DialogDisplayer Instance { get => _instance; }
+    public DialogueRunner Runner { get => _runner; }
 
     [YarnCommand("SetSpeed")]
     public void SetSpeed(float speed)
@@ -27,6 +31,7 @@ public class DialogDisplayer : MonoBehaviour
 
     void Awake()
     {
+        _instance = this;
         Hide();
     }
     public void Initialize(string name, string text, Action followUp)
@@ -80,9 +85,9 @@ public class DialogDisplayer : MonoBehaviour
             Show();
     }
 
-    public void StartDialogue()
+    public void StartDialogue(string dialogue = "Intro_Start")
     {
-        _runner.StartDialogue("Intro_Start");
+        _runner.StartDialogue(dialogue);
     }
 
     private async void WriteOverTime(string text, TMPro.TMP_Text target)

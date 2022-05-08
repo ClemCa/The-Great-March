@@ -588,7 +588,7 @@ public class Planet : MonoBehaviour
 
             foreach (var r in results)
             {
-                if (r.gameObject.name == "Menu" || r.gameObject.FindParentDeep("Menu") || r.gameObject.FindParentDeep("PauseCanvas"))
+                if (r.gameObject.name == "Menu" || r.gameObject.FindParentDeep("Menu") || r.gameObject.FindParentDeep("PauseCanvas") || r.gameObject.FindParentDeep("Dialogs"))
                     return;
             }
 
