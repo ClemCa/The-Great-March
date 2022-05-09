@@ -35,10 +35,12 @@ public class TutorialQuests : MonoBehaviour
                 if (DialogDisplayer.Instance.Runner.IsDialogueRunning || Questing.Instance.IsRunningQuestline)
                     break;
                 var questline = new Questing.QuestLine(
-                    new Questing.Quest(MainPlanetSelected,"Tutorial_Opened", () => { _steps++; UpdateQuestUI(); }),
-                    new Questing.Quest(QueueBuilding, "Tutorial_QueueExplanation", () => { _steps++; UpdateQuestUI(); }),
-                    new Questing.Quest(QueueTransformationBuilding, "Tutorial_TransformationBuilt", () => { _steps++; UpdateQuestUI(); }),
-                    new Questing.Quest(QueueMoveResources, "Tutorial_ResourcesMoved", () => { _steps++; UpdateQuestUI(); })
+                    new Questing.Quest(MainPlanetSelected, "", "Select your planet", () => { _steps++; }),
+                    new Questing.Quest(QueueBuilding, "Tutorial_Opened", "Build a facility", () => { _steps++; }),
+                    new Questing.Quest(QueueTransformationBuilding, "Tutorial_QueueExplanation", "Build a transformation facility", () => { _steps++; }),
+                    new Questing.Quest(QueueMoveResources, "Tutorial_TransformationBuilt", "Send resources towards another planet", () => { _steps++; }),
+                    new Questing.Quest(DialogueFinished, "Tutorial_ResourcesMoved", "", () => { _steps++; Questing.Instance.HideUI(); }),
+                    new Questing.Quest(DialogueFinished, "", "", () => { _steps++; })
                     );
                 Questing.Instance.StartQuestLine(questline);
                 break;
@@ -52,7 +54,6 @@ public class TutorialQuests : MonoBehaviour
                 break;
             case Steps.LastExplanations:
                 ShowTutorialCompletion();
-                DialogDisplayer.Instance.StartDialogue("Tutorial_Completion");
                 _lock = true;
                 break;
         }
@@ -60,12 +61,17 @@ public class TutorialQuests : MonoBehaviour
 
     private void ShowTutorialCompletion()
     {
-
+        Questing.Instance.StartQuestLine(new Questing.QuestLine(new Questing.Quest(ReturnFalse, "Tutorial_Completion", "Tutorial completed.\nPress Escape and use the pause menu to leave.")));
     }
 
-    private void UpdateQuestUI()
+    private bool DialogueFinished()
     {
+        return !DialogDisplayer.Instance.Runner.IsDialogueRunning;
+    }
 
+    private bool ReturnFalse()
+    {
+        return false;
     }
 
     private bool MainPlanetSelected()
@@ -74,14 +80,29 @@ public class TutorialQuests : MonoBehaviour
     }
     private bool QueueBuilding()
     {
-        return Planet.Selected != null && Array.Find(OrderHandler.Instance.GetPlanetQueue(Planet.Selected), t => (t.Execution.Type == OrderHandler.ActionType.Facility && t.LengthLeft == 1)) != null;
+        foreach (var r in OrderHandler.Instance.QueueData)
+        {
+            if (r.Value.FindIndex(t => (t.Execution.Type == OrderHandler.ActionType.Facility && t.LengthLeft.Round() == 1)) != -1)
+                return true;
+        }
+        return false;
     }
     private bool QueueTransformationBuilding()
     {
-        return Planet.Selected != null && Array.Find(OrderHandler.Instance.GetPlanetQueue(Planet.Selected), t => (t.Execution.Type == OrderHandler.ActionType.TransformationFacility && t.LengthLeft == 1)) != null;
+        foreach (var r in OrderHandler.Instance.QueueData)
+        {
+            if (r.Value.FindIndex( t => (t.Execution.Type == OrderHandler.ActionType.TransformationFacility && t.LengthLeft.Round() == 1)) != -1)
+                return true;
+        }
+        return false;
     }
     private bool QueueMoveResources()
     {
-        return Planet.Selected != null && Array.Find(OrderHandler.Instance.GetPlanetQueue(Planet.Selected), t => (t.Execution.Type == OrderHandler.ActionType.CargoResources && t.LengthLeft / t.Length == 1)) != null;
+        foreach (var r in OrderHandler.Instance.QueueData)
+        {
+            if (r.Value.FindIndex(t => (t.Execution.Type == OrderHandler.ActionType.CargoResources && t.LengthLeft.Round() == 1)) != -1)
+                return true;
+        }
+        return false;
     }
 }

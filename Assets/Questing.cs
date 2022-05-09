@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class Questing : MonoBehaviour
 {
+    [SerializeField] private RectTransform _display;
     private static Questing _instance;
     private QuestLine _currentQuestline;
 
@@ -22,9 +23,10 @@ public class Questing : MonoBehaviour
     {
         if (_currentQuestline == null || _currentQuestline.current == null || _currentQuestline.current.Trigger)
             return;
+        _display.GetComponentInChildren<TMPro.TMP_Text>().text = _currentQuestline.current.Objective;
         if (_currentQuestline.current.Checker.Invoke())
         {
-            _currentQuestline.NextQuest();
+            _currentQuestline.NextQuest(_display);
         }
     }
 
@@ -33,7 +35,14 @@ public class Questing : MonoBehaviour
         if (questLine == null || questLine.current == null)
             return false;
         _currentQuestline = questLine;
+        _display.GetComponentInChildren<TMPro.TMP_Text>().text = _currentQuestline.current.Objective;
+        ClemCAddons.Utilities.Lerper.ConstantLerp(_display.anchoredPosition, Vector2.zero, 2, (v) => _display.anchoredPosition = v);
         return true;
+    }
+
+    public void HideUI()
+    {
+        ClemCAddons.Utilities.Lerper.ConstantLerp(_display.anchoredPosition, new Vector2(0, 75), 1, (v) => _display.anchoredPosition = v);
     }
 
     public class Quest
@@ -43,19 +52,22 @@ public class Questing : MonoBehaviour
         public Func<bool> Checker;
         public string Dialogue;
         public Action Done;
-        public Quest(Func<bool> checker, string dialogue, Action done = null)
+        public string Objective;
+        public Quest(Func<bool> checker, string dialogue, string description, Action done = null)
         {
             TriggerMode = false;
             Checker = checker;
             Dialogue = dialogue;
             Done = done;
+            Objective = description;
         }
-        public Quest(Button trigger, string dialogue, Action done = null)
+        public Quest(Button trigger, string dialogue, string description, Action done = null)
         {
             TriggerMode = true;
             Trigger = trigger;
             Dialogue = dialogue;
             Done = done;
+            Objective = description;
         }
     }
 
@@ -71,10 +83,11 @@ public class Questing : MonoBehaviour
             id = 0;
             current = quests[0];
             current.Trigger?.onClick.AddListener(ReceiveTrigger);
-            DialogDisplayer.Instance.StartDialogue(current.Dialogue);
+            if(current.Dialogue != "")
+                DialogDisplayer.Instance.StartDialogue(current.Dialogue);
         }
 
-        public void NextQuest()
+        public void NextQuest(RectTransform display)
         {
             id++;
             if (Quests.Length > id)
@@ -83,15 +96,20 @@ public class Questing : MonoBehaviour
                 current = Quests[id];
                 current.Trigger?.onClick.AddListener(ReceiveTrigger);
                 current.Done?.Invoke();
-                DialogDisplayer.Instance.StartDialogue(current.Dialogue);
+                if(current.Dialogue != "")
+                    DialogDisplayer.Instance.StartDialogue(current.Dialogue); 
             }
             else
+            {
                 current = null;
+                display.GetComponentInChildren<TMPro.TMP_Text>().text = "";
+                ClemCAddons.Utilities.Lerper.ConstantLerp(display.anchoredPosition, new Vector2(0, 75), 1, (v) => display.anchoredPosition = v);
+            }
         }
 
         public void ReceiveTrigger()
         {
-            NextQuest();
+            NextQuest(Instance._display);
         }
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ClemCAddons;
 using ClemCAddons.Utilities;
+using UnityEngine.SceneManagement;
 
 public class ButtonSlider : MonoBehaviour
 {
@@ -82,7 +83,7 @@ public class ButtonSlider : MonoBehaviour
 
     public void Exit()
     {
-        Application.Quit();
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void Save(int slot = -1)
