@@ -1,20 +1,55 @@
 ﻿title: Tutorial_Start
 tags:
 ---
-todo: In the form of a "simulator training" in-lore. Explains what procedure L is ("Let's get the fuck out of here". It's all about leaving with specialists and experts in many fields, and the president)
-todo: Shows that Lira actually has a strong grip on the President by having someone beg Lira to have him listen
-todo: Step 1: Select the main planet, and see the information available (name, people, Facilities, Storage
+<<SetSpeed Talk 1>>
+Lira: Oh, you're here.
+Lira: We've been waiting for you.
+-> President: What were we doing already?
+    <<SetSpeed Talk 0.5>>
+    Lira: Ugh...
+    <<SetSpeed Talk 1>>
+    Lira: We had an appointement 2 hours ago to see the L Procedure simulator.
+    President: L Procedure?
+-> President: I've been busy.
+    <<SetSpeed Talk 0.75>>
+    Lira: I'm not even surprised.
+    <<SetSpeed Talk 1>>
+    Lira: Anyway, shall we go see the simulator?
+    <<SetSpeed Talk 0.5>>
+    President: The... simulator?
+    <<SetSpeed Talk 1>>
+    Lira: L Procedure. Don't you remember L Procedure?
+    President: ...
+    Lira: Ugh...
+Lira: About a year ago, you ordered for a new procedure to be created, along with a simulation to go alongside it.
+President: How much?
+Lira: 3g.<br>And a coma 10 minutes later.
+President: So what is L Procedure?
+Lira: To use your own words, it stands for "Let's get the fuck out of here".
+President: And what does it m-<br>...<br>Oh, I see.
+<<SetSpeed Talk 0.75>>
+President: Existential dread?
+Lira: Existential dread.
+<<SetSpeed Talk 1>>
+Lira: So, this procedure's goal is to have you, the president, be able to leave with experts of many fields at a moment's notice.
+Lira: To better prepared, you asked for a simulator to be made.
+<<SetSpeed Talk 2>>
+Unknown: Can we start?
+<<SetSpeed Talk 1>>
+President: We shall talk as much as we wish to.<br>Execute him.
+Lira: I'll note it down for later. For now, we're behind today's schedule, let's start.
+Lira: According to the briefing, once in the simulation, you should inspect the planet.
 ===
 title: Tutorial_Opened
 position: 351,86
 ---
-todo: Step 2: Explain what facilities are, and how to build them
+todo: Step 2: Explain what exploitations are, and how to build them
 ===
 title: Tutorial_QueueExplanation
 position: 350,21
 ---
 todo: Step 3: Explain the Queue
-todo: Step 4: Ask the President to scroll down, and see the Transformation Facilities, which can be built on any planet, but require a wildcard slot. Ask them to build it
+todo: Step 4: Ask the President to scroll down, and see the Factories, which can be built on any planet, but require a wildcard slot. Ask them to build it
 ===
 title: Tutorial_TransformationBuilt
 position: 351,-46
@@ -33,5 +68,5 @@ todo: Step 10: Lira: Oh, you...
 title: Tutorial_Completion
 position: 350,125
 ---
-Lira: On other matters, this is all for your simulator training, President. It might be just a preventive measure, but I hope we never have to use procedure L.
+Lira: On other matters, this is all for your simulator training, President. It might be just a preventive measure, but I hope we never have to use L Procedure.
 ===

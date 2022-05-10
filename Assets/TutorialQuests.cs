@@ -36,8 +36,8 @@ public class TutorialQuests : MonoBehaviour
                     break;
                 var questline = new Questing.QuestLine(
                     new Questing.Quest(MainPlanetSelected, "", "Select your planet", () => { _steps++; }),
-                    new Questing.Quest(QueueBuilding, "Tutorial_Opened", "Build a facility", () => { _steps++; }),
-                    new Questing.Quest(QueueTransformationBuilding, "Tutorial_QueueExplanation", "Build a transformation facility", () => { _steps++; }),
+                    new Questing.Quest(QueueBuilding, "Tutorial_Opened", "Build an exploitation", () => { _steps++; }),
+                    new Questing.Quest(QueueTransformationBuilding, "Tutorial_QueueExplanation", "Build a factory", () => { _steps++; }),
                     new Questing.Quest(QueueMoveResources, "Tutorial_TransformationBuilt", "Send resources towards another planet", () => { _steps++; }),
                     new Questing.Quest(DialogueFinished, "Tutorial_ResourcesMoved", "", () => { _steps++; Questing.Instance.HideUI(); }),
                     new Questing.Quest(DialogueFinished, "", "", () => { _steps++; })
