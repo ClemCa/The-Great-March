@@ -43,18 +43,54 @@ Lira: According to the briefing, once in the simulation, you should inspect the 
 title: Tutorial_Opened
 position: 351,86
 ---
-todo: Step 2: Explain what exploitations are, and how to build them
+Lira: As you can see, the report mentions several types of information.
+President: Name, People, Facilities and Storage.
+Lira: Excluding the most obvious ones Facilities are separated in two categories:<br>Exploitations and Factories.
+Lira: Factories are later in the brief, so we'll talk about Exploitations.
+Lira: Planets have a certain amount of resources sources, and those can be exploited with those.
+Lira: Pretty sure you should be able to build one.
 ===
 title: Tutorial_QueueExplanation
 position: 350,21
 ---
-todo: Step 3: Explain the Queue
-todo: Step 4: Ask the President to scroll down, and see the Factories, which can be built on any planet, but require a wildcard slot. Ask them to build it
+President: Well, that was fast.
+Lira: Surprisingly so. You might have talent in this area.
+President: Well I've been running a country.
+Lira: Only for the first few days of office 10 years ago. Then it's all been my work to do.
+President: This is what you were hired for.
+Lira: Quite so. The Queue you see in the simulation should be especially easy to familiarize yourself with.
+President: ...
+Lira: You have a similar list of tasks for others to do in your stead.
+President: Lira...
+Lira: *Cough*<br>Anyway.
+Lira: Besides Exploitations, I also mentioned Factories earlier.<br>They can be used to make more advanced resources out of basic resources.
+President: Any requirement other than space?
+Lira: Just space.
+President: I see.<br>My government is not so poor it'd need anything else.
+President: I'll build one.
 ===
 title: Tutorial_TransformationBuilt
 position: 351,-46
 ---
-todo: Step 5: Tell the President how to move resources from Planet to Planet. (in-lore, it's planned to be for when seeking an exoplanet fit to host human life)
+Lira: And we're reaching the end of my briefing notes. Let me check...
+Lira: If there are any exploplanets at range, you can use cargo ships.
+Lira: You can send resources...
+Lira: You can also send people. How comfy.
+Lira: And you can also send yourself.
+Lira: That should be it. Would definitely be useful to send you my resignation.
+President: ...
+President: Lira.<br>Did I forget your birthday?
+Lira: ...
+President: So that's it! You've been awfully cynical today because I forgot your birthday?
+Lira: I am so every waking hour of my life.
+President: Awfully!
+Lira: Certainly, I might have been a little more serious than usual.<br>But that's it.
+<<SetSpeed Talk 2>>
+President: Happy birthday!
+<<SetSpeed Talk 0.1>>
+Lira: Woooo.
+Lira: I'm so happyyyy.
+<<SetSpeed Talk 1>>
 ===
 title: Tutorial_ResourcesMoved
 position: 351,-112
