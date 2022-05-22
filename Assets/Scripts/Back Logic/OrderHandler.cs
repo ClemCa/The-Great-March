@@ -203,7 +203,7 @@ public class OrderHandler : MonoBehaviour
         UnpackingCargo
     }
 
-    void Start()
+    void Awake()
     {
         _instance = this;
     }

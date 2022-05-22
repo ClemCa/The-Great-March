@@ -1,8 +1,14 @@
-﻿title: Tutorial_Start
+﻿// br = return to line
+// dl = next delay, replaced by space
+// sd = next speed, not replaced by space
+title: Tutorial_Start
 tags:
 ---
+<<SetSpeed Talk 1 0.5>>
+<<SetDelay Talk 0 500>>
+Lira: Oh,<dl><sd>you're here.
 <<SetSpeed Talk 1>>
-Lira: Oh, you're here.
+<<SkipAhead Talk>>
 Lira: We've been waiting for you.
 -> President: What were we doing already?
     <<SetSpeed Talk 0.5>>
@@ -16,26 +22,33 @@ Lira: We've been waiting for you.
     <<SetSpeed Talk 1>>
     Lira: Anyway, shall we go see the simulator?
     <<SetSpeed Talk 0.5>>
-    President: The... simulator?
+    <<SetDelay Talk 0 1000>>
+    President: The...<dl>simulator?
     <<SetSpeed Talk 1>>
-    Lira: L Procedure. Don't you remember L Procedure?
+    <<SetDelay Talk 0 500>>
+    Lira: L Procedure.<dl>Don't you remember L Procedure?
     President: ...
     Lira: Ugh...
 Lira: About a year ago, you ordered for a new procedure to be created, along with a simulation to go alongside it.
 President: How much?
-Lira: 3g.<br>And a coma 10 minutes later.
+<<SetDelay Talk 0 500>>
+Lira: 3 grams.<br>And a coma 10 minutes later.
 President: So what is L Procedure?
 Lira: To use your own words, it stands for "Let's get the fuck out of here".
+<<SetSpeed Talk 1 0.2 1>>
+<<SetDelay Talk 0 0 500>>
 President: And what does it m-<br>...<br>Oh, I see.
 <<SetSpeed Talk 0.75>>
 President: Existential dread?
 Lira: Existential dread.
 <<SetSpeed Talk 1>>
 Lira: So, this procedure's goal is to have you, the president, be able to leave with experts of many fields at a moment's notice.
-Lira: To better prepared, you asked for a simulator to be made.
+Lira: To be better prepared, you asked for a simulator to be made.
 <<SetSpeed Talk 2>>
-Unknown: Can we start?
+<<SetDelay Talk 0 1000>>
+Unknown: Can we...<dl>start?
 <<SetSpeed Talk 1>>
+<<SetDelay Talk 0 500>>
 President: We shall talk as much as we wish to.<br>Execute him.
 Lira: I'll note it down for later. For now, we're behind today's schedule, let's start.
 Lira: According to the briefing, once in the simulation, you should inspect the planet.
@@ -44,28 +57,50 @@ title: Tutorial_Opened
 position: 351,86
 ---
 Lira: As you can see, the report mentions several types of information.
-President: Name, People, Facilities and Storage.
-Lira: Excluding the most obvious ones Facilities are separated in two categories:<br>Exploitations and Factories.
-Lira: Factories are later in the brief, so we'll talk about Exploitations.
-Lira: Planets have a certain amount of resources sources, and those can be exploited with those.
-Lira: Pretty sure you should be able to build one.
+<<SetSpeed Talk 0.5>>
+<<SetDelay Talk 0 1000 1000 1000 1000>>
+President: Name,<dl>People,<dl>Facilities,<dl>and Storage.
+<<SetSpeed Talk 1>>
+<<SetDelay Talk 0 500>>
+Lira: Excluding the most obvious information, Facilities is the first subject that needs explanations.<br>They are separated in two categories:<br>Exploitations and Factories.
+<<SetSpeed Talk 0.8>>
+Lira: Factories are later in the brief, so we'll talk about Exploitations first.
+Lira: Planets have a certain amount of resources sources, and those can be exploited with these.
+<<SetSpeed Talk 1>>
+Lira: I'm pretty sure you should be able to build one.
 ===
 title: Tutorial_QueueExplanation
 position: 350,21
 ---
-President: Well, that was fast.
+<<SetSpeed Talk 0.75>>
+<<SetDelay Talk 0 500>>
+President: Well,<dl>that was fast.
+<<SetSpeed Talk 1>>
 Lira: Surprisingly so. You might have talent in this area.
-President: Well I've been running a country.
-Lira: Only for the first few days of office 10 years ago. Then it's all been my work to do.
+<<SetSpeed Talk 0.9>>
+President: I've been running a country, after all.
+<<SetSpeed Talk 1>>
+<<SetDelay Talk 0 1000>>
+Lira: Only for the first few days of office 10 years ago.<dl>Then it's all been my work to do.
 President: This is what you were hired for.
+<<SetDelay Talk 0 500>>
 Lira: Quite so. The Queue you see in the simulation should be especially easy to familiarize yourself with.
+<<SetSpeed Talk 0.2>>
 President: ...
+<<SetSpeed Talk 1>>
 Lira: You have a similar list of tasks for others to do in your stead.
+<<SetSpeed Talk 0.5>>
 President: Lira...
+<<SetSpeed Talk 1>>
+<<SetDelay Talk 0 1500>>
 Lira: *Cough*<br>Anyway.
+<<SetDelay Talk 0 500>>
 Lira: Besides Exploitations, I also mentioned Factories earlier.<br>They can be used to make more advanced resources out of basic resources.
+<<SetDelay Talk 0 250>>
+Lira: It's also in the Facilities section,<dl>you might need to scroll a bit.
 President: Any requirement other than space?
 Lira: Just space.
+<<SetDelay Talk 0 250>>
 President: I see.<br>My government is not so poor it'd need anything else.
 President: I'll build one.
 ===
@@ -73,36 +108,92 @@ title: Tutorial_TransformationBuilt
 position: 351,-46
 ---
 Lira: And we're reaching the end of my briefing notes. Let me check...
+<<SetSpeed Talk 0.9>>
 Lira: If there are any exploplanets at range, you can use cargo ships.
+<<SetSpeed Talk 0.7>>
 Lira: You can send resources...
-Lira: You can also send people. How comfy.
+<<SetSpeed Talk 0.5 1>>
+<<SetDelay Talk 0 1000>>
+Lira: You can also send people.<br>How comfy.
+<<SetSpeed Talk 0.9>>
 Lira: And you can also send yourself.
+<<SetSpeed Talk 1>>
 Lira: That should be it. Would definitely be useful to send you my resignation.
+<<SetSpeed Talk 0.2>>
 President: ...
+<<SetSpeed Talk 0.5 1>>
+<<SetDelay Talk 0 500>>
 President: Lira.<br>Did I forget your birthday?
+<<SetSpeed Talk 0.2>>
 Lira: ...
+<<SetSpeed Talk 1>>
 President: So that's it! You've been awfully cynical today because I forgot your birthday?
+<<SetSpeed Talk 0.8>>
 Lira: I am so every waking hour of my life.
-President: Awfully!
+<<SetSpeed Talk 1>>
+<<SetDelay Talk 0 1000 500 1000>>
+President: I said<dl>"awfully"<dl>before<dl>"cynical".
+<<SetSpeed Talk 1 0.5>>
+<<SetDelay Talk 0 250>>
 Lira: Certainly, I might have been a little more serious than usual.<br>But that's it.
 <<SetSpeed Talk 2>>
 President: Happy birthday!
 <<SetSpeed Talk 0.1>>
 Lira: Woooo.
-Lira: I'm so happyyyy.
+<<SetSpeed Talk 0.2 0.1>>
+<<SetDelay Talk 0 250>>
+Lira: I'm so<br>Happyyyy.
 <<SetSpeed Talk 1>>
 ===
 title: Tutorial_ResourcesMoved
 position: 351,-112
 ---
-todo: Step 6: Tell them that to unpack resources they need people
-todo: Step 7: Have the president say they won't leave last, they need someone to wave goodbye to
-todo: Step 8: Have Lira say, fine.
-todo: Step 9: The president say they also need Lira to be here to welcome them when they arrive.
-todo: Step 10: Lira: Oh, you...
+President: So that's it?
+Lira: There are a few details left to be added to the simulation, such as a need for people to actually unpack and manage the resources.
+Lira: But that should be it.
+President: It shouldn't, though.
+<<SetSpeed Talk 1 0.7>>
+<<SetDelay Talk 0 500>>
+President: There's a clear lack of attention to detail.<br>I wouldn't leave last.
+<<SetSpeed Talk 1 1.1 1.2 1.3>>
+<<SetDelay Talk 0 2000 1500 1000 500>>
+President: To each their job.<br>I leave populism to populists.<br>I leave the dangers of discovery to explorers.<br>I leave guarding the back to the slow.
+<<SetSpeed Talk 0.9 1.5>>
+<<SetDelay Talk 0 500 1000>>
+President: I am the leader of this country.<dl>My job is to lead.<br>Waving to crowds is pretty good for your public image, I hear.
+<<SetSpeed Talk 1>>
+Lira: This will be included in our remarks to the developing team.
+<<SetSpeed Talk 0.75 1>>
+President: Good.<br>Let's leave.
+<<SetSpeed Talk 1>>
+Lira: Hmm.
+<<SetSpeed Talk 0.5>>
+President: Oh, and...
+<<SetSpeed Talk 1>>
+Lira: Hmm?
+<<SetSpeed Talk 1>>
+President: I'd want you to be there to welcome me when I arrive.
+<<SetSpeed Talk 0.75>>
+Lira: Oh, you...
+<<SetSpeed Talk 1 1.5>>
+<<SetDelay Talk 0 1000 500 500>>
+President: This is a grave error of judgement.<br>Note it down,<dl>dereliction of duty,<dl>immediate execution.
+<<SetSpeed Talk 1.5>>
+Lira: Noted.
+<<SetSpeed Talk 1>>
 ===
 title: Tutorial_Completion
 position: 350,125
 ---
-Lira: On other matters, this is all for your simulator training, President. It might be just a preventive measure, but I hope we never have to use L Procedure.
+<<SetSpeed Talk 1>>
+Lira: On other matters, this was the last of your schedule for today, President.
+<<SetSpeed Talk 0.8>>
+President: Only one this afternoon, huh.
+<<SetSpeed Talk 1>>
+Lira: I expected a sizeable nap.
+President: Great scheduling.
+Lira: Thank you for your kind words.
+Lira: Our teams will work tirelessly to put together a better simulator, as well as prepare everything needed for L Procedure.
+<<SetSpeed Talk 0.8>>
+Lira: Though it is one preventive measure I hope never needs using.
 ===

@@ -11,7 +11,7 @@ public class FacilitySubMenu : MonoBehaviour
     private static FacilitySubMenu _instance;
     private Registry.Resources? _ressource;
 
-    void Start()
+    void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _instance = this;

@@ -34,7 +34,7 @@ public class Scoring : MonoBehaviour
         // update time to match ours
     }
 
-    void Start()
+    void Awake()
     {
         if (_instance != null)
         {

@@ -18,7 +18,7 @@ public class ResourcesSelectionSubMenu : MonoBehaviour
 
     public delegate void ResourceReturn(Registry.Resources? resource, Registry.AdvancedResources? advancedResource);
 
-    void Start()
+    void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _instance = this;

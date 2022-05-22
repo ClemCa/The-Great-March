@@ -8,7 +8,7 @@ public class CargoGenerator : MonoBehaviour
     [SerializeField] private GameObject _cargoPrefab;
     private static CargoGenerator _instance;
 
-    void Start()
+    void Awake()
     {
         _instance = this;
     }

@@ -16,7 +16,7 @@ public class ShippingSubMenu : MonoBehaviour
 
     public static ShippingSubMenu Instance { get => _instance; }
 
-    void Start()
+    void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _instance = this;

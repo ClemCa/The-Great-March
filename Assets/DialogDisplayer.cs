@@ -13,9 +13,13 @@ public class DialogDisplayer : MonoBehaviour
     [SerializeField] private int _choiceDelay = 250;
     [SerializeField] private DialogueRunner _runner;
     [SerializeField] private float _speed = 1;
+
+    private float[] _speeds = new float[] { 1 };
+    private int[] _delays = new int[0];
     private bool _visible = true;
     private string[] _choicesText;
     private static DialogDisplayer _instance;
+
     
     private Action[] _choices;
     private Action _followUp;
@@ -23,10 +27,34 @@ public class DialogDisplayer : MonoBehaviour
     public static DialogDisplayer Instance { get => _instance; }
     public DialogueRunner Runner { get => _runner; }
 
+
     [YarnCommand("SetSpeed")]
-    public void SetSpeed(float speed)
+    public void SetSpeed(float speed, float speed2 = -1, float speed3 = -1, float speed4 = -1)
     {
         _speed = speed;
+        var r = new float[] { speed };
+        if (speed2 != -1)
+            r = r.Add(speed2);
+        if (speed3 != -1)
+            r = r.Add(speed3);
+        if (speed4 != -1)
+            r = r.Add(speed4);
+        _speeds = r;
+    }
+
+    [YarnCommand("SetDelay")]
+    public void SetDelay(int delay, int delay2 = -1, int delay3 = -1, int delay4 = -1, int delay5 = -1)
+    {
+        var r = new int[] { delay };
+        if (delay2 != -1)
+            r = r.Add(delay2);
+        if (delay3 != -1)
+            r = r.Add(delay3);
+        if (delay4 != -1)
+            r = r.Add(delay4);
+        if (delay5 != -1)
+            r = r.Add(delay5);
+        _delays = r;
     }
 
     void Awake()
@@ -93,28 +121,60 @@ public class DialogDisplayer : MonoBehaviour
     private async void WriteOverTime(string text, TMPro.TMP_Text target)
     {
         string current = "";
+        int _speedID = 0;
+        int delayID = 0;
         target.text = current;
-        for(int i = 0; i < text.Length; i++)
+        if(_delays.Length > 0)
+        {
+            await System.Threading.Tasks.Task.Delay(_delays[0]);
+        }
+        for (int i = 0; i < text.Length; i++)
         {
             await System.Threading.Tasks.Task.Delay((_writingDelay / _speed).Round());
-            if(text.Length > current.Length + 4)
+            if(text.Length > i + 5) // 4+1
             {
                 var t = "";
                 t += text[i];
                 t += text[i + 1];
                 t += text[i + 2];
                 t += text[i + 3];
-                if(t == "<br>")
+                if (t == "<dl>")
+                {
+                    current += " ";  // replace command by space, and directly skip ahead
+                    i += 3;
+                    target.text = current;
+                    delayID++;
+                    if (delayID < _delays.Length)
+                        await System.Threading.Tasks.Task.Delay(_delays[_speedID]);
+                    continue;
+                }
+                if (t == "<sd>")
+                {
+                    i += 3;
+                    target.text = current;
+                    _speedID++;
+                    if (_speedID < _speeds.Length)
+                        _speed = _speeds[_speedID];
+                    continue;
+                }
+                if (t == "<br>")
                 {
                     current += t;
                     i += 3;
                     target.text = current;
+                    _speedID++;
+                    delayID++;
+                    if (_speedID < _speeds.Length)
+                        _speed = _speeds[_speedID];
+                    if (delayID < _delays.Length)
+                        await System.Threading.Tasks.Task.Delay(_delays[_speedID]);
                     continue;
                 }
             }
             current += text[i];
             target.text = current;
         }
+        _delays = new int[0]; // reset delays
         await System.Threading.Tasks.Task.Delay(_choiceDelay);
         var buttons = transform.FindDeep("Buttons");
         if (_choices != null)
@@ -133,6 +193,7 @@ public class DialogDisplayer : MonoBehaviour
     }
 }
 
+#if(UNITY_EDITOR)
 [CustomEditor(typeof(DialogDisplayer))]
 public class DialogDisplayerEditor : Editor
 {
@@ -157,3 +218,4 @@ public class DialogDisplayerEditor : Editor
         }
     }
 }
+#endif

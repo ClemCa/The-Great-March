@@ -14,7 +14,7 @@ public class PromptMenu : MonoBehaviour
     private Vector2 _baseSize;
     [SerializeField] private Vector2 _extendedSize;
 
-    void Start()
+    void Awake()
     {
         _instance = this;
         _rectTransform = GetComponent<RectTransform>();

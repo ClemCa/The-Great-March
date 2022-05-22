@@ -18,7 +18,7 @@ public class SystemSpawning : MonoBehaviour
     public List<GameObject> Spawned { get => _spawned; }
     public static SystemSpawning Instance { get => _instance; }
 
-    void Start()
+    void Awake()
     {
         _instance = this;
     }

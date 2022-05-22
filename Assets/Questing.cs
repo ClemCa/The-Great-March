@@ -14,7 +14,7 @@ public class Questing : MonoBehaviour
 
     public static Questing Instance { get => _instance;}
 
-    void Start()
+    void Awake()
     {
         _instance = this;
     }

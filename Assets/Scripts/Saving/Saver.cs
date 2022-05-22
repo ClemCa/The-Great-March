@@ -27,6 +27,7 @@ public class Saver : MonoBehaviour
         public string SelectedPlanet;
         public string CargoSave;
         public bool LeaderInTransit;
+        public int StoryStage;
     }
 
     [Serializable]
@@ -116,6 +117,8 @@ public class Saver : MonoBehaviour
         LoadCargo(JsonConvert.DeserializeObject<string[]>(save.CargoSave), save.LeaderInTransit);
         CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
         CloudMoveScript.Instance.enabled = true;
+        StoryScript.StoryStage = save.StoryStage;
+        StoryScript.CheckStage();
         return true;
     }
 
@@ -199,6 +202,7 @@ public class Saver : MonoBehaviour
         save = SetScoring(save);
         save = SetSystems(save);
         save.SelectedPlanet = Planet.Selected == null ? "" : Planet.Selected.Name;
+        save.StoryStage = StoryScript.StoryStage;
 
         SaveSave(save, slot);
     }

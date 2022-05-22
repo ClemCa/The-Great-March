@@ -18,6 +18,7 @@ public class ResourceSelection : MonoBehaviour, IPointerClickHandler
             ResourcesSelectionSubMenu.Hide(_advancedResourceType);
         else
             ResourcesSelectionSubMenu.Hide(_resourceType);
+        PromptMenu.Hide();
     }
     public Registry.Resources GetResource()
     {

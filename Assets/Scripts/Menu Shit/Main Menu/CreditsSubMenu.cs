@@ -14,7 +14,7 @@ public class CreditsSubMenu : MonoBehaviour
     private RectTransform _rectTransform;
     private bool _enabled;
 
-    void Start()
+    void Awake()
     {
         _instance = this;
         _rectTransform = GetComponent<RectTransform>();
