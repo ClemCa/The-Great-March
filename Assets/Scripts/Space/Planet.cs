@@ -35,6 +35,7 @@ public class Planet : MonoBehaviour
     private static Planet _leaderPlanet;
     private int _roll = -1;
     private int _temperateType = -1;
+    private List<Registry.ShipType> _ships;
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
@@ -55,6 +56,7 @@ public class Planet : MonoBehaviour
     public List<int> FacilitiesOverTime { get => _facilitiesOverTime; }
     public int TemperateType { get => _temperateType; set => _temperateType = value; }
     public int Roll { get => _roll; set => _roll = value; }
+    public List<Registry.ShipType> Ships { get => _ships; set => _ships = value; }
 
     public static void Select(Planet planet)
     {

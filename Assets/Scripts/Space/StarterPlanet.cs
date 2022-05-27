@@ -20,14 +20,14 @@ public class StarterPlanet : MonoBehaviour
     [Serializable]
     public class StarterResource
     {
-        public Registry.Resources Ressource;
+        public Registry.Resources Resource;
         public int Quantity;
     }
 
     [Serializable]
     public class StarterAdvancedResource
     {
-        public Registry.AdvancedResources Ressource;
+        public Registry.AdvancedResources Resource;
         public int Quantity;
     }
 
@@ -36,11 +36,11 @@ public class StarterPlanet : MonoBehaviour
         var planet = GetComponent<Planet>();
         foreach(var starter in starterResources)
         {
-            planet.AddResource(starter.Ressource, starter.Quantity);
+            planet.AddResource(starter.Resource, starter.Quantity);
         }
         foreach (var starter in starterAdvancedResources)
         {
-            planet.AddResource(starter.Ressource, starter.Quantity);
+            planet.AddResource(starter.Resource, starter.Quantity);
         }
         planet.AddPeople(starterPeople);
         foreach(var facility in starterFacilities)

@@ -12,9 +12,16 @@ public class ShippingSubMenu : MonoBehaviour
     private bool _enabled;
     private static ShippingSubMenu _instance;
     private int _currentValue = 0;
-    private bool _mode;
+    private MenuMode _mode;
 
     public static ShippingSubMenu Instance { get => _instance; }
+
+    public enum MenuMode
+    {
+        People,
+        Resources,
+        Ship
+    }
 
     void Awake()
     {
@@ -80,25 +87,33 @@ public class ShippingSubMenu : MonoBehaviour
 
     public void ShowPeopleChoice()
     {       
-        _mode = true;
+        _mode = MenuMode.People;
         transform.FindDeep("ContentChoice").gameObject.SetActive(false);
         transform.FindDeep("PeopleChoice").gameObject.SetActive(true);
         _currentValue = _currentValue.Min(Planet.Selected.GetPeople());
     }
     public void ShowResourcesChoice()
     {
-        _mode = false;
+        _mode = MenuMode.Resources;
         transform.FindDeep("ContentChoice").gameObject.SetActive(false);
         transform.FindDeep("ResourcesChoice").gameObject.SetActive(true);
         _currentValue = 0;
     }
 
+    public void ShowShipChoice()
+    {
+        _mode = MenuMode.Ship;
+        transform.FindDeep("ContentChoice").gameObject.SetActive(false);
+        transform.FindDeep("ShipsChoice").gameObject.SetActive(true);
+        _currentValue = 0;
+    }
+
     public void UpdateValue(int value)
     {
-        if(_mode)
+        if(_mode == MenuMode.People)
             _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetPeople().Min(5));
         var button = GetComponentInChildren<SelectResourcesButton>();
-        if(!_mode && button.Unlocked)
+        if(_mode == MenuMode.Resources && button.Unlocked)
         {
             if(button.IsAdvanced)
                 _currentValue = Mathf.Clamp(value + _currentValue, 0, Planet.Selected.GetResource(button.AdvancedResource).Min(10));

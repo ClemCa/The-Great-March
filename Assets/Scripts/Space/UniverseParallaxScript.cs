@@ -2,19 +2,21 @@ using ClemCAddons;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class UniverseParallaxScript : MonoBehaviour
 {
     [SerializeField] private int population;
 
-    [SerializeField] private GameObject closeStar;
+    [SerializeField, FormerlySerializedAs("closeStar")] private GameObject[] closeStars;
     [SerializeField] private float closeStarRange;
 
-    [SerializeField] private GameObject mediumStar;
+    [SerializeField, FormerlySerializedAs("mediumStar")] private GameObject[] mediumStars;
     [SerializeField] private float mediumStarRange;
 
-    [SerializeField] private GameObject farAwayStar;
+    [SerializeField, FormerlySerializedAs("farAwayStar")] private GameObject[] farAwayStars;
     [SerializeField] private float farAwayStarRange;
+
 
     private List<GameObject> stars = new List<GameObject>();
 
@@ -29,15 +31,15 @@ public class UniverseParallaxScript : MonoBehaviour
             switch (i % 3)
             {
                 case 0:
-                    star = closeStar;
+                    star = closeStars[Random.Range(0, closeStars.Length)];
                     range = closeStarRange;
                     break;
                 case 1:
-                    star = mediumStar;
+                    star = mediumStars[Random.Range(0, mediumStars.Length)];
                     range = mediumStarRange;
                     break;
                 default:  // case 2
-                    star = farAwayStar;
+                    star = farAwayStars[Random.Range(0, farAwayStars.Length)];
                     range = farAwayStarRange;
                     break;
             }

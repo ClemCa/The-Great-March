@@ -88,6 +88,14 @@ public class Registry : MonoBehaviour
         public int Production;
     }
 
+
+    public enum ShipType
+    {
+        Cargo,
+        Passenger,
+        Fighter
+    }
+
     public enum PlanetType
     {
         None,

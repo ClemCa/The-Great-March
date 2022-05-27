@@ -9,7 +9,7 @@ public class FacilitySubMenu : MonoBehaviour
     private Transform _target;
     private bool _enabled;
     private static FacilitySubMenu _instance;
-    private Registry.Resources? _ressource;
+    private Registry.Resources? _resource;
 
     void Awake()
     {
@@ -34,12 +34,12 @@ public class FacilitySubMenu : MonoBehaviour
 
     private void ExecuteFlip(Transform target, Registry.Resources resource)
     {
-        if (_ressource.HasValue && _ressource.Value != resource)
+        if (_resource.HasValue && _resource.Value != resource)
             _enabled = true;
         else
             _enabled = !_enabled;
         _target = target;
-        _ressource = resource;
+        _resource = resource;
         if (_enabled)
         {
             _rectTransform.position = _target.position;
