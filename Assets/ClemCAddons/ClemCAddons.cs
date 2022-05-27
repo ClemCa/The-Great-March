@@ -5554,16 +5554,16 @@ namespace ClemCAddons
     public class SerializableQuaternion
     {
         [SerializeField]
-        private Vector3 _angle = new Vector3();
+        private SerializableVector3 _angle = new SerializableVector3();
         public Vector3 Angle
         {
             get
             {
-                return _angle;
+                return _angle.Value;
             }
             set
             {
-                _angle = value;
+                _angle = new SerializableVector3(value);
                 _q = Quaternion.Euler(value);
             }
         }
@@ -5577,26 +5577,26 @@ namespace ClemCAddons
             set
             {
                 _q = value;
-                _angle = value.eulerAngles;
+                _angle = new SerializableVector3(value.eulerAngles);
             }
         }
 
         public SerializableQuaternion(Vector3 angle)
         {
             _q = Quaternion.Euler(angle);
-            _angle = angle;
+            _angle = new SerializableVector3(angle);
         }
 
         public SerializableQuaternion(Quaternion angle)
         {
             _q = angle;
-            _angle = angle.eulerAngles;
+            _angle = new SerializableVector3(angle.eulerAngles);
         }
 
         public SerializableQuaternion()
         {
             _q = Quaternion.identity;
-            _angle = Quaternion.identity.eulerAngles;
+            _angle = new SerializableVector3(Quaternion.identity.eulerAngles);
         }
 
         public void Update()
@@ -5605,5 +5605,140 @@ namespace ClemCAddons
         }
     }
     #endregion Serializable Quaternion
+    #region Serializable Vector3
+    [Serializable]
+    public class SerializableVector3
+    {
+        [SerializeField]
+        private float _x;
+        [SerializeField]
+        private float _y;
+        [SerializeField]
+        private float _z;
+
+        public float x => _x;
+
+        public float y => _y;
+
+        public float z => _z;
+
+        public Vector3 Value
+        {
+            get
+            {
+                return new Vector3(_x, _y, _z);
+            }
+            set
+            {
+                _x = value.x;
+                _y = value.y;
+                _z = value.z;
+            }
+        }
+
+        public SerializableVector3(Vector3 value)
+        {
+            _x = value.x;
+            _y = value.y;
+            _z = value.z;
+        }
+
+        public SerializableVector3(float x, float y, float z)
+        {
+            _x = x;
+            _y = y;
+            _z = z;
+        }
+
+        public SerializableVector3(SerializableVector3 value)
+        {
+            _x = value._x;
+            _y = value._y;
+            _z = value._z;
+        }
+
+        public SerializableVector3()
+        {
+            _x = 0;
+            _y = 0;
+            _z = 0;
+        }
+    }
+    #endregion Serializable Vector3
+    #region Serializable Dictionary
+    // https://stackoverflow.com/a/1728996
+    [Serializable]
+    [XmlRoot("dictionary")]
+    public class SerializableDictionary<TKey, TValue>
+    : Dictionary<TKey, TValue>, IXmlSerializable
+    {
+        public SerializableDictionary() { }
+        public SerializableDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary) { }
+        public SerializableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer) : base(dictionary, comparer) { }
+        public SerializableDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }
+        public SerializableDictionary(int capacity) : base(capacity) { }
+        public SerializableDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(capacity, comparer) { }
+
+        #region IXmlSerializable Members
+        public System.Xml.Schema.XmlSchema GetSchema()
+        {
+            return null;
+        }
+
+        public void ReadXml(System.Xml.XmlReader reader)
+        {
+            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
+            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
+
+            bool wasEmpty = reader.IsEmptyElement;
+            reader.Read();
+
+            if (wasEmpty)
+                return;
+
+            while (reader.NodeType != System.Xml.XmlNodeType.EndElement)
+            {
+                reader.ReadStartElement("item");
+
+                reader.ReadStartElement("key");
+                TKey key = (TKey)keySerializer.Deserialize(reader);
+                reader.ReadEndElement();
+
+                reader.ReadStartElement("value");
+                TValue value = (TValue)valueSerializer.Deserialize(reader);
+                reader.ReadEndElement();
+
+                this.Add(key, value);
+
+                reader.ReadEndElement();
+                reader.MoveToContent();
+            }
+            reader.ReadEndElement();
+        }
+
+        public void WriteXml(System.Xml.XmlWriter writer)
+        {
+            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
+            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
+
+            foreach (TKey key in this.Keys)
+            {
+                writer.WriteStartElement("item");
+
+                writer.WriteStartElement("key");
+                keySerializer.Serialize(writer, key);
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("value");
+                TValue value = this[key];
+                valueSerializer.Serialize(writer, value);
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+            }
+        }
+        #endregion
+    }
+    #endregion Serializable Dictionary
     #endregion Definitions
 }
