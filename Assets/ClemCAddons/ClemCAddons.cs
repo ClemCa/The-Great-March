@@ -3125,7 +3125,7 @@ namespace ClemCAddons
         /// <summary>Returns all the children with a set component.</summary>
         /// <param name="transform">The base transform.</param>
         /// <param name="type">The component to search for.</param>
-        public static Transform[] GetChildsWithComponent(this Transform transform, Type type)
+        public static Transform[] GetChildrenWithComponent(this Transform transform, Type type)
         {
             Transform[] r = new Transform[] { };
             for (int i = 0; i < transform.childCount; i++)
