@@ -7,6 +7,7 @@ using System;
 
 public class TutorialQuests : MonoBehaviour
 {
+    [SerializeField] private bool _ignoreDialoguesEditor;
     private Steps _steps;
     private bool _lock;
 
@@ -22,7 +23,7 @@ public class TutorialQuests : MonoBehaviour
     }
     void Update()
     {
-        if (_lock)
+        if (_lock || (_ignoreDialoguesEditor && Application.isEditor))
             return;
         switch (_steps)
         {

@@ -106,6 +106,7 @@ public class ShipChoice : MonoBehaviour
             var ship = Planet.Selected.Ships[_selected];
             var requiredFuel = Registry.Instance.GetRequiredFuel(ship.Type);
             Planet.Selected.ConsumeFuel(requiredFuel - ship.Fuel);
+            ship.Fuel += requiredFuel;
         }
     }
 }
