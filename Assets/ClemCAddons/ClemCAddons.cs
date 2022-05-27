@@ -13,6 +13,7 @@ using System.IO;
 using System.Text;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
@@ -350,6 +351,22 @@ namespace ClemCAddons
             result[index] = value;
             return result;
         }
+        /// <summary>Set the value at an index, extends the array if it doesn't exist</summary>
+        /// <param name="source">The source array.</param>
+        /// <param name="value">New value.</param>
+        /// <param name="index">Index to replace at.</param>
+        public static T[] SetOrCreateAt<T>(this T[] source, T value, int index)
+        {
+            if (source.Length <= index)
+            {
+                Array.Resize(ref source, index + 1);
+            }
+            dynamic result = source;
+            result[index] = value;
+            return result;
+        }
+#endif
+
         /// <summary>Sets a value only if the index doesn't exist</summary>
         /// <param name="source">The source array.</param>
         /// <param name="value">New value.</param>
@@ -364,24 +381,6 @@ namespace ClemCAddons
                 return result;
             }
             return source;
-        }
-#endif
-
-        /// <summary>Set the value at an index, extends the array if it doesn't exist</summary>
-        /// <param name="source">The source array.</param>
-        /// <param name="value">New value.</param>
-        /// <param name="index">Index to replace at.</param>
-        public static T[] SetOrCreateAt<T>(this T[] source, T value, int index)
-        {
-            if (source == null)
-                source = new T[0];
-            if (source.Length <= index)
-            {
-                Array.Resize(ref source, index + 1);
-            }
-            T[] result = source;
-            result[index] = value;
-            return result;
         }
         #endregion SetAt
         #region Total
@@ -412,10 +411,10 @@ namespace ClemCAddons
                 r += source[i];
             return r;
         }
-#endregion Total
-#endregion ArrayAdditions
+        #endregion Total
+        #endregion ArrayAdditions
         //good
-#region Dictionary Additions
+        #region Dictionary Additions
         /// <summary>Add or replace a key in the dictionary</summary>
         /// <param name="dictionary">The source dictionary.</param>
         /// <param name="key">Key.</param>
@@ -430,11 +429,372 @@ namespace ClemCAddons
             dictionary.Add(key, value);
             return dictionary;
         }
-#endregion Dictioanry Additions
-        //good
+        #endregion Dictioanry Additions
         // good
+        #region Casts
+        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            RaycastHit hit = new RaycastHit();
+            var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
+            if (hits.Length > 0)
+            {
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                        hit.distance += 0.2f;
+                    }
+                }
+            }
+            if (!result)
+            {
+                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                    }
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="hit">RaycastHit reference to write to.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, out RaycastHit hit, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            hit = new RaycastHit();
+            var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
+            if (hits.Length > 0)
+            {
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                        hit.distance += 0.2f;
+                    }
+                }
+            }
+            if (!result)
+            {
+                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                    }
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="radius">The specified radius of the spherecast.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            RaycastHit hit = new RaycastHit();
+            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
+            if (hits.Length > 0)
+            {
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                        hit.distance += radius;
+                    }
+                }
+            }
+            if (!result)
+            {
+                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                    }
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts a spherecast through all and selects the closest hit entity. In case there is no result, also casts a raycast</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="hit">RaycastHit reference to write to.</param>
+        /// <param name="radius">The specified radius of the spherecast.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastTo(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, out RaycastHit hit, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            hit = new RaycastHit();
+            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
+            if (hits.Length > 0)
+            {
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                        hit.distance += radius;
+                    }
+                }
+            }
+            if (!result)
+            {
+                hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                    }
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts a line through all and selects the closest hit entity.</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="hit">RaycastHit reference to write to.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastToLineOnly(this Vector3 from, Vector3 to, LayerMask layer, string tag, out RaycastHit hit, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            hit = new RaycastHit();
+            RaycastHit[] hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                {
+                    result = true;
+                    hit = hits[i];
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts a line through all and selects the closest hit entity.</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="hit">RaycastHit reference to write to.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastToLineOnly(this Vector3 from, Vector3 to, LayerMask layer, out RaycastHit hit, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            hit = new RaycastHit();
+            RaycastHit[] hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
+                {
+                    result = true;
+                    hit = hits[i];
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts a spherecast through all and selects the closest hit entity.</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="radius">The specified radius of the spherecast.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastToSphereOnly(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            RaycastHit hit = new RaycastHit();
+            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
+            if (hits.Length > 0)
+            {
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                        hit.distance += radius;
+                    }
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts a spherecast through all and selects the closest hit entity.</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="hit">RaycastHit reference to write to.</param>
+        /// <param name="radius">The specified radius of the spherecast.</param>
+        /// <param name="debug">Whether or not to draw debug gizmos in editor.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool CastToSphereOnly(this Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, out RaycastHit hit, bool debug = false)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            hit = new RaycastHit();
+            var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
+            if (hits.Length > 0)
+            {
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                    {
+                        result = true;
+                        hit = hits[i];
+                        hit.distance += radius;
+                    }
+                }
+            }
+            if (debug)
+            {
+                Debug.DrawLine(from, to, Color.grey);
+                EditorTools.DrawLineInEditor(from, to, Color.grey);
+                EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+            }
+            return result;
+        }
+        /// <summary>Casts several spherecasts of multiple radiuses (like layers of precision) through all and selects the closest hit entity.</summary>
+        /// <param name="from">The start position of the cast.</param>
+        /// <param name="to">The end position of the cast.</param>
+        /// <param name="layer">The target layer.</param>
+        /// <param name="tag">The target tag.</param>
+        /// <param name="hit">RaycastHit reference to write to.</param>
+        /// <param name="radius">An array of radius for each layer.</param>
+        /// <param name="ID">The index of the radius that hit.</param>
+        /// <returns>Whether the cast hit anything</returns>
+        public static bool MultilayerCast(this Vector3 from, Vector3 to, LayerMask layer, string tag, float[] radius, out RaycastHit hit, out int ID)
+        {
+            Ray ray = new Ray(from, (to - from).normalized);
+            bool result = false;
+            hit = new RaycastHit();
+            ID = 0;
+            for (int i = 0; i < radius.Length; i++)
+            {
+                var hits = Physics.SphereCastAll(ray, radius[i], Vector3.Distance(from, to), layer);
+                if (hits.Length > 0)
+                {
+                    for (int t = 0; t < hits.Length; t++)
+                    {
+                        if (hits[t].distance > 0 && hits[t].collider.gameObject.CompareTag(tag) && (hits[t].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[t];
+                            hit.distance += radius[i];
+                            ID = i;
+                        }
+                    }
+                }
+                if (!result)
+                {
+                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                    for (int t = 0; t < hits.Length; t++)
+                    {
+                        if (hits[t].distance > 0 && hits[t].collider.gameObject.CompareTag(tag) && (hits[t].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[t];
+                            ID = i;
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+        #endregion Casts
         // good
-#region Texture Additions
+        #region Texture Additions
         /// <summary>Rewrites and updates part of a Texture2D.</summary>
         /// <param name="texture">The source texture.</param>
         /// <param name="pos">The top left corner to edit from.</param>
@@ -455,9 +815,9 @@ namespace ClemCAddons
             }
             return texture;
         }
-#endregion Texture Additions
+        #endregion Texture Additions
         // good
-#region Color Additions
+        #region Color Additions
         /// <summary>Sets all pixels in the array to match a set color.</summary>
         /// <param name="pixels">The pixels to edit.</param>
         /// <param name="pixels">The color to use.</param>
@@ -580,10 +940,10 @@ namespace ClemCAddons
         {
             return new Color(r, g, b, a);
         }
-#endregion Color Additions
+        #endregion Color Additions
         // good
-#region Vector3 Additions
-#region Geometry
+        #region Vector3 Additions
+        #region Geometry
         /// <summary>Gets the position of a specified corner or  of a rectangular geometry. Can also be used for other purposes</summary>
         /// <param name="pos">The position of the center of the rectangle.</param>
         /// <param name="corner">The normalized direction of the target corner.</param>
@@ -592,8 +952,8 @@ namespace ClemCAddons
         {
             return pos + corner.Multiply(scale / 2);
         }
-#endregion Geometry
-#region Operations
+        #endregion Geometry
+        #region Operations
         /// <summary>Adds a value to every component of a Vector3</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="value">The value to add.</param>
@@ -642,8 +1002,8 @@ namespace ClemCAddons
         {
             return new Vector3(vector.x == 0 ? vector.x : 1 / vector.x, vector.y == 0 ? vector.y : 1 / vector.y, vector.z == 0 ? vector.z : 1 / vector.z);
         }
-#endregion Operations
-#region Validation
+        #endregion Operations
+        #region Validation
         /// <summary>Is the vector equal to (0, 0, 0)?</summary>
         /// <param name="vector">The source vector.</param>
         public static bool IsZero(this Vector3 vector)
@@ -716,8 +1076,8 @@ namespace ClemCAddons
         {
             return vector.Distance(value) <= epsilon;
         }
-#endregion Validation
-#region Direction
+        #endregion Validation
+        #region Direction
         /// <summary>Turn the vector to match the direction</summary>
         /// <param name="vector">The source vector to turn.</param>
         /// <param name="direction">The direction vector.</param>
@@ -868,8 +1228,8 @@ namespace ClemCAddons
         {
             return Vector2.Perpendicular(Vector2.Perpendicular(vector)).normalized;
         }
-#endregion Direction
-#region Min Max
+        #endregion Direction
+        #region Min Max
         /// <summary>For each parameter of the vector, returns the minimum between them and the value</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The minimum.</param>
@@ -1062,8 +1422,8 @@ namespace ClemCAddons
         {
             return new Vector3Int(vector.x.Min(min), vector.y, vector.z.Min(min));
         }
-#endregion Min Max
-#region Self Min Max
+        #endregion Min Max
+        #region Self Min Max
         /// <summary>Returns the highest parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static float Max(this Vector3 vector)
@@ -1076,8 +1436,8 @@ namespace ClemCAddons
         {
             return vector.x.Min(vector.y).Min(vector.z);
         }
-#endregion Self Min Max
-#region Value
+        #endregion Self Min Max
+        #region Value
         /// <summary>Returns the absolute of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector3 Abs(this Vector3 vector)
@@ -1090,8 +1450,8 @@ namespace ClemCAddons
         {
             return vector.x + vector.y + vector.z;
         }
-#endregion Value
-#region Clamp
+        #endregion Value
+        #region Clamp
         /// <summary>Clamps each parameter of the vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The min value.</param>
@@ -1263,7 +1623,7 @@ namespace ClemCAddons
         {
             if (vector.magnitude <= max && vector.magnitude >= min)
                 return vector;
-            if(vector.magnitude >= min)
+            if (vector.magnitude >= min)
                 return vector * max / vector.magnitude;
             return vector * min / vector.magnitude;
         }
@@ -1301,7 +1661,7 @@ namespace ClemCAddons
         {
             if (vector.Total() <= max && vector.Total() >= min)
                 return vector;
-            if(vector.Total() >= min)
+            if (vector.Total() >= min)
                 return vector * max / vector.Total();
             return vector * min / vector.Total();
         }
@@ -1328,8 +1688,8 @@ namespace ClemCAddons
             limit = max.x * xRatio + max.y * yRatio + max.z * zRatio;
             return vector.ClampMagnitude(limit);
         }
-#endregion Clamp
-#region Add
+        #endregion Clamp
+        #region Add
         /// <summary>Returns the sum of every vector in the array</summary>
         /// <param name="vectors">The source vectors.</param>
         public static Vector3 Sum(this Vector3[] vectors)
@@ -1341,8 +1701,8 @@ namespace ClemCAddons
             }
             return result;
         }
-#endregion Add
-#region isBetween
+        #endregion Add
+        #region isBetween
         /// <summary>Is the source vector inside the bounding vector? (positional)</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="bound">The bounding vector.</param>
@@ -1358,8 +1718,8 @@ namespace ClemCAddons
         {
             return vector.x.IsBetween(bound1.x, bound2.x) && vector.y.IsBetween(bound1.y, bound2.y) && vector.z.IsBetween(bound1.z, bound2.z);
         }
-#endregion isBetween
-#region Set Partial
+        #endregion isBetween
+        #region Set Partial
         /// <summary>Sets the x parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="x">The new x parameter.</param>
@@ -1408,16 +1768,16 @@ namespace ClemCAddons
             vector.z = (float)z;
             return vector;
         }
-#endregion Set Partial
-#region ToVector2
+        #endregion Set Partial
+        #region ToVector2
         /// <summary>Returns the vector as a Vector2. The z parameter is dropped</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector2 ToVector2(this Vector3 vector)
         {
             return vector;
         }
-#endregion ToVector2
-#region Random
+        #endregion ToVector2
+        #region Random
         /// <summary>Returns a completely random vector between 0 and 1</summary>
         /// <param name="_">The source vector.</param>
         public static Vector3 Randomize(this Vector3 _)
@@ -1473,8 +1833,8 @@ namespace ClemCAddons
             float res = Mathf.Max(0, diff - tolerance); // perc diff that matters
             return Vector3.Slerp(r, vector, res).normalized; // a + (b -a ) * x
         }
-#endregion Random
-#region NormalizeTo
+        #endregion Random
+        #region NormalizeTo
         /// <summary>Normalizes the source vector to a set length</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="n">The length to normalize to.</param>
@@ -1491,8 +1851,8 @@ namespace ClemCAddons
         {
             return vector.normalized.Multiply(n);
         }
-#endregion NormalizeTo
-#region Interpolation
+        #endregion NormalizeTo
+        #region Interpolation
         /// <summary>Interpolates between the source vector and b at a constant speed</summary>
         /// <param name="a">The source vector.</param>
         /// <param name="b">The target vector.</param>
@@ -1510,26 +1870,26 @@ namespace ClemCAddons
             Vector3 r = a + (b - a).normalized * t;
             return r.ClampTowards(b, b - a);
         }
-#endregion Interpolation
-#region Sign
+        #endregion Interpolation
+        #region Sign
         /// <summary>Returns a vector representing the sign of each parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector3 Sign(this Vector3 vector)
         {
             return vector.SetX(vector.x.Sign()).SetY(vector.y.Sign()).SetZ(vector.z.Sign());
         }
-        /// <summary>Returns the source vector with each parameters set to match the sign of the referenceVector</summary>
+        /// <summary>Returns the source vector with each parameters set to match the sign of the reference vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="referenceVector">The reference vector.</param>
         public static Vector3 SetSign(this Vector3 vector, Vector3 referenceVector)
         {
             return vector.Abs().Multiply(referenceVector.Sign());
         }
-#endregion Sign
-#endregion Vector3 Additions
+        #endregion Sign
+        #endregion Vector3 Additions
         // good
-#region Vector2 Additions
-#region Validation
+        #region Vector2 Additions
+        #region Validation
         /// <summary>Is approximately equal to another vector?</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="value">The vector to compare with.</param>
@@ -1545,9 +1905,8 @@ namespace ClemCAddons
         {
             return vector.Distance(value) <= epsilon;
         }
-#endregion Validation
-        // good
-#region Clamp
+        #endregion Validation
+        #region Clamp
         /// <summary>Clamps each parameter of the vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The min value.</param>
@@ -1651,9 +2010,8 @@ namespace ClemCAddons
                 vector.y = target.y;
             return vector;
         }
-#endregion Clamp
-        // good
-#region Value
+        #endregion Clamp
+        #region Value
         /// <summary>Returns total of every parameter in the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static float Total(this Vector2 vector)
@@ -1666,9 +2024,8 @@ namespace ClemCAddons
         {
             return new Vector2(vector.x.Abs(), vector.y.Abs());
         }
-#endregion Value
-        // good
-#region Min Max
+        #endregion Value
+        #region Min Max
         /// <summary>For each parameter of the vector, returns the minimum between them and the value</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="min">The minimum.</param>
@@ -1805,9 +2162,8 @@ namespace ClemCAddons
         {
             return new Vector2Int(vector.x, vector.y.Min(min));
         }
-#endregion Min Max
-        // good
-#region Self Min Max
+        #endregion Min Max
+        #region Self Min Max
         /// <summary>Returns the highest parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         public static float Max(this Vector2 vector)
@@ -1820,9 +2176,8 @@ namespace ClemCAddons
         {
             return vector.x.Min(vector.y);
         }
-#endregion Self Min Max
-        // good
-#region Geometry
+        #endregion Self Min Max
+        #region Geometry
         /// <summary>Given a distance and angle, returns a point relative to the source point. Will always move in the positive direction</summary>
         /// <param name="point">The source point.</param>
         /// <param name="distance">The distance.</param>
@@ -1852,9 +2207,8 @@ namespace ClemCAddons
         {
             return new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
         }
-#endregion Geometry
-        // good
-#region Direction
+        #endregion Geometry
+        #region Direction
         /// <summary>Reflects a direction vector perpendicular to a normal</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="normal">The normal.</param>
@@ -1883,9 +2237,8 @@ namespace ClemCAddons
         {
             return inverse ? (from - to).normalized : (to - from).normalized;
         }
-#endregion Direction
-        // good
-#region isBetween
+        #endregion Direction
+        #region isBetween
         /// <summary>Is the source vector inside the bounding vector? (positional)</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="bound">The bounding vector.</param>
@@ -1901,9 +2254,8 @@ namespace ClemCAddons
         {
             return vector.x.IsBetween(bound1.x, bound2.x) && vector.y.IsBetween(bound1.y, bound2.y);
         }
-#endregion isBetween
-        // good
-#region Set Partial
+        #endregion isBetween
+        #region Set Partial
         /// <summary>Sets the x parameter of the source vector</summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="x">The new x parameter.</param>
@@ -1936,9 +2288,8 @@ namespace ClemCAddons
             vector.y = (float)y;
             return vector;
         }
-#endregion Set Partial
-        // good
-#region ToVector3
+        #endregion Set Partial
+        #region ToVector3
         /// <summary>Returns the vector as a Vector3. The z parameter is 0</summary>
         /// <param name="vector">The source vector.</param>
         public static Vector3 ToVector3(this Vector2 vector)
@@ -1952,9 +2303,8 @@ namespace ClemCAddons
         {
             return new Vector3(vector.x, vector.y, z);
         }
-#endregion ToVector3
-        // good
-#region Interpolation
+        #endregion ToVector3
+        #region Interpolation
         /// <summary>Interpolates from a to b at a constant speed, returns new a</summary>
         /// <param name="a">The source vector.</param>
         /// <param name="b">The destination vector.</param>
@@ -1973,61 +2323,93 @@ namespace ClemCAddons
             return r.ClampTowards(b, b - a);
         }
         // good
-#endregion Interpolation
-        // good
-#region Operations
+        #endregion Interpolation
+        #region Operations
+        /// <summary>Adds a value to every component of a Vector2</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The value to add.</param>
         public static Vector2 Add(this Vector2 vector, float value)
         {
             return new Vector2(vector.x + value, vector.y + value);
         }
+        /// <summary>Substracts a value from every component of a Vector2</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The value to substract.</param>
         public static Vector2 Substract(this Vector2 vector, float value)
         {
             return new Vector2(vector.x - value, vector.y - value);
         }
+        /// <summary>Multiplies every component of a Vector2 by a value</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The value to multiply by.</param>
         public static Vector2 Multiply(this Vector2 vector, float value)
         {
             return new Vector2(vector.x * value, vector.y * value);
         }
+        /// <summary>Divides every component of a Vector2 by a value</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The value to divide by.</param>
         public static Vector2 Divide(this Vector2 vector, float value)
         {
             return new Vector2(vector.x / value, vector.y / value);
         }
+        /// <summary>Multiplies a Vector2 by another</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The vector to use.</param>
         public static Vector2 MultiplyEach(this Vector2 v, Vector2 vector)
         {
             return new Vector2(v.x * vector.x, v.y * vector.y);
         }
-
+        /// <summary>Divides a Vector2 by another</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The vector to use.</param>
         public static Vector2 DivideEach(this Vector2 vector, Vector2 value)
         {
             return new Vector2(vector.x / value.x, vector.y / value.y);
         }
+        /// <summary>Multiplies a Vector2 by another</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The vector to use.</param>
         public static Vector2 Multiply(this Vector2 vector, Vector2 value)
         {
             return new Vector2(vector.x * value.x, vector.y * value.y);
         }
+        /// <summary>Divides a Vector2 by another</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="value">The vector to use.</param>
         public static Vector2 Divide(this Vector2 vector, Vector2 value)
         {
             return new Vector2(vector.x / value.x, vector.y / value.y);
         }
-
+        /// <summary>Inverses a Vector2's direction</summary>
+        /// <param name="vector">The source vector.</param>
         public static Vector2 Inverse(this Vector2 vector)
         {
             return new Vector2(vector.x == 0 ? vector.x : 1 / vector.x, vector.y == 0 ? vector.y : 1 / vector.y);
         }
-#endregion Operations
-#region Sign
+        #endregion Operations
+        #region Sign
+        /// <summary>Returns a vector representing the sign of each parameter of the source vector</summary>
+        /// <param name="vector">The source vector.</param>
         public static Vector2 Sign(this Vector2 vector)
         {
             return vector.SetX(vector.x.Sign()).SetY(vector.y.Sign());
         }
+        /// <summary>Returns the source vector with each parameters set to match the sign of the reference vector</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="referenceVector">The reference vector.</param>
         public static Vector2 SetSign(this Vector2 vector, Vector2 referenceVector)
         {
             return vector.Abs().Multiply(referenceVector.Sign());
         }
-#endregion Sign
-#endregion Vector2 Additions
-#region float Additions
-#region Ratio
+        #endregion Sign
+        #endregion Vector2 Additions
+        // good
+        #region float Additions
+        #region Ratio
+        /// <summary>Returns an array of each value to their total.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="values">Additional values.</param>
         public static float[] Ratio(this float value, params float[] values)
         {
             float total = value + values.Total();
@@ -2039,8 +2421,11 @@ namespace ClemCAddons
             }
             return r;
         }
-#endregion Ratio
-#region RemoveInfinity
+        #endregion Ratio
+        #region RemoveInfinity
+        /// <summary>Should the source value be infinite in either direction, set it to the maximum or minimum value float can store.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="InfiniteToMin">Should infinity loop around (infinity becomes minimum value and inversely).</param>
         public static float RemoveInfinity(this float value, bool InfiniteToMin = false)
         {
             if (value == float.PositiveInfinity)
@@ -2049,43 +2434,73 @@ namespace ClemCAddons
                 return InfiniteToMin ? float.MaxValue : float.MinValue;
             return value;
         }
-#endregion RemoveInfinity
-#region GetMaxs
+        #endregion RemoveInfinity
+        #region GetMaxs
+        /// <summary>Returns the highest component in the source vector.</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="abs">Should sign be ignored.</param>
         public static float GetMax(this Vector3 vector, bool abs = false)
         {
             return vector.x.Max(abs, vector.y, vector.z);
         }
-
+        /// <summary>Returns the highest component in the source vector, z excluded.</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="abs">Should sign be ignored.</param>
         public static float GetMaxXY(this Vector3 vector, bool abs = false)
         {
             return vector.x.Max(abs, vector.y);
         }
+        /// <summary>Returns the highest component in the source vector, y excluded.</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="abs">Should sign be ignored.</param>
         public static float GetMaxXZ(this Vector3 vector, bool abs = false)
         {
             return vector.x.Max(abs, vector.z);
         }
+        /// <summary>Returns the highest component in the source vector, x excluded.</summary>
+        /// <param name="vector">The source vector.</param>
+        /// <param name="abs">Should sign be ignored.</param>
         public static float GetMaxYZ(this Vector3 vector, bool abs = false)
         {
             return vector.y.Max(abs, vector.z);
         }
-#endregion GetMaxs
-#region Min Max
+        #endregion GetMaxs
+        #region Min Max
+        /// <summary>Returns the lowest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="values">Additional values.</param>
         public static float Min(this float value, params float[] values)
         {
             return Mathf.Min(value, values.Min());
         }
+        /// <summary>Returns the highest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="values">Additional values.</param>
         public static float Max(this float value, params float[] values)
         {
             return Mathf.Max(value, values.Max());
         }
+        /// <summary>Returns the lowest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="abs">Should sign be ignored.</param>
+        /// <param name="values">Additional values.</param>
         public static float Min(this float value, bool abs = false, params float[] values)
         {
             return abs ? Mathf.Min(value.Abs(), values.Abs().Min()) : Mathf.Min(value, values.Min());
         }
+        /// <summary>Returns the highest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="abs">Should sign be ignored.</param>
+        /// <param name="values">Additional values.</param>
         public static float Max(this float value, bool abs = false, params float[] values)
         {
             return abs ? Mathf.Max(value.Abs(), values.Abs().Max()) : Mathf.Max(value, values.Max());
         }
+        /// <summary>Returns the lowest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="abs">Should sign be ignored.</param>
+        /// <param name="ignoreInfinity">Should infinity be ignored.</param>
+        /// <param name="values">Additional values.</param>
         public static float Min(this float value, bool abs = false, bool ignoreInfinity = false, params float[] values)
         {
             if (ignoreInfinity)
@@ -2096,6 +2511,11 @@ namespace ClemCAddons
             }
             return abs ? Mathf.Min(value.Abs(), values.Abs().Min()) : Mathf.Min(value, values.Min());
         }
+        /// <summary>Returns the highest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="abs">Should sign be ignored.</param>
+        /// <param name="ignoreInfinity">Should infinity be ignored.</param>
+        /// <param name="values">Additional values.</param>
         public static float Max(this float value, bool abs = false, bool ignoreInfinity = false, params float[] values)
         {
             if (ignoreInfinity)
@@ -2106,32 +2526,55 @@ namespace ClemCAddons
             }
             return abs ? Mathf.Max(value.Abs(), values.Abs().Max()) : Mathf.Max(value, values.Max());
         }
-#endregion Min Max
-#region Clamp
+        #endregion Min Max
+        #region Clamp
+        /// <summary>Clamps the given value between the minimum and maximum values.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="min">The minimum value.</param>
+        /// <param name="max">The maximum value.</param>
         public static float Clamp(this float value, float min, float max)
         {
             return Mathf.Clamp(value, min, max);
         }
+        /// <summary>Clamps the given value between the minimum and maximum values.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="min">The minimum value.</param>
+        /// <param name="max">The maximum value.</param>
         public static double Clamp(this double value, double min, double max)
         {
             return Math.Max(Math.Min(value, max), min);
         }
+        /// <summary>Clamps the given value between the minimum and maximum values.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="min">The minimum value.</param>
+        /// <param name="max">The maximum value.</param>
         public static float Clamp(this float value, double min, double max)
         {
             return Mathf.Clamp(value, (float)max, (float)min);
         }
+        /// <summary>Clamps the given value between the 0 and 1.</summary>
+        /// <param name="value">The source value.</param>
         public static float Clamp01(this float value)
         {
             return Mathf.Clamp01(value);
         }
+        /// <summary>Clamps the given value between the maximum value on either side of 0.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="max">The maximum value.</param>
         public static float ClampAroundZero(this float value, float max)
         {
             return Mathf.Clamp(value, -max, max);
         }
+        /// <summary>Clamps the given value between the maximum value on either side of 0.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="max">The maximum value.</param>
         public static float ClampAroundZero(this float value, double max)
         {
             return Mathf.Clamp(value, (float)-max, (float)max);
         }
+        /// <summary>Clamps the given value to 0 should it go beyond 0 in the given direction.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="direction">The direction. Only sign matter.</param>
         public static float ClampTo0InDirection(this float value, float direction)
         {
             if (value.Sign() == direction.Sign()) // if the value is going in a direction matching it, it's going opposite to 0,
@@ -2142,73 +2585,124 @@ namespace ClemCAddons
                 value = value.Max(0);
             return value;
         }
+        /// <summary>Should the should the source value be lower than the given check value, sets it to zero.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="check">The check value.</param>
+        /// <param name="zero">The value to use instead of zero.</param>
         public static float BelowIs0(this float value, float check, float zero = 0)
         {
             return value < check ? zero : value;
         }
+        /// <summary>Should the should the source value be higher than the given check value, sets it to zero.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="check">The check value.</param>
+        /// <param name="zero">The value to use instead of zero.</param>
         public static float AboveIs0(this float value, float check, float zero = 0)
         {
             return value > check ? zero : value;
         }
-#endregion Clamp
-#region Abs, Sum, Minus
+        #endregion Clamp
+        #region Abs, Sum, Minus
+        /// <summary>Returns the absolute of the source value.</summary>
+        /// <param name="f">The source value.</param>
         public static float Abs(this float f)
         {
             return Mathf.Abs(f);
         }
+        /// <summary>Returns an array of the source values' absolutes.</summary>
+        /// <param name="f">The source values.</param>
         public static float[] Abs(this float[] f)
         {
             for (int i = 0; i < f.Length; i++)
                 f[i] = f[i].Abs();
             return f;
         }
+        /// <summary>Returns the sum of the components of the Vector2.</summary>
+        /// <param name="vector">The source vector.</param>
         public static float Sum(this Vector2 vector)
         {
             return vector.x + vector.y;
         }
+        /// <summary>Returns the sum of the components of the Vector3.</summary>
+        /// <param name="vector">The source vector.</param>
         public static float Sum(this Vector3 vector)
         {
             return vector.x + vector.y + vector.z;
         }
+        /// <summary>Returns the substraction of the second value by the first.</summary>
+        /// <param name="f">The first value.</param>
+        /// <param name="value">The second value.</param>
+        /// <param name="abs">Should the value be absolute.</param>
         public static float Minus(this float f, float value, bool abs = false)
         {
             return abs ? Mathf.Abs(f - value) : f - value;
         }
+        /// <summary>Returns the substraction of the one value by the other.</summary>
+        /// <param name="f">The first value.</param>
+        /// <param name="value">The second value.</param>
+        /// <param name="maxFirst">Should the order of the operation be determined by highest value. Otherwise uses the lowest first.</param>
+        /// <param name="abs">Should the value be absolute.</param>
         public static float Minus(this float f, float value, bool maxFirst = false, bool abs = false)
         {
-            return abs ? (Mathf.Max(f, value) - Mathf.Min(f, value)).Abs() : Mathf.Max(f, value) - Mathf.Min(f, value);
+            if (maxFirst)
+                return abs ? (Mathf.Max(f, value) - Mathf.Min(f, value)).Abs() : Mathf.Max(f, value) - Mathf.Min(f, value);
+            else
+                return abs ? (Mathf.Min(f, value) - Mathf.Max(f, value)).Abs() : Mathf.Min(f, value) - Mathf.Max(f, value);
         }
+        /// <summary>Substracts an angle from another. Wraps around at 360.</summary>
+        /// <param name="f">The source angle.</param>
+        /// <param name="value">The angle to subtract by.</param>
         public static float MinusAngle(this float f, float value)
         {
             float r = f - value;
             return r + ((r > 180) ? -360 : (r < -180) ? 360 : 0);
         }
+        /// <summary>Substracts an angle from another. Wraps around at 360.</summary>
+        /// <param name="f">The source angle.</param>
+        /// <param name="value">The angle to subtract by.</param>
+        /// <param name="maxFirst">Should the order of the operation be determined by highest value. Otherwise uses the lowest first.</param>
         public static float MinusAngle(this float f, float value, bool maxFirst = false)
         {
-            float r = Mathf.Max(f, value) - Mathf.Min(f, value);
+            float r;
+            if (maxFirst)
+                r = Mathf.Max(f, value) - Mathf.Min(f, value);
+            else
+                r = Mathf.Min(f, value) - Mathf.Max(f, value);
             return r + ((r > 180) ? -360 : (r < -180) ? 360 : 0);
         }
-#endregion Abs, Sum
-#region IsBetween
+        #endregion Abs, Sum
+        #region IsBetween
+        /// <summary>Is the source value between the two given values. Order is irrelevant.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="first">The first value.</param>
+        /// <param name="second">The second value.</param>
         public static bool IsBetween(this float value, float first, float second)
         {
             return value >= Mathf.Min(first, second) && value <= Mathf.Max(first, second);
         }
-#endregion IsBetween
-#region Round
-        public static int Round(this float _value)
+        #endregion IsBetween
+        #region Round
+        /// <summary>Round the given value to an int.</summary>
+        /// <param name="value">The source value.</param>
+        public static int Round(this float value)
         {
-            return (int)Math.Round(_value);
+            return (int)Math.Round(value);
         }
-        public static int Truncate(this float _value)
+        /// <summary>Truncates the given value to an int.</summary>
+        /// <param name="value">The source value.</param>
+        public static int Truncate(this float value)
         {
-            return (int)_value;
+            return (int)value;
         }
-#endregion Round
-#region Angles
-        // saved me a lot of time man https://stackoverflow.com/a/42248572
+        #endregion Round
+        #region Angles
+        /// <summary>Clamps an angle between two values. Order matters.</summary>
+        /// <param name="value">The source angle.</param>
+        /// <param name="min">The minimum value.</param>
+        /// <param name="max">The maximum value.</param>
         public static float ClampAngle(this float value, float min, float max)
         {
+            // saved me a lot of time man https://stackoverflow.com/a/42248572
             value = NormalizeAngle(value);
             if (value.IsBetween(min, max))
                 return value;
@@ -2216,46 +2710,83 @@ namespace ClemCAddons
                 return max;
             return min;
         }
+        /// <summary>Normalizes the source angle from a [0,360[ range to a [-180;180] range.</summary>
+        /// <param name="value">The source angle.</param>
+        /// <param name="to">The angle to use instead of 180.</param>
         public static float NormalizeAngle(this float value, float to = 180)
         {
             return (value + 180) % (to * 2) - 180;
         }
-#endregion Angles
-#region Sign
+        #endregion Angles
+        #region Sign
+        /// <summary>Returns the sign of the source value.</summary>
+        /// <param name="value">The source value.</param>
         public static float Sign(this float value)
         {
             return Mathf.Sign(value);
         }
-        public static float SignInt(this float value)
+        /// <summary>Returns the sign of the source value as an int.</summary>
+        /// <param name="value">The source value.</param>
+        public static int SignInt(this float value)
         {
             return Mathf.Sign(value).Round();
         }
+        /// <summary>Returns the sign of the source value as a bool, with positive value mapped to positive boolean.</summary>
+        /// <param name="value">The source value.</param>
         public static bool SignBool(this float value)
         {
             return Mathf.Sign(value) == 1;
         }
-#endregion Sign
-#endregion float Additions
-#region int Additions
+        #endregion Sign
+        #endregion float Additions
+        // good
+        #region int Additions
+        #region IsBetween
+        /// <summary>Is the source value between the two given values. Order is irrelevant.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="first">The first value.</param>
+        /// <param name="second">The second value.</param>
         public static bool IsBetween(this int value, int first, int second)
         {
             return value >= Math.Min(first, second) && value <= Math.Max(first, second);
         }
+        /// <summary>Is the source value between the two given values. Order is irrelevant.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="first">The first value.</param>
+        /// <param name="second">The second value.</param>
         public static bool IsBetween(this int value, float first, float second)
         {
             return value >= Math.Min(first, second) && value <= Math.Max(first, second);
         }
+        /// <summary>Is the source value between the two components of the Vector2. Order is irrelevant.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="limit">The Vector2 value.</param>
         public static bool IsBetween(this int value, Vector2Int limit)
         {
             return value >= limit.Min() && value <= limit.Max();
         }
-#region Loop Around
+        /// <summary>Is the source value between the two components of the Vector2. Order is irrelevant.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="limit">The Vector2 value.</param>
+        public static bool IsBetween(this int value, Vector2 limit)
+        {
+            return value >= limit.Min() && value <= limit.Max();
+        }
+        #endregion IsBetween
+        #region Loop Around
+        /// <summary>Adds 1 to the source value each call, and loop around back to 0 once the target length value is reached. The value never reaches the target length.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="length">The length value.</param>
         public static int LoopAround(this int value, int length)
         {
             if (value < length - 1)
                 return value + 1;
             return 0;
         }
+        /// <summary>Adds 1 to the source value each call, and loop around back to 0 once the target length value is reached. The value never reaches the target length.</summary>
+        /// <param name="value">The source value.</param>
+        /// <param name="length">The length value.</param>
+        /// <param name="change">The value to add instead of 1.</param>
         public static int LoopAround(this int value, int length, int change)
         {
             value += change;
@@ -2267,95 +2798,152 @@ namespace ClemCAddons
                 return length + value;
             return value - length;
         }
-#endregion Loop Around
-#region Min Max
+        #endregion Loop Around
+        #region Min Max
+        /// <summary>Returns the lowest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="values">Additional values.</param>
         public static int Min(this int value, params int[] values)
         {
             return Mathf.Min(value, values.Min());
         }
+        /// <summary>Returns the highest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="values">Additional values.</param>
         public static int Max(this int value, params int[] values)
         {
             return Mathf.Max(value, values.Max());
         }
+        /// <summary>Returns the lowest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="abs">Should sign be ignored.</param>
+        /// <param name="values">Additional values.</param>
         public static int Min(this int value, bool abs = false, params int[] values)
         {
             return abs ? Mathf.Min(value.Abs(), values.Abs().Min()) : Mathf.Min(value, values.Min());
         }
+        /// <summary>Returns the highest value among the parameters.</summary>
+        /// <param name="value">The first value.</param>
+        /// <param name="abs">Should sign be ignored.</param>
+        /// <param name="values">Additional values.</param>
         public static int Max(this int value, bool abs = false, params int[] values)
         {
             return abs ? Mathf.Max(value.Abs(), values.Abs().Max()) : Mathf.Max(value, values.Max());
         }
-#endregion Min Max
-
-#region Abs, Sum, Minus
+        #endregion Min Max
+        #region Abs, Sum, Minus
+        /// <summary>Returns the absolute of the source value.</summary>
+        /// <param name="f">The source value.</param>
         public static int Abs(this int f)
         {
             return Mathf.Abs(f);
         }
+        /// <summary>Returns an array of the source values' absolutes.</summary>
+        /// <param name="f">The source values.</param>
         public static int[] Abs(this int[] f)
         {
             for (int i = 0; i < f.Length; i++)
                 f[i] = f[i].Abs();
             return f;
         }
+        /// <summary>Returns the sum of the components of the Vector2.</summary>
+        /// <param name="vector">The source vector.</param>
         public static int Sum(this Vector2Int vector)
         {
             return vector.x + vector.y;
         }
+        /// <summary>Returns the sum of the components of the Vector3.</summary>
+        /// <param name="vector">The source vector.</param>
         public static int Sum(this Vector3Int vector)
         {
             return vector.x + vector.y + vector.z;
         }
+        /// <summary>Returns the substraction of the second value by the first.</summary>
+        /// <param name="f">The first value.</param>
+        /// <param name="value">The second value.</param>
+        /// <param name="abs">Should the value be absolute.</param>
         public static int Minus(this int f, int value, bool abs = false)
         {
             return abs ? Mathf.Abs(f - value) : f - value;
         }
+        /// <summary>Returns the substraction of the one value by the other.</summary>
+        /// <param name="f">The first value.</param>
+        /// <param name="value">The second value.</param>
+        /// <param name="maxFirst">Should the order of the operation be determined by highest value. Otherwise uses the lowest first.</param>
+        /// <param name="abs">Should the value be absolute.</param>
         public static int Minus(this int f, int value, bool maxFirst = false, bool abs = false)
         {
             return abs ? (Mathf.Max(f, value) - Mathf.Min(f, value)).Abs() : Mathf.Max(f, value) - Mathf.Min(f, value);
         }
+        /// <summary>Substracts an angle from another. Wraps around at 360.</summary>
+        /// <param name="f">The source angle.</param>
+        /// <param name="value">The angle to subtract by.</param>
         public static int MinusAngle(this int f, int value)
         {
             int r = f - value;
             return r + ((r > 180) ? -360 : (r < -180) ? 360 : 0);
         }
+        /// <summary>Substracts an angle from another. Wraps around at 360.</summary>
+        /// <param name="f">The source angle.</param>
+        /// <param name="value">The angle to subtract by.</param>
+        /// <param name="maxFirst">Should the order of the operation be determined by highest value. Otherwise uses the lowest first.</param>
         public static int MinusAngle(this int f, int value, bool maxFirst = false)
         {
             int r = Mathf.Max(f, value) - Mathf.Min(f, value);
             return r + ((r > 180) ? -360 : (r < -180) ? 360 : 0);
         }
-#endregion Abs, Sum
-#endregion int Additions
-#region Basic conversions
+        #endregion Abs, Sum
+        #endregion int Additions
+        // good
+        #region Basic conversions
+        /// <summary>Converts an int to a bool value. Any value equal or superior to 1 is considered true.</summary>
+        /// <param name="value">The source value.</param>
         public static bool ToBool(this int value)
         {
-            return value <= 0;
+            return value > 0;
         }
+        /// <summary>Converts a bool to an int value. It is an efficient pointer cast, cost varies between 0 & 1 cycle depending on CPU.</summary>
+        /// <param name="value">The source value.</param>
         public static unsafe int ToInt(this bool value)
         {
             return *(Byte*)&value;
             // optimized pointer cast. Cost is basically 0 on intel cpu, 1 cycle on amd, according to my source (https://stackoverflow.com/questions/66985162/how-to-convert-bool-to-int-efficiently)
         }
-#endregion Basic conversions
-#region Transform Additions
-#region Anchors
+        #endregion Basic conversions
+        // good
+        #region Transform Additions
+        #region Anchors
+        /// <summary>Transforms vector from local space to world space.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="localSpace">The local space vector.</param>
         public static Vector3 GetWorld(this Transform transform, Vector3 localSpace)
         {
             return transform.TransformVector(localSpace);
         }
+        /// <summary>From local position, returns a world position.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="localSpace">The local space position.</param>
         public static Vector3 GetWorldPosition(this Transform transform, Vector3 localSpace)
         {
             return transform.position + transform.TransformVector(localSpace);
         }
+        /// <summary>Transforms vector from world space to local space.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="worldSpace">The world space vector.</param>
         public static Vector3 GetLocal(this Transform transform, Vector3 worldSpace)
         {
             return transform.InverseTransformVector(worldSpace);
         }
+        /// <summary>From world position, returns a local position.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="worldSpace">The world space position.</param>
         public static Vector3 GetLocalPosition(this Transform transform, Vector3 worldSpace)
         {
             return transform.InverseTransformPoint(worldSpace);
         }
-#endregion Anchors
+        #endregion Anchors
+        /// <summary>Returns the number of active children.</summary>
+        /// <param name="transform">The base transform.</param>
         public static int ActiveChildCount(this Transform transform)
         {
             int r = 0;
@@ -2368,6 +2956,9 @@ namespace ClemCAddons
             }
             return r;
         }
+        /// <summary>Returns the number of children of a set type.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="type">The type to search for.</param>
         public static int ChildsOfTypeCount(this Transform transform, Type type)
         {
             int r = 0;
@@ -2380,6 +2971,9 @@ namespace ClemCAddons
             }
             return r;
         }
+        /// <summary>Returns the number of children with a set component.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="type">The type of the component to search for.</param>
         public static int ChildsWithComponent(this Transform transform, Type type)
         {
             int r = 0;
@@ -2392,6 +2986,9 @@ namespace ClemCAddons
             }
             return r;
         }
+        /// <summary>Returns the number of active children with a set type.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="type">The type to search for.</param>
         public static int ActiveChildsOfTypeCount(this Transform transform, Type type)
         {
             int r = 0;
@@ -2404,6 +3001,9 @@ namespace ClemCAddons
             }
             return r;
         }
+        /// <summary>Returns the number of active children with a set component.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="type">The type of the component to search for.</param>
         public static int ActiveChildsWithComponent(this Transform transform, Type type)
         {
             int r = 0;
@@ -2416,6 +3016,10 @@ namespace ClemCAddons
             }
             return r;
         }
+        /// <summary>Find the first child with the target name. Goes through the whole sub-hierarchy.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="name">The name to search for.</param>
+        /// <param name="startsWith">Whether or not to accept children with names starting by the key.</param>
         public static Transform FindDeep(this Transform transform, string name, bool startsWith = false)
         {
             if (transform.childCount == 0)
@@ -2430,6 +3034,9 @@ namespace ClemCAddons
             }
             return null;
         }
+        /// <summary>Find the first matching child. Goes through the whole sub-hierarchy.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="predicate">Predicate.</param>
         public static Transform FindDeep(this Transform transform, Predicate<Transform> predicate)
         {
             if (transform.childCount == 0)
@@ -2440,16 +3047,30 @@ namespace ClemCAddons
                 return r;
             return null;
         }
+        /// <summary>Find the first child with the target name. Goes through the whole sub-hierarchy.</summary>
+        /// <param name="gameObject">The base gameobject.</param>
+        /// <param name="name">The name to search for.</param>
+        /// <param name="startsWith">Whether or not to accept children with names starting by the key.</param>
         public static GameObject FindDeep(this GameObject gameObject, string name, bool startsWith = false)
         {
             var r = gameObject.transform.FindDeep(name, startsWith);
             return r == null ? null : r.gameObject;
         }
-
+        /// <summary>Find the first matching child. Goes through the whole sub-hierarchy.</summary>
+        /// <param name="gameObject">The base gameobject.</param>
+        /// <param name="predicate">Predicate.</param>
+        public static GameObject FindDeep(this GameObject gameObject, Predicate<Transform> predicate)
+        {
+            var r = gameObject.transform.FindDeep(predicate);
+            return r == null ? null : r.gameObject;
+        }
+        /// <summary>Find the first child with the target uid. Goes through the whole sub-hierarchy.</summary>
+        /// <param name="gameObject">The base gameobject.</param>
+        /// <param name="uid">The UID to search for.</param>
         public static GameObject FindDeepUID(this GameObject gameObject, int uid)
         {
             Transform[] res = gameObject.GetComponentsInChildren<Transform>(true);
-            foreach(Transform r in res)
+            foreach (Transform r in res)
             {
                 if (r.GetInstanceID() == uid)
                 {
@@ -2470,33 +3091,41 @@ namespace ClemCAddons
             }
             return null;
         }
-
-
-        public static Transform GetParent(this Transform transform, int num)
+        /// <summary>Returns the parent.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="num">How many generations to go through.</param>
+        public static Transform GetParent(this Transform transform, int num = 1)
         {
             if (num == 0)
                 return transform;
             return transform.parent.GetParent(num - 1);
         }
+        /// <summary>Find the first parent with the target name. Goes through the whole hierarchy.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="name">The name to search for.</param>
         public static Transform FindParentDeep(this Transform transform, string name)
         {
             if (transform == null)
                 return null;
             Transform res = transform.parent;
-            if (res == null)
-                return null;
             if (res.name == name)
             {
                 return res;
             }
             return FindParentDeep(res, name);
         }
+        /// <summary>Find the first parent with the target name. Goes through the whole hierarchy.</summary>
+        /// <param name="gameObject">The base gameobject.</param>
+        /// <param name="name">The name to search for.</param>
         public static GameObject FindParentDeep(this GameObject gameObject, string name)
         {
             var r = gameObject.transform.FindParentDeep(name);
             return r == null ? null : r.gameObject;
         }
-        public static Transform[] GetChildrenWithComponent(this Transform transform, Type type)
+        /// <summary>Returns all the children with a set component.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="type">The component to search for.</param>
+        public static Transform[] GetChildsWithComponent(this Transform transform, Type type)
         {
             Transform[] r = new Transform[] { };
             for (int i = 0; i < transform.childCount; i++)
@@ -2508,24 +3137,31 @@ namespace ClemCAddons
             }
             return r;
         }
+        /// <summary>Find the first parent with a set component. Goes through the whole hierarchy.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="type">The component to search for.</param>
         public static Transform FindParentWithComponent(this Transform transform, Type type)
         {
             if (transform == null)
                 return null;
             Transform res = transform.parent;
-            if (res == null)
-                return null;
             if (res.TryGetComponent(type, out _))
             {
                 return res;
             }
             return FindParentWithComponent(res, type);
         }
+        /// <summary>Find the first parent with a set component. Goes through the whole hierarchy.</summary>
+        /// <param name="gameObject">The base gameobject.</param>
+        /// <param name="type">The component to search for.</param>
         public static GameObject FindParentWithComponent(this GameObject gameObject, Type type)
         {
             var r = gameObject.transform.FindParentWithComponent(type);
             return r == null ? null : r.gameObject;
         }
+        /// <summary>Returns the world rect of a RectTransform.</summary>
+        /// <param name="rt">The base RectTransform.</param>
+        /// <param name="scale">A value to scale the result by.</param>
         public static Rect GetWorldRect(this RectTransform rt, Vector2? scale = null)
         {
             if (!scale.HasValue)
@@ -2540,56 +3176,95 @@ namespace ClemCAddons
 
             return new Rect(topLeft, scaledSize);
         }
+        /// <summary>Gets the position of the center of the RectTransform.</summary>
+        /// <param name="rectTransform">The base RectTransform.</param>
         public static Vector3 AnchorNeutralPosition(this RectTransform rectTransform)
         {
             return rectTransform.position + (rectTransform.rect.center * rectTransform.lossyScale).ToVector3();
         }
+        /// <summary>Gets the position of the center of the RectTransform.</summary>
+        /// <param name="rectTransform">The base RectTransform.</param>
+        /// <param name="offset">Idk wtf I did and why tf this is needed.</param>
         public static Vector3 AnchorNeutralPosition(this RectTransform rectTransform, bool offset)
         {
             return rectTransform.position + ((rectTransform.rect.center - (offset ? rectTransform.anchoredPosition : Vector2.zero)) * rectTransform.lossyScale).ToVector3();
         }
-#endregion Transform Additions
-#region Distances
+        #endregion Transform Additions
+        // good
+        #region Distances
+        /// <summary>Returns the distance between the two transforms.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="compared">The transform to compare it with.</param>
         public static float Distance(this Transform transform, Transform compared) // transform transform
         {
             return Vector3.Distance(transform.position, compared.position);
         }
+        /// <summary>Returns the distance between the transform and the gameobject.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="compared">The gameobject to compare it with.</param>
         public static float Distance(this Transform transform, GameObject compared) // transform gameobject
         {
             return Vector3.Distance(transform.position, compared.transform.position);
         }
+        /// <summary>Returns the distance between the transform and the given position.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="compared">The position to compare it with.</param>
         public static float Distance(this Transform transform, Vector3 compared) // transform vector3
         {
             return Vector3.Distance(transform.position, compared);
         }
-        public static float Distance(this GameObject transform, Transform compared) // gameobject transform
+        /// <summary>Returns the distance between the gameobject and the transform.</summary>
+        /// <param name="gameobject">The base gameobject.</param>
+        /// <param name="compared">The transform to compare it with.</param>
+        public static float Distance(this GameObject gameobject, Transform compared) // gameobject transform
         {
-            return Vector3.Distance(transform.transform.position, compared.position);
+            return Vector3.Distance(gameobject.transform.position, compared.position);
         }
-        public static float Distance(this GameObject transform, GameObject compared) // gameobject gameobject
+        /// <summary>Returns the distance between the two gameobjects.</summary>
+        /// <param name="gameobject">The base gameobject.</param>
+        /// <param name="compared">The gameobject to compare it with.</param>
+        public static float Distance(this GameObject gameobject, GameObject compared) // gameobject gameobject
         {
-            return Vector3.Distance(transform.transform.position, compared.transform.position);
+            return Vector3.Distance(gameobject.transform.position, compared.transform.position);
         }
-        public static float Distance(this GameObject transform, Vector3 compared) // gameobject vector3
+        /// <summary>Returns the distance between the gameobject and the given position.</summary>
+        /// <param name="gameobject">The base gameobject.</param>
+        /// <param name="compared">The position to compare it with.</param>
+        public static float Distance(this GameObject gameobject, Vector3 compared) // gameobject vector3
         {
-            return Vector3.Distance(transform.transform.position, compared);
+            return Vector3.Distance(gameobject.transform.position, compared);
         }
-        public static float Distance(this Vector3 transform, Transform compared) // vector3 transform
+        /// <summary>Returns the distance between the given position and the transform.</summary>
+        /// <param name="position">The base position.</param>
+        /// <param name="compared">The transform to compare it with.</param>
+        public static float Distance(this Vector3 position, Transform compared) // vector3 transform
         {
-            return Vector3.Distance(transform, compared.position);
+            return Vector3.Distance(position, compared.position);
         }
-        public static float Distance(this Vector3 transform, GameObject compared) // vector3 gameobject
+        /// <summary>Returns the distance between the given position and the gameobject.</summary>
+        /// <param name="position">The base position.</param>
+        /// <param name="compared">The transform to compare it with.</param>
+        public static float Distance(this Vector3 position, GameObject compared) // vector3 gameobject
         {
-            return Vector3.Distance(transform, compared.transform.position);
+            return Vector3.Distance(position, compared.transform.position);
         }
-        public static float Distance(this Vector3 transform, Vector3 compared) // vector3 vector3
+        /// <summary>Returns the distance between the two given positions.</summary>
+        /// <param name="position">The base position.</param>
+        /// <param name="compared">The position to compare it with.</param>
+        public static float Distance(this Vector3 position, Vector3 compared) // vector3 vector3
         {
-            return Vector3.Distance(transform, compared);
+            return Vector3.Distance(position, compared);
         }
-        public static float Distance(this Vector2 vector, Vector2 compared) // vector3 vector3
+        /// <summary>Returns the distance between the two given vectors.</summary>
+        /// <param name="vector">The base vetor.</param>
+        /// <param name="compared">The vector to compare it with.</param>
+        public static float Distance(this Vector2 vector, Vector2 compared) // vector2 vector2
         {
             return Vector2.Distance(vector, compared);
         }
+        /// <summary>Gets the closest transform to the reference frame.</summary>
+        /// <param name="transforms">The transforms to check.</param>
+        /// <param name="referenceFrame">The reference frame transform.</param>
         public static Transform GetClosest(this Transform[] transforms, Transform referenceFrame)
         {
             Transform closest = transforms[0];
@@ -2604,6 +3279,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest transform to the reference frame.</summary>
+        /// <param name="transforms">The transforms to check.</param>
+        /// <param name="referenceFrame">The reference frame position.</param>
         public static Transform GetClosest(this Transform[] transforms, Vector3 referenceFrame)
         {
             Transform closest = transforms[0];
@@ -2618,6 +3296,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest transform to the reference frame.</summary>
+        /// <param name="transforms">The transforms to check.</param>
+        /// <param name="referenceFrame">The reference frame gameobject.</param>
         public static Transform GetClosest(this Transform[] transforms, GameObject referenceFrame)
         {
             Transform closest = transforms[0];
@@ -2632,6 +3313,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame transform.</param>
         public static GameObject GetClosest(this GameObject[] gameObjects, Transform referenceFrame)
         {
             GameObject closest = gameObjects[0];
@@ -2646,6 +3330,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame position.</param>
         public static GameObject GetClosest(this GameObject[] gameObjects, Vector3 referenceFrame)
         {
             GameObject closest = gameObjects[0];
@@ -2660,6 +3347,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame gameobject.</param>
         public static GameObject GetClosest(this GameObject[] gameObjects, GameObject referenceFrame)
         {
             GameObject closest = gameObjects[0];
@@ -2674,49 +3364,60 @@ namespace ClemCAddons
             }
             return closest;
         }
-        public static Vector3 GetClosest(this Vector3[] gameObjects, Transform referenceFrame)
+        /// <summary>Gets the closest position to the reference frame.</summary>
+        /// <param name="positions">The positions to check.</param>
+        /// <param name="referenceFrame">The reference frame transform.</param>
+        public static Vector3 GetClosest(this Vector3[] positions, Transform referenceFrame)
         {
-            Vector3 closest = gameObjects[0];
-            float t = referenceFrame.Distance(gameObjects[0]);
-            for (int i = 1; i < gameObjects.Length; i++)
+            Vector3 closest = positions[0];
+            float t = referenceFrame.Distance(positions[0]);
+            for (int i = 1; i < positions.Length; i++)
             {
-                if (referenceFrame.Distance(gameObjects[i]) < t)
+                if (referenceFrame.Distance(positions[i]) < t)
                 {
-                    t = referenceFrame.Distance(gameObjects[i]);
-                    closest = gameObjects[i];
+                    t = referenceFrame.Distance(positions[i]);
+                    closest = positions[i];
                 }
             }
             return closest;
         }
-        public static Vector3 GetClosest(this Vector3[] gameObjects, Vector3 referenceFrame)
+        /// <summary>Gets the closest position to the reference frame.</summary>
+        /// <param name="positions">The positions to check.</param>
+        /// <param name="referenceFrame">The reference frame position.</param>
+        public static Vector3 GetClosest(this Vector3[] positions, Vector3 referenceFrame)
         {
-            Vector3 closest = gameObjects[0];
-            float t = referenceFrame.Distance(gameObjects[0]);
-            for (int i = 1; i < gameObjects.Length; i++)
+            Vector3 closest = positions[0];
+            float t = referenceFrame.Distance(positions[0]);
+            for (int i = 1; i < positions.Length; i++)
             {
-                if (referenceFrame.Distance(gameObjects[i]) < t)
+                if (referenceFrame.Distance(positions[i]) < t)
                 {
-                    t = referenceFrame.Distance(gameObjects[i]);
-                    closest = gameObjects[i];
+                    t = referenceFrame.Distance(positions[i]);
+                    closest = positions[i];
                 }
             }
             return closest;
         }
-        public static Vector3 GetClosest(this Vector3[] gameObjects, GameObject referenceFrame)
+        /// <summary>Gets the closest position to the reference frame.</summary>
+        /// <param name="positions">The positions to check.</param>
+        /// <param name="referenceFrame">The reference frame gameobject.</param>
+        public static Vector3 GetClosest(this Vector3[] positions, GameObject referenceFrame)
         {
-            Vector3 closest = gameObjects[0];
-            float t = referenceFrame.Distance(gameObjects[0]);
-            for (int i = 1; i < gameObjects.Length; i++)
+            Vector3 closest = positions[0];
+            float t = referenceFrame.Distance(positions[0]);
+            for (int i = 1; i < positions.Length; i++)
             {
-                if (referenceFrame.Distance(gameObjects[i]) < t)
+                if (referenceFrame.Distance(positions[i]) < t)
                 {
-                    t = referenceFrame.Distance(gameObjects[i]);
-                    closest = gameObjects[i];
+                    t = referenceFrame.Distance(positions[i]);
+                    closest = positions[i];
                 }
             }
             return closest;
         }
-
+        /// <summary>Gets the closest transform to the reference frame.</summary>
+        /// <param name="transforms">The transforms to check.</param>
+        /// <param name="referenceFrame">The reference frame transform.</param>
         public static Transform GetClosest(this List<Transform> transforms, Transform referenceFrame)
         {
             Transform closest = transforms[0];
@@ -2731,6 +3432,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest transform to the reference frame.</summary>
+        /// <param name="transforms">The transforms to check.</param>
+        /// <param name="referenceFrame">The reference frame position.</param>
         public static Transform GetClosest(this List<Transform> transforms, Vector3 referenceFrame)
         {
             Transform closest = transforms[0];
@@ -2745,6 +3449,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest transform to the reference frame.</summary>
+        /// <param name="transforms">The transforms to check.</param>
+        /// <param name="referenceFrame">The reference frame gameobject.</param>
         public static Transform GetClosest(this List<Transform> transforms, GameObject referenceFrame)
         {
             Transform closest = transforms[0];
@@ -2759,6 +3466,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame transform.</param>
         public static GameObject GetClosest(this List<GameObject> gameObjects, Transform referenceFrame)
         {
             GameObject closest = gameObjects[0];
@@ -2773,6 +3483,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame position.</param>
         public static GameObject GetClosest(this List<GameObject> gameObjects, Vector3 referenceFrame)
         {
             GameObject closest = gameObjects[0];
@@ -2787,6 +3500,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame gameoject.</param>
         public static GameObject GetClosest(this List<GameObject> gameObjects, GameObject referenceFrame)
         {
             GameObject closest = gameObjects[0];
@@ -2801,6 +3517,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame transform.</param>
         public static Vector3 GetClosest(this List<Vector3> gameObjects, Transform referenceFrame)
         {
             Vector3 closest = gameObjects[0];
@@ -2815,6 +3534,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame position.</param>
         public static Vector3 GetClosest(this List<Vector3> gameObjects, Vector3 referenceFrame)
         {
             Vector3 closest = gameObjects[0];
@@ -2829,6 +3551,9 @@ namespace ClemCAddons
             }
             return closest;
         }
+        /// <summary>Gets the closest gameobject to the reference frame.</summary>
+        /// <param name="gameObjects">The gameobjects to check.</param>
+        /// <param name="referenceFrame">The reference frame gameobject.</param>
         public static Vector3 GetClosest(this List<Vector3> gameObjects, GameObject referenceFrame)
         {
             Vector3 closest = gameObjects[0];
@@ -2844,41 +3569,63 @@ namespace ClemCAddons
             return closest;
         }
 
-#endregion Distances
-#region Quaternion Additions
+        #endregion Distances
+        // good
+        #region Quaternion Additions
+        /// <summary>Are the two quaternions approximately equal.</summary>
+        /// <param name="quat">The source quaternion.</param>
+        /// <param name="quaternion">The compared quaternion.</param>
+        /// <param name="range">How close is considered approximate. Dot is used to estimate proximity [-1;1]).</param>
         public static bool IsApproximatelyEqual(this Quaternion quat, Quaternion quaternion, float range = 0.01f)
         {
             return 1 - Mathf.Abs(Quaternion.Dot(quat, quaternion)) < range;
         }
+        /// <summary>Sets the x parameter of the source quaternion.</summary>
+        /// <param name="quaternion">The source quaternion.</param>
+        /// <param name="x">The new x parameter.</param>
         public static Quaternion SetX(this Quaternion quaternion, float x)
         {
             quaternion.x = x;
             return quaternion;
         }
+        /// <summary>Sets the y parameter of the source quaternion.</summary>
+        /// <param name="quaternion">The source quaternion.</param>
+        /// <param name="y">The new y parameter.</param>
         public static Quaternion SetY(this Quaternion quaternion, float y)
         {
             quaternion.y = y;
             return quaternion;
         }
+        /// <summary>Sets the z parameter of the source quaternion.</summary>
+        /// <param name="quaternion">The source quaternion.</param>
+        /// <param name="z">The new z parameter.</param>
         public static Quaternion SetZ(this Quaternion quaternion, float z)
         {
             quaternion.z = z;
             return quaternion;
         }
+        /// <summary>Sets the w parameter of the source quaternion.</summary>
+        /// <param name="quaternion">The source quaternion.</param>
+        /// <param name="w">The new w parameter.</param>
         public static Quaternion SetW(this Quaternion quaternion, float w)
         {
             quaternion.w = w;
             return quaternion;
         }
+        /// <summary>Multiply the source quaternion by a value.</summary>
+        /// <param name="quaternion">The source quaternion.</param>
+        /// <param name="value">The value to multiply by.</param>
         public static Quaternion Multiply(this Quaternion quaternion, float value)
         {
             return new Quaternion(quaternion.x * value, quaternion.y * value, quaternion.z * value, quaternion.w * value);
         }
+        /// <summary>Inverse the rotation.</summary>
+        /// <param name="quaternion">The source quaternion.</param>
         public static Quaternion Inverse(this Quaternion quaternion)
         {
             return Quaternion.Inverse(quaternion);
         }
-#region Interpolation
+        #region Interpolation
         public static Quaternion Slerp(this Quaternion a, Quaternion b, float t)
         {
             return Quaternion.Slerp(a, b, t);
@@ -2887,32 +3634,41 @@ namespace ClemCAddons
         {
             return Quaternion.RotateTowards(a, b, t);
         }
-#endregion Interpolation
-#endregion QuaternionAdditions
-#region Class Additions
-#if (UNITY_STANDALONE_WIN)
-
+        #endregion Interpolation
+        #endregion QuaternionAdditions
+        // good
+        #region Class Additions
+        /// <summary>Returns a copy of the source array.</summary>
+        /// <param name="source">The source array.</param>
         public static T[] GetCopy<T>(this T[] source)
         {
             var t = new T[source.Length];
             source.CopyTo(t, 0);
             return t;
         }
+        /// <summary>Returns a clone of the source object.</summary>
+        /// <param name="source">The source object.</param>
         public static T Clone<T>(this T source) // inspired by https://stackoverflow.com/a/78612
         {
             return source.ToBytes().ToType(typeof(T));
         }
-#endif
-#endregion Class Additions
+        #endregion Class Additions
+        // good
     }
-#endregion Extensions
+    #endregion Extensions
     namespace Utilities
     {
-#region Utilities
+        #region Utilities
         public class GameTools
         {
-#region Logic
+            #region Logic
             private static List<KeyValuePair<int, bool>> GateMemory = new List<KeyValuePair<int, bool>>();
+
+            /// <summary>
+            /// Only triggers the first time the value is true, until false.
+            /// </summary>
+            /// <param name="value">The value to check against.</param>
+            /// <param name="id">The unique identifier for this gate.</param>
             public static bool OnceIfTrue(int id, bool value)
             {
                 var c = GateMemory.FindIndex(t => t.Key == id);
@@ -2931,12 +3687,19 @@ namespace ClemCAddons
                     return value;
                 }
             }
-#endregion Logic
-#region Vector3 Additions
+            #endregion Logic
+            // good
+            #region Vector3 Additions
+            /// <summary>Rotate vector.</summary>
+            /// <param name="vector">The vector to rotate.</param>
+            /// <param name="angle">The angle to rotate by.</param>
+            /// <param name="axis">The axis to rotate around.</param>
             public static Vector3 Rotate(Vector3 vector, float angle, Vector3 axis) // https://answers.unity.com/questions/46770/rotate-a-vector3-direction.html
             {
                 return Quaternion.AngleAxis(angle, axis) * vector;
             }
+            /// <summary>Sum vectors.</summary>
+            /// <param name="vectors">The vectors to sum.</param>
             public static Vector3 Sum(Vector3[] vectors)
             {
                 Vector3 result = new Vector3 { };
@@ -2946,7 +3709,7 @@ namespace ClemCAddons
                 }
                 return result;
             }
-#region Direction
+            #region Direction
             public static Vector3 DirectionTo(Vector3 from, Vector3 to)
             {
                 return (to - from).normalized;
@@ -2971,8 +3734,8 @@ namespace ClemCAddons
             {
                 return vector - Vector3.Dot(vector, normal) * normal;
             }
-#endregion Direction
-#region Random
+            #endregion Direction
+            #region Random
             public static Vector3 RandomVector()
             {
                 return Random.insideUnitCircle.normalized;
@@ -3004,19 +3767,456 @@ namespace ClemCAddons
                     Random.Range(bounds.min.z, bounds.max.z)
                 );
             }
-#endregion Random
-#endregion Vector3 Additions
-#region Vector2 Additions
+            #endregion Random
+            #endregion Vector3 Additions
+            // good
+            #region Vector2 Additions
+            /// <summary>Returns a reflection of the vector onto the normal.</summary>
+            /// <param name="vector">The vector to reflect.</param>
+            /// <param name="normal">The normal of the surface.</param>
             public static Vector2 Reflect(Vector2 vector, Vector2 normal)
             {
                 return vector - 2 * Vector2.Dot(vector, normal) * normal;
             }
+            /// <summary>Returns a turned vector to move along a surface.</summary>
+            /// <param name="vector">The vector to turn.</param>
+            /// <param name="normal">The normal of the surface.</param>
             public static Vector2 Movealong(Vector2 vector, Vector2 normal)
             {
                 return vector - Vector2.Dot(vector, normal) * normal;
             }
-#endregion Vector2 Additions
-#region Async
+            #endregion Vector2 Additions
+            // good
+            #region Ground & Wall
+            /// <summary>Try to find the ground.</summary>
+            /// <param name="position">The origin position.</param>
+            /// <param name="sizeCompensation">Should there be a result, the offset to reduce the result by.</param>
+            /// <param name="maxDistance">The maximum distance to look for.</param>
+            /// <param name="layer">The layermask to use.</param>
+            /// <returns>Distance if found, maximum distance if not.</returns>
+            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer)
+            {
+                Ray groundRay = (new Ray(position, Vector3.down));
+                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer, QueryTriggerInteraction.Ignore);
+                if (ground)
+                {
+                    return groundHit.distance - sizeCompensation;
+                }
+                return maxDistance;
+            }
+            /// <summary>Try to find the ground.</summary>
+            /// <param name="position">The origin position.</param>
+            /// <param name="sizeCompensation">Should there be a result, the offset to reduce the result by.</param>
+            /// <param name="maxDistance">The maximum distance to look for.</param>
+            /// <param name="layer">The layermask to use.</param>
+            /// <param name="hit">Hit, if found.</param>
+            /// <returns>Distance if found, maximum distance if not.</returns>
+            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer, out RaycastHit hit)
+            {
+                Ray groundRay = (new Ray(position, Vector3.down));
+                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer, QueryTriggerInteraction.Ignore);
+                hit = groundHit;
+                if (ground)
+                {
+                    return groundHit.distance - sizeCompensation;
+                }
+                return maxDistance;
+            }
+            /// <summary>Try to find the ground.</summary>
+            /// <param name="position">The origin position.</param>
+            /// <param name="sizeCompensation">Should there be a result, the offset to reduce the result by.</param>
+            /// <param name="maxDistance">The maximum distance to look for.</param>
+            /// <param name="layer">The layermask to use.</param>
+            /// <param name="defaultTo">Value to default to instead of the maximum distance.</param>
+            /// <returns>Distance if found.</returns>
+            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer, float defaultTo)
+            {
+                Ray groundRay = (new Ray(position, Vector3.down));
+                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer, QueryTriggerInteraction.Ignore);
+                if (ground)
+                {
+                    return groundHit.distance - sizeCompensation;
+                }
+                return defaultTo;
+            }
+            /// <summary>Try to find the ground.</summary>
+            /// <param name="position">The origin position.</param>
+            /// <param name="sizeCompensation">Should there be a result, the offset to reduce the result by.</param>
+            /// <param name="maxDistance">The maximum distance to look for.</param>
+            /// <param name="layer">The layermask to use.</param>
+            /// <param name="hit">Hit, if found.</param>
+            /// <param name="defaultTo">Value to default to instead of the maximum distance.</param>
+            /// <returns>Distance if found.</returns>
+            public static float FindGround(Vector3 position, float sizeCompensation, float maxDistance, LayerMask layer, out RaycastHit hit, float defaultTo)
+            {
+                Ray groundRay = (new Ray(position, Vector3.down));
+                bool ground = Physics.Raycast(groundRay, out RaycastHit groundHit, maxDistance, layer, QueryTriggerInteraction.Ignore);
+                hit = groundHit;
+                if (ground)
+                {
+                    return groundHit.distance - sizeCompensation;
+                }
+                return defaultTo;
+            }
+            /// <summary>Try to find a slope size.</summary>
+            /// <param name="position">The origin position.</param>
+            /// <param name="forward">The forward direction.</param>
+            /// <param name="height">The height.</param>
+            /// <param name="maxDistance">The maximum distance to look for.</param>
+            /// <param name="layer">The layermask to use.</param>
+            /// <returns>Height difference if found.</returns>
+            public static float FindSlope(Vector3 position, Vector3 forward, float height, float maxDistance, LayerMask layer)
+            {
+                Ray groundRayF = (new Ray(position + forward, Vector3.down));
+                Ray groundRayB = (new Ray(position + (forward * -1), Vector3.down));
+                bool groundF = Physics.Raycast(groundRayF, out RaycastHit groundHitF, height + maxDistance, layer, QueryTriggerInteraction.Ignore);
+                bool groundB = Physics.Raycast(groundRayB, out RaycastHit groundHitB, height + maxDistance, layer, QueryTriggerInteraction.Ignore);
+                float distF = groundF ? groundHitF.distance : height + maxDistance;
+                float distB = groundB ? groundHitB.distance : height + maxDistance;
+                return distF - distB;
+            }
+            /// <summary>Try to find a slope.</summary>
+            /// <param name="position">The origin position.</param>
+            /// <param name="forward">The forward direction.</param>
+            /// <param name="height">The height.</param>
+            /// <param name="maxDistance">The maximum distance to look for.</param>
+            /// <param name="layer">The layermask to use.</param>
+            /// <param name="distance">Height difference if found.</param>
+            /// <returns>Slope if found.</returns>
+            public static float FindSlopePerc(Vector3 position, Vector3 forward, float height, float maxDistance, LayerMask layer, out float distance)
+            {
+                Ray groundRayF = (new Ray(position + forward, Vector3.down));
+                Ray groundRayB = (new Ray(position + (forward * -1), Vector3.down));
+                bool groundF = Physics.Raycast(groundRayF, out RaycastHit groundHitF, height + maxDistance, layer, QueryTriggerInteraction.Ignore);
+                bool groundB = Physics.Raycast(groundRayB, out RaycastHit groundHitB, height + maxDistance, layer, QueryTriggerInteraction.Ignore);
+                float distF = groundF ? groundHitF.distance : height + maxDistance;
+                float distB = groundB ? groundHitB.distance : height + maxDistance;
+                distance = (distF - distB).Abs();
+                return (distF - distB) / forward.magnitude;
+            }
+            /// <summary>Using a spherecast, try to find a wall within bounds.</summary>
+            /// <param name="position">The origin position.</param>
+            /// <param name="direction">The forward direction.</param>
+            /// <param name="radius">The radius of the sphere.</param>
+            /// <param name="width">The width of the bounds.</param>
+            /// <param name="layerName">The name of the layer to use.</param>
+            /// <returns>The position if found, associated with a bool telling whether it was found.</returns>
+            public static KeyValuePair<Vector3, bool> CheckForWall(Vector3 position, Vector3 direction, float radius, float width, string layerName = "Wall")
+            {
+                Ray ray = new Ray(position, direction);
+                Debug.DrawRay(ray.origin, ray.direction * 5, Color.red);
+                bool r = Physics.SphereCast(ray, radius, out RaycastHit hit, width / 2 - radius, LayerMask.GetMask(layerName), QueryTriggerInteraction.Ignore);
+                Vector3 res = Vector3.Cross(hit.normal, ray.direction);
+                res = Vector3.Cross(res, hit.normal);
+                return new KeyValuePair<Vector3, bool>(res, r);
+            }
+            #endregion
+            // good
+            #region Geometry
+            public static bool IsInRectangle(Vector3 rectPos, Vector3 rectScale, Vector3 position)
+            {
+                return position.x.IsBetween(rectPos.x - (rectScale.x), rectPos.x + (rectScale.x)) && position.y.IsBetween(rectPos.y, rectPos.y + (rectScale.y * 2)) && position.z.IsBetween(rectPos.z - (rectScale.z), rectPos.z + (rectScale.z));
+            }
+
+            public static Vector3 ClosestOnCube(Vector3 point, Vector3 cubePos, Vector3 cubeSize, BoxCollider box, bool debug = false)
+            {
+                box.transform.position = cubePos + new Vector3(0, cubeSize.y);
+                box.size = cubeSize * 2;
+                if (IsInRectangle(cubePos, cubeSize, point))
+                {
+                    return ClosestInCube(point, cubePos, cubeSize, debug);
+                }
+                var r = box.ClosestPointOnBounds(point);
+                return r;
+            }
+
+            public static Vector3 ClosestInCube(Vector3 point, Vector3 cubePos, Vector3 cubeSize, bool debug = false)
+            {
+                //f1 will be x+
+                //f2 will be x-
+                //f3 will be y+
+                //f4 will be y-
+                //f5 will be z+
+                //f6 will be z-
+                var f1 = cubePos;
+                f1.y += (cubeSize.y);
+                var f2 = f1;
+                var f3 = f2;
+                var f4 = f3;
+                var f5 = f4;
+                var f6 = f5;
+                f1.x += cubeSize.x;
+                f2.x -= cubeSize.x;
+                f3.y += cubeSize.y;
+                f4.y -= cubeSize.y;
+                f5.z += cubeSize.z;
+                f6.z -= cubeSize.z;
+                f1.y = f2.y = point.y;
+                f1.z = f2.z = point.z;
+                f3.z = f4.z = point.z;
+                f3.x = f4.x = point.x;
+                f5.x = f6.x = point.x;
+                f5.y = f6.y = point.y;
+                if (debug)
+                {
+                    EditorTools.DrawLineInEditor(f1, point, new Color(1, 0.5f, 0));
+                    EditorTools.DrawLineInEditor(f2, point, new Color(1, 0.5f, 0));
+                    EditorTools.DrawLineInEditor(f3, point, new Color(1, 0.5f, 0));
+                    EditorTools.DrawLineInEditor(f4, point, new Color(1, 0.5f, 0));
+                    EditorTools.DrawLineInEditor(f5, point, new Color(1, 0.5f, 0));
+                    EditorTools.DrawLineInEditor(f6, point, new Color(1, 0.5f, 0));
+                }
+                return FindClosestPoint(point, new Vector3[] { f1, f2, f3, f4, f5, f6 });
+            }
+            public static Vector3 FindClosestPoint(Vector3 reference, Vector3[] points)
+            {
+                Vector3 result = points[0];
+                float r = Vector3.Distance(result, reference);
+                for (int i = 1; i < points.Length; i++)
+                {
+                    var res = Vector3.Distance(points[i], reference);
+                    if (res < r)
+                    {
+                        result = points[i];
+                        r = res;
+                    }
+                }
+                return result;
+            }
+
+            public static Quaternion QuaternionAvoidNull(Quaternion quaternion)
+            {
+                if (quaternion.x == 0 && quaternion.y == 0 && quaternion.z == 0 && quaternion.w == 0)
+                {
+                    return Quaternion.identity;
+                }
+                return quaternion;
+            }
+            #endregion Geometry
+            #region Casts
+            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, string tag, bool debug = false)
+            {
+                Ray ray = new Ray(from, (to - from).normalized);
+                bool result = false;
+                RaycastHit hit = new RaycastHit();
+                var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
+                if (hits.Length > 0)
+                {
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit.distance += 0.2f;
+                        }
+                    }
+                }
+                if (!result)
+                {
+                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                        }
+                    }
+                }
+                if (debug)
+                {
+                    EditorTools.DrawLineInEditor(from, to, Color.grey);
+                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+                }
+                return result;
+            }
+            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, bool debug = false)
+            {
+                Ray ray = new Ray(from, (to - from).normalized);
+                bool result = false;
+                RaycastHit hit = new RaycastHit();
+                var hits = Physics.SphereCastAll(ray, 0.2f, Vector3.Distance(from, to), layer);
+                if (hits.Length > 0)
+                {
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit.distance += 0.2f;
+                        }
+                    }
+                }
+                if (!result)
+                {
+                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                        }
+                    }
+                }
+                if (debug)
+                {
+                    EditorTools.DrawLineInEditor(from, to, Color.grey);
+                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+                }
+                return result;
+            }
+            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, bool debug = false)
+            {
+                Ray ray = new Ray(from, (to - from).normalized);
+                bool result = false;
+                RaycastHit hit = new RaycastHit();
+                var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
+                if (hits.Length > 0)
+                {
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                            hit.distance += radius;
+                        }
+                    }
+                }
+                if (!result)
+                {
+                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                        }
+                    }
+                }
+                if (debug)
+                {
+                    EditorTools.DrawLineInEditor(from, to, Color.grey);
+                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+                }
+                return result;
+            }
+
+            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, string tag, float radius, out RaycastHit hit, bool debug = false)
+            {
+                Ray ray = new Ray(from, (to - from).normalized);
+                bool result = false;
+                hit = new RaycastHit();
+                var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
+                if (hits.Length > 0)
+                {
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                            hit.distance += radius;
+                        }
+                    }
+                }
+                if (!result)
+                {
+                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && hits[i].collider.gameObject.CompareTag(tag) && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                        }
+                    }
+                }
+                if (debug)
+                {
+                    EditorTools.DrawLineInEditor(from, to, Color.grey);
+                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+                }
+                return result;
+            }
+            public static bool CastTo(Vector3 from, Vector3 to, LayerMask layer, float radius, out RaycastHit hit, bool debug = false)
+            {
+                Ray ray = new Ray(from, (to - from).normalized);
+                bool result = false;
+                hit = new RaycastHit();
+                var hits = Physics.SphereCastAll(ray, radius, Vector3.Distance(from, to), layer);
+                if (hits.Length > 0)
+                {
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                            hit.distance += radius;
+                        }
+                    }
+                }
+                if (!result)
+                {
+                    hits = Physics.RaycastAll(ray, Vector3.Distance(from, to), layer);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                        }
+                    }
+                }
+                if (debug)
+                {
+                    EditorTools.DrawLineInEditor(from, to, Color.grey);
+                    EditorTools.DrawSphereInEditor(result ? from + (ray.direction * hit.distance) : to, 0.05f, Color.grey);
+                }
+                return result;
+            }
+            public static bool CastTo2D(Vector2 from, Vector2 to, LayerMask layer, float radius, out RaycastHit2D hit, bool debug = false)
+            {
+                Vector2 dir = (to - from).normalized;
+                bool result = false;
+                hit = new RaycastHit2D();
+                var hits = Physics2D.CircleCastAll(from, radius, dir, Vector3.Distance(from, to), layer);
+                if (hits.Length > 0)
+                {
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                            hit.distance += radius;
+                        }
+                    }
+                }
+                if (!result)
+                {
+                    hits = Physics2D.RaycastAll(from, dir, Vector2.Distance(from, to), layer);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].distance > 0 && (hits[i].distance < hit.distance || hit.distance == 0))
+                        {
+                            result = true;
+                            hit = hits[i];
+                        }
+                    }
+                }
+                if (debug)
+                {
+                    EditorTools.DrawLineInEditor(from, to, Color.grey);
+                    EditorTools.DrawSphereInEditor(result ? from + (dir * hit.distance) : to, 0.05f, Color.grey);
+                }
+                return result;
+            }
+            #endregion Casts
+            #region Async
             public delegate void Call();
             public static async Task DelayedCall(int delayms, Call call)
             {
@@ -3063,9 +4263,30 @@ namespace ClemCAddons
                 }
                 return;
             }
-#endregion Async
+            #endregion Async
+            #region Threading
+            public static void RunInThread(bool backgroundThread, Action action)
+            {
+                new Thread(() =>
+                {
+                    Thread.CurrentThread.IsBackground = backgroundThread;
+                    action.Invoke();
+                }).Start();
+            }
+            #endregion Threading
+            #region IsInCamera
+            public static bool IsInCamera(Vector3 vector, float perc)
+            {
+                return Camera.allCameras[0].WorldToScreenPoint(vector).IsBetween(new Vector3() + (Camera.allCameras[0].pixelRect.size.ToVector3() * perc), Camera.allCameras[0].pixelRect.size - (Camera.allCameras[0].pixelRect.size * perc));
+            }
+
+            public static bool IsInCamera(Transform transform, float perc)
+            {
+                return Camera.allCameras[0].WorldToScreenPoint(transform.position).IsBetween(new Vector3() + (Camera.allCameras[0].rect.size.ToVector3() * perc), Camera.allCameras[0].rect.size - (Camera.allCameras[0].rect.size * perc));
+            }
+            #endregion IsInCamera
         }
-#region Timer
+        #region Timer
         public class RandomC
         {
             public static int RandomInt()
@@ -3086,7 +4307,7 @@ namespace ClemCAddons
             public static int RandomInt(int max)
             {
                 var rand = new System.Random();
-                return rand.Next(max+1);
+                return rand.Next(max + 1);
             }
             public static float RandomFloat(float max)
             {
@@ -3101,17 +4322,17 @@ namespace ClemCAddons
             public static int RandomInt(int min, int max)
             {
                 var rand = new System.Random();
-                return rand.Next(min, max+1);
+                return rand.Next(min, max + 1);
             }
             public static float RandomFloat(float min, float max)
             {
                 var rand = new System.Random();
-                return (float)rand.NextDouble() * (max-min) + min;
+                return (float)rand.NextDouble() * (max - min) + min;
             }
             public static double RandomDouble(double min, double max)
             {
                 var rand = new System.Random();
-                return rand.NextDouble() * (max-min) + min;
+                return rand.NextDouble() * (max - min) + min;
             }
         }
         public class Lerper
@@ -3128,7 +4349,7 @@ namespace ClemCAddons
                     action.Invoke(value);
                 }
             }
-#region SetAtTimer
+            #region SetAtTimer
             private static float SetAtTimer(float origin, float target, float progress)
             {
                 return Mathf.Lerp(origin, target, progress);
@@ -3145,8 +4366,8 @@ namespace ClemCAddons
             {
                 return Quaternion.Lerp(origin, target, progress);
             }
-#endregion SetAtTimer
-#region float
+            #endregion SetAtTimer
+            #region float
             private static unsafe void SetUnsafe(float* source, float value)
             {
                 *source = value;
@@ -3183,6 +4404,38 @@ namespace ClemCAddons
                 LerpSafe(origin, destination, speed, tolerance, setter);
             }
 
+
+            public static void ConstantLerp(float origin, float destination, float duration, Action<float> setter, Action ender)
+            {
+
+                ConstantLerpSafe(duration, origin, destination, setter, ender);
+            }
+
+            public static void Lerp(float origin, float destination, float speed, Action<float> setter, Action ender, float tolerance = 0.01f)
+            {
+
+                LerpSafe(origin, destination, speed, tolerance, setter, ender);
+            }
+
+
+            public static void ConstantLerp(ref float origin, float destination, float duration, Action ender)
+            {
+                unsafe
+                {
+                    fixed (float* p = &origin)
+                        ConstantLerpUnsafe(duration, p, destination, ender);
+                }
+            }
+
+            public static void Lerp(ref float origin, float destination, float speed, Action ender, float tolerance = 0.01f)
+            {
+                unsafe
+                {
+                    fixed (float* p = &origin)
+                        LerpUnsafe(p, destination, speed, tolerance, ender);
+                }
+            }
+
             private static void ConstantLerpSafe(float duration, float origin, float destination, Action<float> setter)
             {
                 HandleConstantLerp(duration, origin, destination, setter, true);
@@ -3194,6 +4447,17 @@ namespace ClemCAddons
             }
 
 
+            private static void ConstantLerpSafe(float duration, float origin, float destination, Action<float> setter, Action ender)
+            {
+                HandleConstantLerp(duration, origin, destination, setter, ender, true);
+            }
+
+            private static void LerpSafe(float origin, float destination, float speed, float tolerance, Action<float> setter, Action ender)
+            {
+                HandleLerp(origin, destination, tolerance, speed, setter, ender, true);
+            }
+
+
             private static unsafe void ConstantLerpUnsafe(float duration, float* origin, float destination)
             {
                 HandleConstantLerp(duration, *origin, destination, (float param) => { SetUnsafe(origin, param); });
@@ -3201,6 +4465,15 @@ namespace ClemCAddons
             private static unsafe void LerpUnsafe(float* origin, float destination, float speed, float tolerance)
             {
                 HandleLerp(*origin, destination, tolerance, speed, (float param) => { SetUnsafe(origin, param); });
+            }
+
+            private static unsafe void ConstantLerpUnsafe(float duration, float* origin, float destination, Action ender)
+            {
+                HandleConstantLerp(duration, *origin, destination, (float param) => { SetUnsafe(origin, param); }, ender);
+            }
+            private static unsafe void LerpUnsafe(float* origin, float destination, float speed, float tolerance, Action ender)
+            {
+                HandleLerp(*origin, destination, tolerance, speed, (float param) => { SetUnsafe(origin, param); }, ender);
             }
 
             private async static void HandleLerp(float origin, float destination, float tolerance, float speed, Action<float> setter, bool standardInvoke = false)
@@ -3232,8 +4505,39 @@ namespace ClemCAddons
                 setter.Invoke(destination);
             }
 
-#endregion float
-#region vector
+            private async static void HandleLerp(float origin, float destination, float tolerance, float speed, Action<float> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                long prev = 0;
+                await Task.Delay(5);
+                while ((origin - destination).Abs() > tolerance)
+                {
+                    origin = Mathf.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
+                    prev = r.ElapsedMilliseconds;
+                    InvokeNow(setter, origin, standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+
+            private async static void HandleConstantLerp(float duration, float origin, float destination, Action<float> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                float max = duration * 1000;
+                while (r.ElapsedMilliseconds <= max)
+                {
+                    InvokeNow(setter, Mathf.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+
+            #endregion float
+            #region vector
             private static unsafe void SetUnsafe(Vector3* source, Vector3 value)
             {
                 *source = value;
@@ -3257,16 +4561,49 @@ namespace ClemCAddons
                 }
             }
 
+
             public static void ConstantLerp(Vector3 origin, Vector3 destination, float duration, Action<Vector3> setter)
             {
-                
+
                 ConstantLerpSafe(duration, origin, destination, setter);
             }
 
             public static void Lerp(Vector3 origin, Vector3 destination, float speed, Action<Vector3> setter, float tolerance = 0.01f)
             {
-                
+
                 LerpSafe(origin, destination, speed, tolerance, setter);
+            }
+
+
+            public static void ConstantLerp(Vector3 origin, Vector3 destination, float duration, Action<Vector3> setter, Action ender)
+            {
+
+                ConstantLerpSafe(duration, origin, destination, setter, ender);
+            }
+
+            public static void Lerp(Vector3 origin, Vector3 destination, float speed, Action<Vector3> setter, Action ender, float tolerance = 0.01f)
+            {
+
+                LerpSafe(origin, destination, speed, tolerance, setter, ender);
+            }
+
+
+            public static void ConstantLerp(ref Vector3 origin, Vector3 destination, float duration, Action ender)
+            {
+                unsafe
+                {
+                    fixed (Vector3* p = &origin)
+                        ConstantLerpUnsafe(duration, p, destination, ender);
+                }
+            }
+
+            public static void Lerp(ref Vector3 origin, Vector3 destination, float speed, Action ender, float tolerance = 0.01f)
+            {
+                unsafe
+                {
+                    fixed (Vector3* p = &origin)
+                        LerpUnsafe(p, destination, speed, tolerance, ender);
+                }
             }
 
             private static void ConstantLerpSafe(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter)
@@ -3280,14 +4617,33 @@ namespace ClemCAddons
             }
 
 
+            private static void ConstantLerpSafe(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender)
+            {
+                HandleConstantLerp(duration, origin, destination, setter, ender, true);
+            }
+
+            private static void LerpSafe(Vector3 origin, Vector3 destination, float speed, float tolerance, Action<Vector3> setter, Action ender)
+            {
+                HandleLerp(origin, destination, tolerance, speed, setter, ender, true);
+            }
+
+
             private static unsafe void ConstantLerpUnsafe(float duration, Vector3* origin, Vector3 destination)
             {
                 HandleConstantLerp(duration, *origin, destination, (Vector3 param) => { SetUnsafe(origin, param); });
             }
-
             private static unsafe void LerpUnsafe(Vector3* origin, Vector3 destination, float speed, float tolerance)
             {
                 HandleLerp(*origin, destination, tolerance, speed, (Vector3 param) => { SetUnsafe(origin, param); });
+            }
+
+            private static unsafe void ConstantLerpUnsafe(float duration, Vector3* origin, Vector3 destination, Action ender)
+            {
+                HandleConstantLerp(duration, *origin, destination, (Vector3 param) => { SetUnsafe(origin, param); }, ender);
+            }
+            private static unsafe void LerpUnsafe(Vector3* origin, Vector3 destination, float speed, float tolerance, Action ender)
+            {
+                HandleLerp(*origin, destination, tolerance, speed, (Vector3 param) => { SetUnsafe(origin, param); }, ender);
             }
 
             private async static void HandleLerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, bool standardInvoke = false)
@@ -3318,8 +4674,39 @@ namespace ClemCAddons
                 }
                 setter.Invoke(destination);
             }
-#endregion vector
-#region vector2
+
+            private async static void HandleLerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                long prev = 0;
+                await Task.Delay(5);
+                while (origin.Distance(destination) > tolerance)
+                {
+                    origin = Vector3.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
+                    prev = r.ElapsedMilliseconds;
+                    InvokeNow(setter, origin, standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+
+            private async static void HandleConstantLerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                float max = duration * 1000;
+                while (r.ElapsedMilliseconds <= max)
+                {
+                    InvokeNow(setter, Vector3.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+            #endregion vector
+            #region vector2
             private static unsafe void SetUnsafe(Vector2* source, Vector2 value)
             {
                 *source = value;
@@ -3356,6 +4743,38 @@ namespace ClemCAddons
                 LerpSafe(origin, destination, speed, tolerance, setter);
             }
 
+
+            public static void ConstantLerp(Vector2 origin, Vector2 destination, float duration, Action<Vector2> setter, Action ender)
+            {
+
+                ConstantLerpSafe(duration, origin, destination, setter, ender);
+            }
+
+            public static void Lerp(Vector2 origin, Vector2 destination, float speed, Action<Vector2> setter, Action ender, float tolerance = 0.01f)
+            {
+
+                LerpSafe(origin, destination, speed, tolerance, setter, ender);
+            }
+
+
+            public static void ConstantLerp(ref Vector2 origin, Vector2 destination, float duration, Action ender)
+            {
+                unsafe
+                {
+                    fixed (Vector2* p = &origin)
+                        ConstantLerpUnsafe(duration, p, destination, ender);
+                }
+            }
+
+            public static void Lerp(ref Vector2 origin, Vector2 destination, float speed, Action ender, float tolerance = 0.01f)
+            {
+                unsafe
+                {
+                    fixed (Vector2* p = &origin)
+                        LerpUnsafe(p, destination, speed, tolerance, ender);
+                }
+            }
+
             private static void ConstantLerpSafe(float duration, Vector2 origin, Vector2 destination, Action<Vector2> setter)
             {
                 HandleConstantLerp(duration, origin, destination, setter, true);
@@ -3367,14 +4786,33 @@ namespace ClemCAddons
             }
 
 
+            private static void ConstantLerpSafe(float duration, Vector2 origin, Vector2 destination, Action<Vector2> setter, Action ender)
+            {
+                HandleConstantLerp(duration, origin, destination, setter, ender, true);
+            }
+
+            private static void LerpSafe(Vector2 origin, Vector2 destination, float speed, float tolerance, Action<Vector2> setter, Action ender)
+            {
+                HandleLerp(origin, destination, tolerance, speed, setter, ender, true);
+            }
+
+
             private static unsafe void ConstantLerpUnsafe(float duration, Vector2* origin, Vector2 destination)
             {
                 HandleConstantLerp(duration, *origin, destination, (Vector2 param) => { SetUnsafe(origin, param); });
             }
-
             private static unsafe void LerpUnsafe(Vector2* origin, Vector2 destination, float speed, float tolerance)
             {
                 HandleLerp(*origin, destination, tolerance, speed, (Vector2 param) => { SetUnsafe(origin, param); });
+            }
+
+            private static unsafe void ConstantLerpUnsafe(float duration, Vector2* origin, Vector2 destination, Action ender)
+            {
+                HandleConstantLerp(duration, *origin, destination, (Vector2 param) => { SetUnsafe(origin, param); }, ender);
+            }
+            private static unsafe void LerpUnsafe(Vector2* origin, Vector2 destination, float speed, float tolerance, Action ender)
+            {
+                HandleLerp(*origin, destination, tolerance, speed, (Vector2 param) => { SetUnsafe(origin, param); }, ender);
             }
 
             private async static void HandleLerp(Vector2 origin, Vector2 destination, float tolerance, float speed, Action<Vector2> setter, bool standardInvoke = false)
@@ -3405,8 +4843,39 @@ namespace ClemCAddons
                 }
                 setter.Invoke(destination);
             }
-#endregion vector2
-#region quaternion
+
+            private async static void HandleLerp(Vector2 origin, Vector2 destination, float tolerance, float speed, Action<Vector2> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                long prev = 0;
+                await Task.Delay(5);
+                while (origin.Distance(destination) > tolerance)
+                {
+                    origin = Vector2.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
+                    prev = r.ElapsedMilliseconds;
+                    InvokeNow(setter, origin, standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+
+            private async static void HandleConstantLerp(float duration, Vector2 origin, Vector2 destination, Action<Vector2> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                float max = duration * 1000;
+                while (r.ElapsedMilliseconds <= max)
+                {
+                    InvokeNow(setter, Vector2.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+            #endregion vector2
+            #region quaternion
             private static unsafe void SetUnsafe(Quaternion* source, Quaternion value)
             {
                 *source = value;
@@ -3430,6 +4899,7 @@ namespace ClemCAddons
                 }
             }
 
+
             public static void ConstantLerp(Quaternion origin, Quaternion destination, float duration, Action<Quaternion> setter)
             {
 
@@ -3440,6 +4910,38 @@ namespace ClemCAddons
             {
 
                 LerpSafe(origin, destination, speed, tolerance, setter);
+            }
+
+
+            public static void ConstantLerp(Quaternion origin, Quaternion destination, float duration, Action<Quaternion> setter, Action ender)
+            {
+
+                ConstantLerpSafe(duration, origin, destination, setter, ender);
+            }
+
+            public static void Lerp(Quaternion origin, Quaternion destination, float speed, Action<Quaternion> setter, Action ender, float tolerance = 0.01f)
+            {
+
+                LerpSafe(origin, destination, speed, tolerance, setter, ender);
+            }
+
+
+            public static void ConstantLerp(ref Quaternion origin, Quaternion destination, float duration, Action ender)
+            {
+                unsafe
+                {
+                    fixed (Quaternion* p = &origin)
+                        ConstantLerpUnsafe(duration, p, destination, ender);
+                }
+            }
+
+            public static void Lerp(ref Quaternion origin, Quaternion destination, float speed, Action ender, float tolerance = 0.01f)
+            {
+                unsafe
+                {
+                    fixed (Quaternion* p = &origin)
+                        LerpUnsafe(p, destination, speed, tolerance, ender);
+                }
             }
 
             private static void ConstantLerpSafe(float duration, Quaternion origin, Quaternion destination, Action<Quaternion> setter)
@@ -3453,14 +4955,33 @@ namespace ClemCAddons
             }
 
 
+            private static void ConstantLerpSafe(float duration, Quaternion origin, Quaternion destination, Action<Quaternion> setter, Action ender)
+            {
+                HandleConstantLerp(duration, origin, destination, setter, ender, true);
+            }
+
+            private static void LerpSafe(Quaternion origin, Quaternion destination, float speed, float tolerance, Action<Quaternion> setter, Action ender)
+            {
+                HandleLerp(origin, destination, tolerance, speed, setter, ender, true);
+            }
+
+
             private static unsafe void ConstantLerpUnsafe(float duration, Quaternion* origin, Quaternion destination)
             {
                 HandleConstantLerp(duration, *origin, destination, (Quaternion param) => { SetUnsafe(origin, param); });
             }
-
             private static unsafe void LerpUnsafe(Quaternion* origin, Quaternion destination, float speed, float tolerance)
             {
                 HandleLerp(*origin, destination, tolerance, speed, (Quaternion param) => { SetUnsafe(origin, param); });
+            }
+
+            private static unsafe void ConstantLerpUnsafe(float duration, Quaternion* origin, Quaternion destination, Action ender)
+            {
+                HandleConstantLerp(duration, *origin, destination, (Quaternion param) => { SetUnsafe(origin, param); }, ender);
+            }
+            private static unsafe void LerpUnsafe(Quaternion* origin, Quaternion destination, float speed, float tolerance, Action ender)
+            {
+                HandleLerp(*origin, destination, tolerance, speed, (Quaternion param) => { SetUnsafe(origin, param); }, ender);
             }
 
             private async static void HandleLerp(Quaternion origin, Quaternion destination, float tolerance, float speed, Action<Quaternion> setter, bool standardInvoke = false)
@@ -3469,7 +4990,7 @@ namespace ClemCAddons
                 r.Start();
                 long prev = 0;
                 await Task.Delay(5);
-                while (!origin.IsApproximatelyEqual(destination, tolerance))
+                while (Quaternion.Dot(origin, destination) > tolerance)
                 {
                     origin = Quaternion.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
@@ -3491,11 +5012,206 @@ namespace ClemCAddons
                 }
                 setter.Invoke(destination);
             }
-#endregion quaternion
+
+            private async static void HandleLerp(Quaternion origin, Quaternion destination, float tolerance, float speed, Action<Quaternion> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                long prev = 0;
+                await Task.Delay(5);
+                while (Quaternion.Dot(origin, destination) > tolerance)
+                {
+                    origin = Quaternion.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
+                    prev = r.ElapsedMilliseconds;
+                    InvokeNow(setter, origin, standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+
+            private async static void HandleConstantLerp(float duration, Quaternion origin, Quaternion destination, Action<Quaternion> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                float max = duration * 1000;
+                while (r.ElapsedMilliseconds <= max)
+                {
+                    InvokeNow(setter, Quaternion.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+            #endregion quaternion
+            #region vectorSlerp
+            public static void ConstantSlerp(ref Vector3 origin, Vector3 destination, float duration)
+            {
+                unsafe
+                {
+                    fixed (Vector3* p = &origin)
+                        ConstantSlerpUnsafe(duration, p, destination);
+                }
+            }
+
+            public static void Slerp(ref Vector3 origin, Vector3 destination, float speed, float tolerance = 0.01f)
+            {
+                unsafe
+                {
+                    fixed (Vector3* p = &origin)
+                        SlerpUnsafe(p, destination, speed, tolerance);
+                }
+            }
+
+
+            public static void ConstantSlerp(Vector3 origin, Vector3 destination, float duration, Action<Vector3> setter)
+            {
+
+                ConstantSlerpSafe(duration, origin, destination, setter);
+            }
+
+            public static void Slerp(Vector3 origin, Vector3 destination, float speed, Action<Vector3> setter, float tolerance = 0.01f)
+            {
+
+                SlerpSafe(origin, destination, speed, tolerance, setter);
+            }
+
+
+            public static void ConstantSlerp(Vector3 origin, Vector3 destination, float duration, Action<Vector3> setter, Action ender)
+            {
+
+                ConstantSlerpSafe(duration, origin, destination, setter, ender);
+            }
+
+            public static void Slerp(Vector3 origin, Vector3 destination, float speed, Action<Vector3> setter, Action ender, float tolerance = 0.01f)
+            {
+
+                SlerpSafe(origin, destination, speed, tolerance, setter, ender);
+            }
+
+
+            public static void ConstantSlerp(ref Vector3 origin, Vector3 destination, float duration, Action ender)
+            {
+                unsafe
+                {
+                    fixed (Vector3* p = &origin)
+                        ConstantSlerpUnsafe(duration, p, destination, ender);
+                }
+            }
+
+            public static void Slerp(ref Vector3 origin, Vector3 destination, float speed, Action ender, float tolerance = 0.01f)
+            {
+                unsafe
+                {
+                    fixed (Vector3* p = &origin)
+                        SlerpUnsafe(p, destination, speed, tolerance, ender);
+                }
+            }
+
+            private static void ConstantSlerpSafe(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter)
+            {
+                HandleConstantSlerp(duration, origin, destination, setter, true);
+            }
+
+            private static void SlerpSafe(Vector3 origin, Vector3 destination, float speed, float tolerance, Action<Vector3> setter)
+            {
+                HandleSlerp(origin, destination, tolerance, speed, setter, true);
+            }
+
+
+            private static void ConstantSlerpSafe(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender)
+            {
+                HandleConstantSlerp(duration, origin, destination, setter, ender, true);
+            }
+
+            private static void SlerpSafe(Vector3 origin, Vector3 destination, float speed, float tolerance, Action<Vector3> setter, Action ender)
+            {
+                HandleSlerp(origin, destination, tolerance, speed, setter, ender, true);
+            }
+
+
+            private static unsafe void ConstantSlerpUnsafe(float duration, Vector3* origin, Vector3 destination)
+            {
+                HandleConstantSlerp(duration, *origin, destination, (Vector3 param) => { SetUnsafe(origin, param); });
+            }
+            private static unsafe void SlerpUnsafe(Vector3* origin, Vector3 destination, float speed, float tolerance)
+            {
+                HandleSlerp(*origin, destination, tolerance, speed, (Vector3 param) => { SetUnsafe(origin, param); });
+            }
+
+            private static unsafe void ConstantSlerpUnsafe(float duration, Vector3* origin, Vector3 destination, Action ender)
+            {
+                HandleConstantSlerp(duration, *origin, destination, (Vector3 param) => { SetUnsafe(origin, param); }, ender);
+            }
+            private static unsafe void SlerpUnsafe(Vector3* origin, Vector3 destination, float speed, float tolerance, Action ender)
+            {
+                HandleSlerp(*origin, destination, tolerance, speed, (Vector3 param) => { SetUnsafe(origin, param); }, ender);
+            }
+
+            private async static void HandleSlerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                long prev = 0;
+                await Task.Delay(5);
+                while (origin.Distance(destination) > tolerance)
+                {
+                    origin = Vector3.Slerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
+                    prev = r.ElapsedMilliseconds;
+                    InvokeNow(setter, origin, standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+            }
+
+            private async static void HandleConstantSlerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                float max = duration * 1000;
+                while (r.ElapsedMilliseconds <= max)
+                {
+                    InvokeNow(setter, Vector3.Slerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+            }
+
+            private async static void HandleSlerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                long prev = 0;
+                await Task.Delay(5);
+                while (origin.Distance(destination) > tolerance)
+                {
+                    origin = Vector3.Slerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
+                    prev = r.ElapsedMilliseconds;
+                    InvokeNow(setter, origin, standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+
+            private async static void HandleConstantSlerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            {
+                var r = new Stopwatch();
+                r.Start();
+                float max = duration * 1000;
+                while (r.ElapsedMilliseconds <= max)
+                {
+                    InvokeNow(setter, Vector3.Slerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
+                    await Task.Delay(5);
+                }
+                setter.Invoke(destination);
+                ender.Invoke();
+            }
+            #endregion vectorSlerp
         }
         public class Timer
         {
-            
+
             public static bool MinimumDelay(int id, int duration, bool firstTryPasses = false, bool clearOnSuccess = true)
             {
                 var c = timers.FindIndex(t => t.Key == id);
@@ -3659,25 +5375,195 @@ namespace ClemCAddons
                 EndTimer(id);
             }
         }
-#endregion Timer
-#endregion Utilities
+        #endregion Timer
+        #endregion Utilities
+        #region EditorTools
+        public class EditorTools
+        {
+            #region Drawers
+            public static void DrawLineInEditor(Vector3 from, Vector3 to, Color color)
+            {
+#if (UNITY_EDITOR)
+                if (!Application.isPlaying)
+                {
+                    Gizmos.color = color;
+                    Gizmos.DrawLine(from, to);
+                }
+#endif
+            }
+            public static void DrawSphereInEditor(Vector3 position, float radius, Color color)
+            {
+#if (UNITY_EDITOR)
+                if (!Application.isPlaying)
+                {
+                    Gizmos.color = color;
+                    Gizmos.DrawSphere(position, radius);
+                }
+#endif
+            }
+            public static void DrawCubeInEditor(Vector3 position, Vector3 dimensions, Color color)
+            {
+#if (UNITY_EDITOR)
+                if (!Application.isPlaying)
+                {
+                    Gizmos.color = color;
+                    Gizmos.DrawCube(position, dimensions * 2);
+                }
+#endif
+            }
+            #endregion Drawers
+        }
+        #endregion EditorTools
+        #region Serializable
+        namespace Serializable
+        {
+            [Serializable]
+            public struct SerializableVector3
+            {
+                /// <summary>
+                /// x component
+                /// </summary>
+                public float x;
+
+                /// <summary>
+                /// y component
+                /// </summary>
+                public float y;
+
+                /// <summary>
+                /// z component
+                /// </summary>
+                public float z;
+
+                /// <summary>
+                /// Constructor
+                /// </summary>
+                /// <param name="rX"></param>
+                /// <param name="rY"></param>
+                /// <param name="rZ"></param>
+                public SerializableVector3(float rX, float rY, float rZ)
+                {
+                    x = rX;
+                    y = rY;
+                    z = rZ;
+                }
+
+                /// <summary>
+                /// Returns a string representation of the object
+                /// </summary>
+                /// <returns></returns>
+                public override string ToString()
+                {
+                    return String.Format("[{0}, {1}, {2}]", x, y, z);
+                }
+
+                /// <summary>
+                /// Automatic conversion from SerializableVector3 to Vector3
+                /// </summary>
+                /// <param name="rValue"></param>
+                /// <returns></returns>
+                public static implicit operator Vector3(SerializableVector3 rValue)
+                {
+                    return new Vector3(rValue.x, rValue.y, rValue.z);
+                }
+
+                /// <summary>
+                /// Automatic conversion from Vector3 to SerializableVector3
+                /// </summary>
+                /// <param name="rValue"></param>
+                /// <returns></returns>
+                public static implicit operator SerializableVector3(Vector3 rValue)
+                {
+                    return new SerializableVector3(rValue.x, rValue.y, rValue.z);
+                }
+            }
+
+            [Serializable]
+            public struct SerializableQuaternion
+            {
+                /// <summary>
+                /// x component
+                /// </summary>
+                public float x;
+
+                /// <summary>
+                /// y component
+                /// </summary>
+                public float y;
+
+                /// <summary>
+                /// z component
+                /// </summary>
+                public float z;
+
+                /// <summary>
+                /// w component
+                /// </summary>
+                public float w;
+
+                /// <summary>
+                /// Constructor
+                /// </summary>
+                /// <param name="rX"></param>
+                /// <param name="rY"></param>
+                /// <param name="rZ"></param>
+                /// <param name="rW"></param>
+                public SerializableQuaternion(float rX, float rY, float rZ, float rW)
+                {
+                    x = rX;
+                    y = rY;
+                    z = rZ;
+                    w = rW;
+                }
+
+                /// <summary>
+                /// Returns a string representation of the object
+                /// </summary>
+                /// <returns></returns>
+                public override string ToString()
+                {
+                    return String.Format("[{0}, {1}, {2}, {3}]", x, y, z, w);
+                }
+
+                /// <summary>
+                /// Automatic conversion from SerializableQuaternion to Quaternion
+                /// </summary>
+                /// <param name="rValue"></param>
+                /// <returns></returns>
+                public static implicit operator Quaternion(SerializableQuaternion rValue)
+                {
+                    return new Quaternion(rValue.x, rValue.y, rValue.z, rValue.w);
+                }
+
+                /// <summary>
+                /// Automatic conversion from Quaternion to SerializableQuaternion
+                /// </summary>
+                /// <param name="rValue"></param>
+                /// <returns></returns>
+                public static implicit operator SerializableQuaternion(Quaternion rValue)
+                {
+                    return new SerializableQuaternion(rValue.x, rValue.y, rValue.z, rValue.w);
+                }
+            }
+        }
+        #endregion Serializable
     }
-#region Definitions
+    #region Definitions
     #region Serializable Quaternion
     [Serializable]
     public class SerializableQuaternion
     {
         [SerializeField]
-        private SerializableVector3 _angle = new SerializableVector3();
+        private Vector3 _angle = new Vector3();
         public Vector3 Angle
         {
             get
             {
-                return _angle.Value;
+                return _angle;
             }
             set
             {
-                _angle = new SerializableVector3(value);
+                _angle = value;
                 _q = Quaternion.Euler(value);
             }
         }
@@ -3691,26 +5577,26 @@ namespace ClemCAddons
             set
             {
                 _q = value;
-                _angle = new SerializableVector3(value.eulerAngles);
+                _angle = value.eulerAngles;
             }
         }
 
         public SerializableQuaternion(Vector3 angle)
         {
             _q = Quaternion.Euler(angle);
-            _angle = new SerializableVector3(angle);
+            _angle = angle;
         }
 
         public SerializableQuaternion(Quaternion angle)
         {
             _q = angle;
-            _angle = new SerializableVector3(angle.eulerAngles);
+            _angle = angle.eulerAngles;
         }
 
         public SerializableQuaternion()
         {
             _q = Quaternion.identity;
-            _angle = new SerializableVector3(Quaternion.identity.eulerAngles);
+            _angle = Quaternion.identity.eulerAngles;
         }
 
         public void Update()
@@ -3719,140 +5605,5 @@ namespace ClemCAddons
         }
     }
     #endregion Serializable Quaternion
-    #region Serializable Vector3
-    [Serializable]
-    public class SerializableVector3
-    {
-        [SerializeField]
-        private float _x;
-        [SerializeField]
-        private float _y;
-        [SerializeField]
-        private float _z;
-
-        public float x => _x;
-
-        public float y => _y;
-
-        public float z => _z;
-
-        public Vector3 Value
-        {
-            get
-            {
-                return new Vector3(_x, _y, _z);
-            }
-            set
-            {
-                _x = value.x;
-                _y = value.y;
-                _z = value.z;
-            }
-        }
-
-        public SerializableVector3(Vector3 value)
-        {
-            _x = value.x;
-            _y = value.y;
-            _z = value.z;
-        }
-
-        public SerializableVector3(float x, float y, float z)
-        {
-            _x = x;
-            _y = y;
-            _z = z;
-        }
-
-        public SerializableVector3(SerializableVector3 value)
-        {
-            _x = value._x;
-            _y = value._y;
-            _z = value._z;
-        }
-
-        public SerializableVector3()
-        {
-            _x = 0;
-            _y = 0;
-            _z = 0;
-        }
-    }
-    #endregion Serializable Vector3
-    #region Serializable Dictionary
-    // https://stackoverflow.com/a/1728996
-    [Serializable]
-    [XmlRoot("dictionary")]
-    public class SerializableDictionary<TKey, TValue>
-    : Dictionary<TKey, TValue>, IXmlSerializable
-    {
-        public SerializableDictionary() { }
-        public SerializableDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary) { }
-        public SerializableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer) : base(dictionary, comparer) { }
-        public SerializableDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }
-        public SerializableDictionary(int capacity) : base(capacity) { }
-        public SerializableDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(capacity, comparer) { }
-
-        #region IXmlSerializable Members
-        public System.Xml.Schema.XmlSchema GetSchema()
-        {
-            return null;
-        }
-
-        public void ReadXml(System.Xml.XmlReader reader)
-        {
-            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
-
-            bool wasEmpty = reader.IsEmptyElement;
-            reader.Read();
-
-            if (wasEmpty)
-                return;
-
-            while (reader.NodeType != System.Xml.XmlNodeType.EndElement)
-            {
-                reader.ReadStartElement("item");
-
-                reader.ReadStartElement("key");
-                TKey key = (TKey)keySerializer.Deserialize(reader);
-                reader.ReadEndElement();
-
-                reader.ReadStartElement("value");
-                TValue value = (TValue)valueSerializer.Deserialize(reader);
-                reader.ReadEndElement();
-
-                this.Add(key, value);
-
-                reader.ReadEndElement();
-                reader.MoveToContent();
-            }
-            reader.ReadEndElement();
-        }
-
-        public void WriteXml(System.Xml.XmlWriter writer)
-        {
-            XmlSerializer keySerializer = new XmlSerializer(typeof(TKey));
-            XmlSerializer valueSerializer = new XmlSerializer(typeof(TValue));
-
-            foreach (TKey key in this.Keys)
-            {
-                writer.WriteStartElement("item");
-
-                writer.WriteStartElement("key");
-                keySerializer.Serialize(writer, key);
-                writer.WriteEndElement();
-
-                writer.WriteStartElement("value");
-                TValue value = this[key];
-                valueSerializer.Serialize(writer, value);
-                writer.WriteEndElement();
-
-                writer.WriteEndElement();
-            }
-        }
-        #endregion
-    }
-    #endregion Serializable Dictionary
     #endregion Definitions
 }
