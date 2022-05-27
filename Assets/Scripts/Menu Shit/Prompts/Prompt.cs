@@ -15,6 +15,8 @@ public class Prompt : MonoBehaviour
     {
         public string Title;
         public string Description;
+        public string Info1;
+        public string Info2;
         public FacilityMenu FacilityMenu;
         public TransformationFacilityMenu TransformationFacilityMenu;
         public ResourceSelection ResourceSelection;

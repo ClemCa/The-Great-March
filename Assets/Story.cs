@@ -12,6 +12,8 @@ public class Story : DialogueViewBase
     private bool _dialogueRunning = false;
     private bool _skipNext = false;
 
+    public bool DialogueRunning { get => _dialogueRunning; }
+
     [YarnCommand("SkipAhead")]
     public void SkipAhead()
     {

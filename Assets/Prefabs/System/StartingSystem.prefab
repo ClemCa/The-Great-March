@@ -148,27 +148,36 @@ MonoBehaviour:
   starterPeople: 15
   starterWildcards: 3
   starterResources:
-  - Ressource: 0
+  - Resource: 0
     Quantity: 5
-  - Ressource: 1
+  - Resource: 0
     Quantity: 10
-  - Ressource: 2
+  - Resource: 0
     Quantity: 10
-  - Ressource: 3
+  - Resource: 0
     Quantity: 3
-  - Ressource: 4
+  - Resource: 0
     Quantity: 0
-  - Ressource: 5
+  - Resource: 0
     Quantity: 0
-  - Ressource: 6
+  - Resource: 0
     Quantity: 1
-  - Ressource: 7
+  - Resource: 0
     Quantity: 1
   starterAdvancedResources:
-  - Ressource: 2
+  - Resource: 0
     Quantity: 5
   starterFacilities: 040000000000000006000000
   starterTransformationFacilities: 0000000001000000
   starterSlots: 00000000010000000300000004000000050000000600000007000000
+  starterShips:
+  - Type: 1
+    Fuel: 10
+  - Type: 0
+    Fuel: 8
+  - Type: 0
+    Fuel: 8
+  - Type: 3
+    Fuel: 0
   roll: 0
   temperateType: 0

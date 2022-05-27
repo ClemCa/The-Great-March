@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 8286233338036583031}
   - component: {fileID: 8286233338036583029}
   - component: {fileID: 8286233338036583028}
-  - component: {fileID: 3783456023244537899}
-  - component: {fileID: 6620765836655821674}
-  - component: {fileID: 7277581506583146609}
+  - component: {fileID: 8370133944096624297}
+  - component: {fileID: 3846219119224733262}
+  - component: {fileID: 2517512951309872237}
   m_Layer: 5
-  m_Name: FighterShip
+  m_Name: PresidentialShip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -69,7 +69,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7aebdd5374093cf4884604f7c3ec5695, type: 3}
+  m_Sprite: {fileID: 21300000, guid: de51a85075e4ab74d8ad782dcef6f37c, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -79,7 +79,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3783456023244537899
+--- !u!114 &8370133944096624297
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -123,7 +123,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &6620765836655821674
+--- !u!114 &3846219119224733262
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -136,17 +136,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _data:
-    Title: Fighter Ship
-    Description: A small fighter ship
-    Info1: Can fire up to three missiles in a trip
-    Info2: Consumes 2 fuel. Requires a pilot
+    Title: Presidential Ship
+    Description: With many necessary features for basic space survival, this ship
+      is best equiped to deal with any situation
+    Info1: The champagne is in the cupboard
+    Info2: Consumes 5 fuel. Can only transport a president
     FacilityMenu: {fileID: 0}
     TransformationFacilityMenu: {fileID: 0}
     ResourceSelection: {fileID: 0}
     ResourceMenu: {fileID: 0}
     SlotMenu: {fileID: 0}
     WildcardMenu: {fileID: 0}
---- !u!114 &7277581506583146609
+--- !u!114 &2517512951309872237
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

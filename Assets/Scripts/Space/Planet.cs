@@ -29,13 +29,16 @@ public class Planet : MonoBehaviour
     private static int moveSelection;
     private static bool moveSelectionAdv;
     private static int moveSelectionCount;
+    private static int moveSelectionCountPeople;
+    private static int moveSelectionShipID;
     private static Planet moveSelectionOrigin;
     private static bool moveSelectionType;
+    private static bool newCargoFormat;
     private bool _hasPlayer = false;
     private static Planet _leaderPlanet;
     private int _roll = -1;
     private int _temperateType = -1;
-    private List<Registry.ShipType> _ships;
+    private List<Registry.Ship> _ships = new List<Registry.Ship>();
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
@@ -56,7 +59,8 @@ public class Planet : MonoBehaviour
     public List<int> FacilitiesOverTime { get => _facilitiesOverTime; }
     public int TemperateType { get => _temperateType; set => _temperateType = value; }
     public int Roll { get => _roll; set => _roll = value; }
-    public List<Registry.ShipType> Ships { get => _ships; set => _ships = value; }
+    public List<Registry.Ship> Ships { get => _ships; set => _ships = value; }
+
 
     public static void Select(Planet planet)
     {
@@ -67,6 +71,8 @@ public class Planet : MonoBehaviour
     {
         selected = null;
     }
+
+    
 
     public Saver.PlanetStorage GetPlanetStorage()
     {
@@ -130,6 +136,16 @@ public class Planet : MonoBehaviour
         return _availableWildcards;
     }
 
+    public int GetAvailableFuel()
+    {
+        int gas = GetResource(Registry.Resources.Gas);
+        int oil = GetResource(Registry.Resources.Oil);
+        int hydrogen = GetResource(Registry.Resources.Hydrogen);
+        int highefficiencyfuel = GetResource(Registry.AdvancedResources.HighEfficiencyFuel);
+        int hydrogenbattery = GetResource(Registry.AdvancedResources.HydrogenBattery);
+        return gas + oil + hydrogen + highefficiencyfuel * 10 + hydrogenbattery * 10;
+    }
+
     public int GetResource(Registry.Resources resoure)
     {
         return _resources[resoure];
@@ -144,6 +160,54 @@ public class Planet : MonoBehaviour
     {
         Scoring.advancedResourcesUnits += count;
         _advancedResources[resource] += count;
+    }
+
+    public void ConsumeFuel(int count)
+    {
+        int gas = GetResource(Registry.Resources.Gas);
+        int oil = GetResource(Registry.Resources.Oil);
+        int hydrogen = GetResource(Registry.Resources.Hydrogen);
+        int highefficiencyfuel = GetResource(Registry.AdvancedResources.HighEfficiencyFuel);
+        int hydrogenbattery = GetResource(Registry.AdvancedResources.HydrogenBattery);
+        while(count > 0)
+        {
+            if(hydrogenbattery > 0)
+            {
+                count -= 10;
+                hydrogenbattery--;
+                TakeResource(Registry.AdvancedResources.HydrogenBattery);
+                continue;
+            }
+            if (highefficiencyfuel > 0)
+            {
+                count -= 10;
+                highefficiencyfuel--;
+                TakeResource(Registry.AdvancedResources.HighEfficiencyFuel);
+                continue;
+            }
+            if (hydrogen > 0)
+            {
+                count --;
+                hydrogen--;
+                TakeResource(Registry.Resources.Hydrogen);
+                continue;
+            }
+            if (oil > 0)
+            {
+                count--;
+                hydrogen--;
+                TakeResource(Registry.Resources.Oil);
+                continue;
+            }
+            if (gas > 0)
+            {
+                count--;
+                gas--;
+                TakeResource(Registry.Resources.Gas);
+                continue;
+            }
+            break;
+        }
     }
 
     public void TakeResource(Registry.AdvancedResources resource, int count = 1)
@@ -281,12 +345,14 @@ public class Planet : MonoBehaviour
     {
         _availableResources = availableResources;
     }
-    public void EngageMoveSelectionMode(Registry.Resources resource, int count)
+    public void EngageMoveSelectionMode(Registry.Resources resource, int count, int shipID, int countPeople = 0)
     {
         Pausing.Block();
         moveSelection = (int)resource;
         moveSelectionAdv = false;
         moveSelectionCount = count;
+        moveSelectionCountPeople = countPeople;
+        moveSelectionShipID = shipID;
         moveSelectionOrigin = selected;
         moveSelectionType = true;
         selected = null;
@@ -296,12 +362,14 @@ public class Planet : MonoBehaviour
             planet.GetComponentInChildren<Outline>().color = 1;
         }
     }
-    public void EngageMoveSelectionMode(Registry.AdvancedResources resource, int count)
+    public void EngageMoveSelectionMode(Registry.AdvancedResources resource, int count, int shipID, int countPeople = 0)
     {
         Pausing.Block();
         moveSelection = (int)resource;
         moveSelectionAdv = true;
         moveSelectionCount = count;
+        moveSelectionCountPeople = countPeople;
+        moveSelectionShipID = shipID;
         moveSelectionOrigin = selected;
         moveSelectionType = true;
         selected = null;
@@ -311,19 +379,21 @@ public class Planet : MonoBehaviour
             planet.GetComponentInChildren<Outline>().color = 1;
         }
     }
-    public void EngageMoveSelectionMode(int count)
+    public void EngageMoveSelectionMode(int count, int shipID)
     {
         Pausing.Block();
         moveSelectionCount = count;
         moveSelectionOrigin = selected;
+        moveSelectionShipID = shipID;
         moveSelectionType = false;
         selected = null;
     }
-    public void EngageMoveSelectionMode()
+    public void EngageMoveSelectionMode(int shipID)
     {
         Pausing.Block();
         moveSelectionCount = -1;
         moveSelectionOrigin = selected;
+        moveSelectionShipID = shipID;
         moveSelectionType = false;
         selected = null;
     }
@@ -506,12 +576,13 @@ public class Planet : MonoBehaviour
                     MenuAudioManager.Instance.PlayClick();
                     if(moveSelectionCount == -1)
                     {
+                        int shipNum = moveSelectionShipID;
                         var order = new OrderHandler.Order(
                                 OrderHandler.OrderType.WavingGoodbye,
                                 10,
                                 1f,
                                 1,
-                                new OrderHandler.OrderExec(moveSelectionOrigin, this)
+                                new OrderHandler.OrderExec(moveSelectionOrigin, this, shipNum)
                             );
                         OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                     }
@@ -520,6 +591,8 @@ public class Planet : MonoBehaviour
                         if (moveSelectionType)
                         {
                             int count = moveSelectionCount;
+                            int count2 = moveSelectionCountPeople;
+                            int shipNum = moveSelectionShipID;
                             if (moveSelectionAdv)
                             {
                                 Registry.AdvancedResources resource = (Registry.AdvancedResources)moveSelection;
@@ -528,7 +601,7 @@ public class Planet : MonoBehaviour
                                     20,
                                     0.5f,
                                     3,
-                                    new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count)
+                                    new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count, count2, shipNum)
                                 );
                                 OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                             }
@@ -540,7 +613,7 @@ public class Planet : MonoBehaviour
                                     20,
                                     0.5f,
                                     3,
-                                    new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count)
+                                    new OrderHandler.OrderExec(moveSelectionOrigin, this, resource, count, count2, shipNum)
                                 );
                                 OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                             }
@@ -548,12 +621,13 @@ public class Planet : MonoBehaviour
                         else
                         {
                             int count = moveSelectionCount;
+                            int shipNum = moveSelectionShipID;
                             var order = new OrderHandler.Order(
                                    OrderHandler.OrderType.PreparingForTrip,
                                    20,
                                    0.5f,
                                    15,
-                                   new OrderHandler.OrderExec(moveSelectionOrigin, this, count)
+                                   new OrderHandler.OrderExec(moveSelectionOrigin, this, count, shipNum)
                                );
                             OrderHandler.Instance.Queue(order, moveSelectionOrigin);
                         }

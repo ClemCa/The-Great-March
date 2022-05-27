@@ -19,7 +19,7 @@ public class StoryScript : MonoBehaviour
 
     public static void CheckStage()
     {
-        if (StoryStage == 0)
+        if (StoryStage == 0 && !Application.isEditor)
         {
             DialogDisplayer.Instance.StartDialogue("Intro_Start");
             StoryStage++;

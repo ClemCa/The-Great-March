@@ -24,9 +24,9 @@ public class SelectResourcesButton : MonoBehaviour, IPointerClickHandler
         {
             transform.GetComponentInChildren<TMPro.TMP_Text>().text = "(Planet)";
             if(_isAdvanced)
-                Planet.Selected.EngageMoveSelectionMode(_advancedResource, ShippingSubMenu.Instance.GetValue());
+                Planet.Selected.EngageMoveSelectionMode(_advancedResource, ShippingSubMenu.Instance.GetValue(), 0);
             else
-                Planet.Selected.EngageMoveSelectionMode(_resource, ShippingSubMenu.Instance.GetValue());
+                Planet.Selected.EngageMoveSelectionMode(_resource, ShippingSubMenu.Instance.GetValue(), 0);
         }
         if (ResourcesSelectionSubMenu.Instance.Enabled)
         {

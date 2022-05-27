@@ -158,8 +158,8 @@ public class PromptMenu : MonoBehaviour
         }
         transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Title;
         transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Description;
-        transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
-        transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "";
+        transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Info1;
+        transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Info2;
         rect.anchorMin = rect.anchorMin.SetY(0);
     }
 

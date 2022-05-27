@@ -23,7 +23,7 @@ public class ShippingMenu : MonoBehaviour, IPointerClickHandler
             case ShippingMenuContent.Player:
                 if (!Planet.Selected.HasPlayer || Cargo.LeaderInTransit)
                     return;
-                Planet.Selected.EngageMoveSelectionMode();
+                Planet.Selected.EngageMoveSelectionMode(0);
                 break;
             case ShippingMenuContent.People:
                 ShippingSubMenu.Instance.ShowPeopleChoice();

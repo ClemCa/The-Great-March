@@ -43,32 +43,38 @@ public class OrderHandler : MonoBehaviour
         public ActionType Type;
         public string Destination;
         public int Count;
+        public int Count2 = 0;
         public Registry.Resources Resource;
         public Registry.AdvancedResources AdvancedResource;
         public Registry.Facilities Facility;
         public Registry.TransformationFacilities TransformationFacility;
+        public int ShipID;
+        public Registry.Ship Ship;
 
-
-        public OrderExec(Planet planet, Planet destination)
+        public OrderExec(Planet planet, Planet destination, int shipID)
         {
             Planet = planet.Name;
             Destination = destination.Name;
             Type = ActionType.CargoLeader;
+            ShipID = shipID;
         }
-        public OrderExec(Planet planet, Planet destination, int count)
+        public OrderExec(Planet planet, Planet destination, int count, int shipID)
         {
             Planet = planet.Name;
             Destination = destination.Name;
             Count = count;
             Type = ActionType.CargoPeople;
+            ShipID = shipID;
         }
-        public OrderExec(Planet planet, Planet destination, Registry.Resources resource, int count)
+        public OrderExec(Planet planet, Planet destination, Registry.Resources resource, int count, int count2, int shipID)
         {
             Planet = planet.Name;
             Destination = destination.Name;
             Count = count;
+            Count2 = count2;
             Resource = resource;
             Type = ActionType.CargoResources;
+            ShipID = shipID;
         }
         public OrderExec(Planet planet, Registry.Resources resource, int count)
         {
@@ -78,13 +84,15 @@ public class OrderHandler : MonoBehaviour
             Type = ActionType.Resources;
         }
 
-        public OrderExec(Planet planet, Planet destination, Registry.AdvancedResources resource, int count)
+        public OrderExec(Planet planet, Planet destination, Registry.AdvancedResources resource, int count, int count2, int shipID)
         {
             Planet = planet.Name;
             Destination = destination.Name;
             Count = count;
+            Count2 = count2;
             AdvancedResource = resource;
             Type = ActionType.CargoAdvancedResources;
+            ShipID = shipID;
         }
 
         public OrderExec(Planet planet, Registry.AdvancedResources resource, int count)
@@ -123,19 +131,28 @@ public class OrderHandler : MonoBehaviour
                     var destination = Array.Find(planets, t => t.Name == Destination);
                     if (destination == null)
                         return;
-                    CargoGenerator.GenerateCargo(planet, destination);
+                    Ship = planet.Ships[ShipID];
+                    planet.Ships.RemoveAt(ShipID);
+                    Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
+                    CargoGenerator.GenerateCargo(planet, destination, Ship);
                     break;
                 case ActionType.CargoPeople:
                     var destination3 = Array.Find(planets, t => t.Name == Destination);
                     if (destination3 == null)
                         return;
-                    CargoGenerator.GenerateCargo(planet, destination3, Count);
+                    Ship = planet.Ships[ShipID];
+                    planet.Ships.RemoveAt(ShipID);
+                    Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
+                    CargoGenerator.GenerateCargo(planet, destination3, Count, Ship);
                     break;
                 case ActionType.CargoResources:
                     var destination2 = Array.Find(planets, t => t.Name == Destination);
                     if (destination2 == null)
                         return;
-                    CargoGenerator.GenerateCargo(planet, destination2, Resource, Count);
+                    Ship = planet.Ships[ShipID];
+                    planet.Ships.RemoveAt(ShipID);
+                    Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
+                    CargoGenerator.GenerateCargo(planet, destination2, Resource, Count, Count2, Ship);
                     break;
                 case ActionType.Resources:
                     planet.AddResource(Resource, Count);
@@ -144,7 +161,10 @@ public class OrderHandler : MonoBehaviour
                     var destination4 = Array.Find(planets, t => t.Name == Destination);
                     if (destination4 == null)
                         return;
-                    CargoGenerator.GenerateCargo(planet, destination4, AdvancedResource, Count);
+                    Ship = planet.Ships[ShipID];
+                    planet.Ships.RemoveAt(ShipID);
+                    Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
+                    CargoGenerator.GenerateCargo(planet, destination4, AdvancedResource, Count, Count2, Ship);
                     break;
                 case ActionType.AdvancedResources:
                     planet.AddResource(AdvancedResource, Count);

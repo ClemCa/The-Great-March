@@ -10,7 +10,7 @@ public class ConfirmPeopleChoice : MonoBehaviour, IPointerClickHandler
         if(ShippingSubMenu.Instance.GetValue() > 0)
         {
             MenuAudioManager.Instance.PlayClick();
-            Planet.Selected.EngageMoveSelectionMode(ShippingSubMenu.Instance.GetValue());
+            Planet.Selected.EngageMoveSelectionMode(ShippingSubMenu.Instance.GetValue(), 0);
         }
     }
 }

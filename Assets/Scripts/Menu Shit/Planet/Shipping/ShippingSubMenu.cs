@@ -14,6 +14,7 @@ public class ShippingSubMenu : MonoBehaviour
     private int _currentValue = 0;
     private MenuMode _mode;
 
+    public int Ship;
     public static ShippingSubMenu Instance { get => _instance; }
 
     public enum MenuMode
@@ -77,14 +78,23 @@ public class ShippingSubMenu : MonoBehaviour
     }
     private void ExecuteResetMenu()
     {
-        transform.FindDeep("ContentChoice").gameObject.SetActive(true);
+        transform.FindDeep("ContentChoice").gameObject.SetActive(false);
         transform.FindDeep("PeopleChoice").gameObject.SetActive(false);
         transform.FindDeep("ResourcesChoice").gameObject.SetActive(false);
+        transform.FindDeep("ResourceSending").gameObject.SetActive(false);
+        transform.FindDeep("PresidentSending").gameObject.SetActive(false);
+        transform.FindDeep("ShipsChoice").gameObject.SetActive(true);
         transform.GetComponentInChildren<SelectResourcesButton>(true).SetResource(null, null);
         ResourcesSelectionSubMenu.Hide();
         _currentValue = 0;
     }
-
+    public void ShowContentChoice()
+    {
+        _mode = MenuMode.People;
+        transform.FindDeep("ShipsChoice").gameObject.SetActive(false);
+        transform.FindDeep("ContentChoice").gameObject.SetActive(true);
+        _currentValue = 0;
+    }
     public void ShowPeopleChoice()
     {       
         _mode = MenuMode.People;
@@ -100,11 +110,27 @@ public class ShippingSubMenu : MonoBehaviour
         _currentValue = 0;
     }
 
+    public void ShowResourceSending()
+    {
+        _mode = MenuMode.Resources;
+        transform.FindDeep("ShipsChoice").gameObject.SetActive(false);
+        transform.FindDeep("ResourceSending").gameObject.SetActive(true);
+        _currentValue = 0;
+    }
+
     public void ShowShipChoice()
     {
         _mode = MenuMode.Ship;
         transform.FindDeep("ContentChoice").gameObject.SetActive(false);
         transform.FindDeep("ShipsChoice").gameObject.SetActive(true);
+        _currentValue = 0;
+    }
+
+    public void ShowPresidentSending()
+    {
+        _mode = MenuMode.Ship;
+        transform.FindDeep("ShipsChoice").gameObject.SetActive(false);
+        transform.FindDeep("PresidentSending").gameObject.SetActive(true);
         _currentValue = 0;
     }
 

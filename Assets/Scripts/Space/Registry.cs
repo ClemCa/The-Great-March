@@ -21,6 +21,7 @@ public class Registry : MonoBehaviour
     [SerializeField] private TransformationFacilitiesInfos[] _transformationFacilitiesInfos;
     [SerializeField] private ResourceInfo[] _resourcesNames;
     [SerializeField] private AdvancedResourceInfo[] _advancedResourcesNames;
+    [SerializeField] private ShipInfos[] _shipInfos;
 
     private static Registry _instance;
 
@@ -88,12 +89,29 @@ public class Registry : MonoBehaviour
         public int Production;
     }
 
+    [Serializable]
+    public class ShipInfos
+    {
+        public ShipType Type;
+        public Sprite Sprite;
+        public GameObject Prefab;
+        public int RequiredFuel;
+    }
+
+
+    [Serializable]
+    public class Ship
+    {
+        public ShipType Type;
+        public int Fuel;
+    }
 
     public enum ShipType
     {
         Cargo,
         Passenger,
-        Fighter
+        Fighter,
+        Presidential
     }
 
     public enum PlanetType
@@ -163,6 +181,22 @@ public class Registry : MonoBehaviour
         _instance = this;
     }
 
+    public int GetRequiredFuel(ShipType ship)
+    {
+        return Array.Find(_shipInfos, t => t.Type == ship).RequiredFuel;
+    }
+    
+
+    public Resources? GetResourceFromName(string name)
+    {
+        return _resourcesNames.First(t => t.Name == name)?.Resource;
+    }
+
+    public AdvancedResources? GetAdvancedResourceFromName(string name)
+    {
+        return _advancedResourcesNames.First(t => t.Name == name)?.Resource;
+    }
+
     public string GetResourceName(Resources resource)
     {
         return _resourcesNames.First(t => t.Resource == resource).Name;
@@ -213,11 +247,20 @@ public class Registry : MonoBehaviour
         return Array.Find(_transformationFacilitiesInfos, t => t.Facility == facility).Sprite;
     }
 
+    public Sprite GetShipSprite(ShipType ship)
+    {
+        return Array.Find(_shipInfos, t => t.Type == ship).Sprite;
+    }
+
+    public GameObject GetShipPrefab(ShipType ship)
+    {
+        return Array.Find(_shipInfos, t => t.Type == ship).Prefab;
+    }
+
     public Sprite GetWildcardSprite()
     {
         return _wildcardSprite;
     }
-
     public Resources GetAssociatedResource(Facilities facility)
     {
         return Array.Find(_facilitiesInfo, t => t.Facility == facility).AssociatedResource;

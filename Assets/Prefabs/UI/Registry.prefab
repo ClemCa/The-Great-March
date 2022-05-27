@@ -291,6 +291,23 @@ MonoBehaviour:
   - Resource: 2
     Name: Prepared Food
     Description: Prepared food? And why not fair elections, to go with it?
+  _shipInfos:
+  - Type: 0
+    Sprite: {fileID: 21300000, guid: df665b2eb5f093d44b8487127f433383, type: 3}
+    Prefab: {fileID: 8286233338036583030, guid: 05027dcc5d19a524b93c2843c75f80c5, type: 3}
+    RequiredFuel: 8
+  - Type: 1
+    Sprite: {fileID: 21300000, guid: 8e0eeb6ff530266428b2488c97d86bc9, type: 3}
+    Prefab: {fileID: 8286233338036583030, guid: 25ae80b80c55d0446876037490c57336, type: 3}
+    RequiredFuel: 10
+  - Type: 2
+    Sprite: {fileID: 21300000, guid: 7aebdd5374093cf4884604f7c3ec5695, type: 3}
+    Prefab: {fileID: 8286233338036583030, guid: fe95a8bc58b6c9e42859c49860d0179c, type: 3}
+    RequiredFuel: 2
+  - Type: 3
+    Sprite: {fileID: 21300000, guid: de51a85075e4ab74d8ad782dcef6f37c, type: 3}
+    Prefab: {fileID: 8286233338036583030, guid: a03934a22eda4b1459db6d7fd603975b, type: 3}
+    RequiredFuel: 5
 --- !u!82 &7399917606416848091
 AudioSource:
   m_ObjectHideFlags: 0

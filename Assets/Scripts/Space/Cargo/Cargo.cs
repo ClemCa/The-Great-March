@@ -26,6 +26,8 @@ public class Cargo : MonoBehaviour
     public CargoType Type { get; private set; }
 
     public int Amount { get; private set; }
+    public int Amount2 { get; private set; }
+    public Registry.Ship Ship { get; private set; }
     public Registry.Resources? Resource { get; private set; }
     public Registry.AdvancedResources? AdvancedResource { get; private set; }
 
@@ -51,6 +53,8 @@ public class Cargo : MonoBehaviour
         public Registry.Resources? Resource;
         public Registry.AdvancedResources? AdvancedResource;
         public SerializableVector3[] Path;
+        public int Amount2;
+        public Registry.Ship Ship;
     }
 
     void Awake()
@@ -79,6 +83,8 @@ public class Cargo : MonoBehaviour
         save.Resource = Resource;
         save.AdvancedResource = AdvancedResource;
         save.Path = _path.Select(t => new SerializableVector3(t)).ToArray();
+        save.Ship = Ship;
+        save.Amount2 = Amount2;
 
         return save;
     }
@@ -98,7 +104,8 @@ public class Cargo : MonoBehaviour
         Resource = save.Resource;
         AdvancedResource = save.AdvancedResource;
         _path = save.Path.Select(t => t.Value).ToArray();
-
+        Ship = save.Ship;
+        Amount2 = save.Amount2;
     }
 
     public Vector3 GetMargin(Planet origin, Planet destination)
@@ -115,12 +122,14 @@ public class Cargo : MonoBehaviour
         return gameObject.GetComponent<Collider>().bounds.Intersects(bounds) || (!_innerTravel && _stage == 2 && _travel >= 1);
     }
 
-    public void Initialize(Planet origin, Planet destination)
+    public void Initialize(Planet origin, Planet destination, Registry.Ship ship)
     {
         LeaderInTransit = true;
 
         Type = CargoType.Leader;
         Origin = origin;
+
+        Ship = ship;
 
         Origin.HasPlayer = false;
 
@@ -129,39 +138,47 @@ public class Cargo : MonoBehaviour
         // smh comparing transform doesn't work
     }
 
-    public void Initialize(Planet origin, Planet destination, int amount)
+    public void Initialize(Planet origin, Planet destination, int amount, Registry.Ship ship)
     {
         Type = CargoType.People;
 
         origin.TakePeople(amount);
         Amount = amount;
 
+        Ship = ship;
+
         Origin = origin;
         Destination = destination;
         _innerTravel = origin.transform.parent.GetComponent<StellarSystem>() == destination.transform.parent.GetComponent<StellarSystem>();
         // smh comparing transform doesn't work
     }
 
-    public void Initialize(Planet origin, Planet destination, int amount, Registry.Resources resource)
+    public void Initialize(Planet origin, Planet destination, int amount, Registry.Resources resource, int people, Registry.Ship ship)
     {
         Type = CargoType.Resource;
 
         origin.TakeResource(resource, amount);
         Amount = amount;
         Resource = resource;
+        Amount2 = people;
+
+        Ship = ship;
 
         Origin = origin;
         Destination = destination;
         _innerTravel = origin.transform.parent.GetComponent<StellarSystem>() == destination.transform.parent.GetComponent<StellarSystem>();
         // smh comparing transform doesn't work
     }
-    public void Initialize(Planet origin, Planet destination, int amount, Registry.AdvancedResources resource)
+    public void Initialize(Planet origin, Planet destination, int amount, Registry.AdvancedResources resource, int people, Registry.Ship ship)
     {
         Type = CargoType.AdvancedResource;
 
         origin.TakeResource(resource, amount);
         Amount = amount;
+        Amount2 = people;
         AdvancedResource = resource;
+
+        Ship = ship;
 
         Origin = origin;
         Destination = destination;
@@ -250,6 +267,7 @@ public class Cargo : MonoBehaviour
         }
         if (HasArrived())
         {
+            Destination.Ships.Add(Ship);
             switch (Type)
             {
                 case CargoType.Leader:
@@ -275,6 +293,7 @@ public class Cargo : MonoBehaviour
                     3,
                     new OrderHandler.OrderExec(Destination, Resource.Value, Amount));
                     OrderHandler.Instance.Queue(orderR, Destination);
+                    Destination.AddPeople(Amount2);
                     break;
                 case CargoType.AdvancedResource:
                     var orderAR = new OrderHandler.Order(
@@ -284,6 +303,7 @@ public class Cargo : MonoBehaviour
                     3,
                     new OrderHandler.OrderExec(Destination, AdvancedResource.Value, Amount));
                     OrderHandler.Instance.Queue(orderAR, Destination);
+                    Destination.AddPeople(Amount2);
                     break;
                 case CargoType.People:
                     Destination.AddPeople(Amount);
