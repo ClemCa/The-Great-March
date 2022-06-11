@@ -20,6 +20,7 @@ public class DialogDisplayer : MonoBehaviour
     private string[] _choicesText;
     private static DialogDisplayer _instance;
 
+    private RectTransform rectTransform;
     
     private Action[] _choices;
     private Action _followUp;
@@ -60,6 +61,7 @@ public class DialogDisplayer : MonoBehaviour
     void Awake()
     {
         _instance = this;
+        rectTransform = GetComponent<RectTransform>();
         Hide();
     }
     public void Initialize(string name, string text, Action followUp)
@@ -84,13 +86,13 @@ public class DialogDisplayer : MonoBehaviour
     public void Show()
     {
         _visible = true;
-        transform.position = transform.position.SetY(0);
+        rectTransform.anchoredPosition = rectTransform.anchoredPosition.SetY(0);
     }
 
     public void Hide()
     {
         _visible = false;
-        transform.position = transform.position.SetY(-GetComponent<RectTransform>().sizeDelta.y);
+        rectTransform.anchoredPosition = rectTransform.anchoredPosition.SetY(-rectTransform.rect.size.y);
     }
 
     public void Select(int index)

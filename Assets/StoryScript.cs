@@ -21,7 +21,8 @@ public class StoryScript : MonoBehaviour
     {
         if (StoryStage == 0 && !Application.isEditor)
         {
-            DialogDisplayer.Instance.StartDialogue("Intro_Start");
+            DialogDisplayer.Instance?.SetSpeed(1);
+            DialogDisplayer.Instance?.StartDialogue("Intro_Start");
             StoryStage++;
         }
     }
