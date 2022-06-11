@@ -409,7 +409,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -439.99976}
+  m_AnchoredPosition: {x: 0, y: -439.99963}
   m_SizeDelta: {x: 300, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &275360917
@@ -789,7 +789,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 915511256}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9999678
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2304,6 +2304,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5283144223311653512, guid: aa3c686faab837e44b6dc630e642bc67, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 1967989262}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aa3c686faab837e44b6dc630e642bc67, type: 3}
 --- !u!1 &1090728268
