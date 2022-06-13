@@ -251,6 +251,7 @@ public class Planet : MonoBehaviour
 
     public void RegisterBuiltFacility(Registry.TransformationFacilities facility)
     {
+        _availableWildcards--;
         Scoring.transformativeFacilitiesCount++;
         _transformationFacilities.Add(facility);
         _transformationFacilitiesProgression.Add(0);

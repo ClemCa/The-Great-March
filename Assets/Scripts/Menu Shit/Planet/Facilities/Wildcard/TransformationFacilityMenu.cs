@@ -29,7 +29,7 @@ public class TransformationFacilityMenu : MonoBehaviour, IPointerClickHandler
                 10,
                 new OrderHandler.OrderExec(selected, _facility.Value)), selected);
         _orderedFacilities.Add(new KeyValuePair<Planet, Registry.TransformationFacilities>(Planet.Selected, _facility.Value));
-        TransformationFacilitySubMenu.Hide();
+        SubMenu.HideActive();
     }
 
     public void SetFacility(Registry.TransformationFacilities facility)

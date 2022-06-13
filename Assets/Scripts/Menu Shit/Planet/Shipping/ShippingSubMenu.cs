@@ -52,8 +52,7 @@ public class ShippingSubMenu : MonoBehaviour
         if (_enabled)
         {
             _rectTransform.position = _target.position;
-            FacilitySubMenu.Hide();
-            TransformationFacilitySubMenu.Hide();
+            SubMenu.HideActive();
             ResourcesSelectionSubMenu.Hide();
         }
         else
@@ -67,8 +66,7 @@ public class ShippingSubMenu : MonoBehaviour
         if (_enabled)
         {
             _rectTransform.position = _target.position;
-            FacilitySubMenu.Hide();
-            TransformationFacilitySubMenu.Hide();
+            SubMenu.HideActive();
             ResourcesSelectionSubMenu.Hide();
         }
         else
@@ -157,6 +155,11 @@ public class ShippingSubMenu : MonoBehaviour
     public int GetValue()
     {
         return _currentValue;
+    }
+
+    public string GetValueAsString()
+    {
+        return _currentValue.ToString();
     }
 
     public static void Flip(Transform target)

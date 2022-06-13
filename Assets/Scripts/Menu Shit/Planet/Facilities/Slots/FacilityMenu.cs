@@ -28,7 +28,7 @@ public class FacilityMenu : MonoBehaviour, IPointerClickHandler
                 new OrderHandler.OrderExec(selected, _facility)),
             Planet.Selected);
         _orderedFacilities.Add(new KeyValuePair<Planet, Registry.Facilities>(Planet.Selected, _facility));
-        FacilitySubMenu.Hide();
+        SubMenu.HideActive();
     }
 
     public void SetFacility(Registry.Facilities facility)

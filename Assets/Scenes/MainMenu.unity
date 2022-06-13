@@ -409,7 +409,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -439.99963}
+  m_AnchoredPosition: {x: 0, y: -439.99994}
   m_SizeDelta: {x: 300, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &275360917
@@ -1518,11 +1518,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 623760942}
   m_CullTransparentMesh: 1
---- !u!4 &663967016 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5639594937130279831, guid: 74d19d5d4519d2647a5c4734d658a1ba, type: 3}
-  m_PrefabInstance: {fileID: 476625106}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &700112241
 GameObject:
   m_ObjectHideFlags: 0
@@ -2565,7 +2560,7 @@ GameObject:
   - component: {fileID: 1191980041}
   - component: {fileID: 1191980040}
   - component: {fileID: 1191980039}
-  - component: {fileID: 1191980038}
+  - component: {fileID: 1191980043}
   - component: {fileID: 1191980042}
   m_Layer: 5
   m_Name: CreditsSubMenu
@@ -2574,20 +2569,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1191980038
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1191980037}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03be29d4d232ccc439ca837baad145aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _targetMode: 0
-  _target: {fileID: 663967016}
 --- !u!114 &1191980039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2658,6 +2639,19 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!114 &1191980043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1191980037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472b8259cd11600479f9450fb58f6f62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mode: 3
 --- !u!1 &1322365680
 GameObject:
   m_ObjectHideFlags: 0
@@ -2669,7 +2663,7 @@ GameObject:
   - component: {fileID: 1322365681}
   - component: {fileID: 1322365685}
   - component: {fileID: 1322365684}
-  - component: {fileID: 1322365683}
+  - component: {fileID: 1322365686}
   - component: {fileID: 1322365682}
   m_Layer: 5
   m_Name: DevelopperSubMenu
@@ -2726,20 +2720,6 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
---- !u!114 &1322365683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1322365680}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6342585b29512e4abdb42d06ed6b8f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _targetMode: 0
-  _target: {fileID: 0}
 --- !u!114 &1322365684
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2762,6 +2742,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1322365680}
   m_CullTransparentMesh: 1
+--- !u!114 &1322365686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322365680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472b8259cd11600479f9450fb58f6f62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mode: 2
 --- !u!1 &1351883063
 GameObject:
   m_ObjectHideFlags: 0

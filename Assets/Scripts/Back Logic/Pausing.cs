@@ -79,7 +79,7 @@ public class Pausing : MonoBehaviour
         var dir = (_timeTarget - Time.timeScale).Sign();
         Time.timeScale = (Time.timeScale + dir * Time.unscaledDeltaTime).Clamp(Time.timeScale.Min(_timeTarget), Time.timeScale.Max(_timeTarget));
 
-        if (Input.GetKeyDown(KeyCode.Escape) && !_blocked)
+        if ((Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Space)) && !_blocked)
         {
             FlipPause();
         }

@@ -29,8 +29,7 @@ public class MainMenu : MonoBehaviour
 
     public void Credits()
     {
-        CreditsSubMenu.Flip();
-        DevelopperSubMenu.Hide();
+        SubMenu.GetInstance(SubMenu.SubMenuMode.CreditsSubMenu).Flip();
         MenuAudioManager.Instance.PlayClick();
     }
 
@@ -38,8 +37,7 @@ public class MainMenu : MonoBehaviour
     {
 
         MenuAudioManager.Instance.PlayClick();
-        CreditsSubMenu.Hide();
-        DevelopperSubMenu.Flip();
+        SubMenu.GetInstance(SubMenu.SubMenuMode.DeveloperSubMenu).Flip();
     }
 
 
