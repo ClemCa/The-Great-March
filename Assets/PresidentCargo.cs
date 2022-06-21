@@ -14,7 +14,11 @@ public class PresidentCargo : MonoBehaviour
 
     public void Launch()
     {
-        Planet.Selected.EngageMoveSelectionMode(ShippingSubMenu.Instance.Ship);
+        var id = Planet.Selected.ShipIDs; // don't wanna pass along a reference
+        Planet.Selected.ShipIDs++;
+        Planet.Selected.ReservedShips.Add(new KeyValuePair<int, Registry.Ship>(id, Planet.Selected.Ships[ShippingSubMenu.Instance.Ship]));
+        Planet.Selected.Ships.RemoveAt(ShippingSubMenu.Instance.Ship);
+        Planet.Selected.EngageMoveSelectionMode(id);
     }
 
     public void Return()

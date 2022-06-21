@@ -131,8 +131,11 @@ public class OrderHandler : MonoBehaviour
                     var destination = Array.Find(planets, t => t.Name == Destination);
                     if (destination == null)
                         return;
-                    Ship = planet.Ships[ShipID];
-                    planet.Ships.RemoveAt(ShipID);
+                    {
+                        var id = planet.ReservedShips.FindIndex(t => t.Key == ShipID);
+                        Ship = planet.ReservedShips[id].Value;
+                        planet.ReservedShips.RemoveAt(id);
+                    }
                     Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
                     CargoGenerator.GenerateCargo(planet, destination, Ship);
                     break;
@@ -140,8 +143,11 @@ public class OrderHandler : MonoBehaviour
                     var destination3 = Array.Find(planets, t => t.Name == Destination);
                     if (destination3 == null)
                         return;
-                    Ship = planet.Ships[ShipID];
-                    planet.Ships.RemoveAt(ShipID);
+                    {
+                        var id = planet.ReservedShips.FindIndex(t => t.Key == ShipID);
+                        Ship = planet.ReservedShips[id].Value;
+                        planet.ReservedShips.RemoveAt(id);
+                    }
                     Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
                     CargoGenerator.GenerateCargo(planet, destination3, Count, Ship);
                     break;
@@ -149,8 +155,11 @@ public class OrderHandler : MonoBehaviour
                     var destination2 = Array.Find(planets, t => t.Name == Destination);
                     if (destination2 == null)
                         return;
-                    Ship = planet.Ships[ShipID];
-                    planet.Ships.RemoveAt(ShipID);
+                    {
+                        var id = planet.ReservedShips.FindIndex(t => t.Key == ShipID);
+                        Ship = planet.ReservedShips[id].Value;
+                        planet.ReservedShips.RemoveAt(id);
+                    }
                     Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
                     CargoGenerator.GenerateCargo(planet, destination2, Resource, Count, Count2, Ship);
                     break;
@@ -161,8 +170,11 @@ public class OrderHandler : MonoBehaviour
                     var destination4 = Array.Find(planets, t => t.Name == Destination);
                     if (destination4 == null)
                         return;
-                    Ship = planet.Ships[ShipID];
-                    planet.Ships.RemoveAt(ShipID);
+                    {
+                        var id = planet.ReservedShips.FindIndex(t => t.Key == ShipID);
+                        Ship = planet.ReservedShips[id].Value;
+                        planet.ReservedShips.RemoveAt(id);
+                    }
                     Ship.Fuel -= Registry.Instance.GetRequiredFuel(Ship.Type);
                     CargoGenerator.GenerateCargo(planet, destination4, AdvancedResource, Count, Count2, Ship);
                     break;
@@ -194,6 +206,30 @@ public class OrderHandler : MonoBehaviour
                     break;
                 case ActionType.TransformationFacility:
                     TransformationFacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.TransformationFacilities>(planet, TransformationFacility));
+                    break;
+                case ActionType.CargoLeader:
+                    {
+                        var id = planet.ReservedShips.FindIndex(t => t.Key == ShipID);
+                        Ship = planet.ReservedShips[id].Value;
+                        planet.Ships.Add(Ship);
+                        planet.ReservedShips.RemoveAt(id);
+                    }
+                    break;
+                case ActionType.CargoPeople:
+                    {
+                        var id = planet.ReservedShips.FindIndex(t => t.Key == ShipID);
+                        Ship = planet.ReservedShips[id].Value;
+                        planet.Ships.Add(Ship);
+                        planet.ReservedShips.RemoveAt(id);
+                    }
+                    break;
+                case ActionType.CargoResources:
+                    {
+                        var id = planet.ReservedShips.FindIndex(t => t.Key == ShipID);
+                        Ship = planet.ReservedShips[id].Value;
+                        planet.Ships.Add(Ship);
+                        planet.ReservedShips.RemoveAt(id);
+                    }
                     break;
                 default:
                     break;
@@ -327,7 +363,7 @@ public class OrderHandler : MonoBehaviour
 
     private void Execute(Order order)
     {
-        if(order != null)
+        if(order != null && order.Execution != null)
             order.Execution.Invoke();
     }
 }

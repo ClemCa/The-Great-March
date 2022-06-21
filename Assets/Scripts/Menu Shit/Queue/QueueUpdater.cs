@@ -20,7 +20,9 @@ public class QueueUpdater : MonoBehaviour
                 Clear(i);
                 return;
             }
-            transform.GetChild(i).GetComponent<QueueDisplay>().Order = orders[i];
+            var r = transform.GetChild(i).GetComponent<QueueDisplay>();
+            r.Order = orders[i];
+            r.Init();
         }
 #pragma warning disable CS1717 // Assignment made to same variable
         for (i = i; i < orders.Length; i++)

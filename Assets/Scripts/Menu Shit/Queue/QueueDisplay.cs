@@ -13,8 +13,8 @@ public class QueueDisplay : MonoBehaviour
 
     void Start()
     {
-        if (_order != null && (_order.Type == OrderHandler.OrderType.UnpackingCargo || _order.Type == OrderHandler.OrderType.WavingGoodbye))
-            _cancelObject.SetActive(false);
+        if (_order != null)
+            _cancelObject.SetActive(_order.Type != OrderHandler.OrderType.UnpackingCargo && _order.Type != OrderHandler.OrderType.TriumphantArrival);
     }
 
     void Update()
@@ -29,6 +29,11 @@ public class QueueDisplay : MonoBehaviour
         transform.Find("Assigned").GetComponent<TMPro.TMP_Text>().text = "Assigned: " + _order.Assigned + "/"+_order.MaxPeople+" people";
         transform.Find("Speed").GetComponent<TMPro.TMP_Text>().text = "Speed: x"+_order.SpeedPerPerson * _order.Assigned;
         transform.Find("Difficulty").GetComponent<TMPro.TMP_Text>().text = "Tasks: " + _order.LengthLeft.Round() +"/"+_order.Length;
+    }
+
+    public void Init()
+    {
+        Start();
     }
 
     public void Clear()

@@ -33,12 +33,13 @@ public class Planet : MonoBehaviour
     private static int moveSelectionShipID;
     private static Planet moveSelectionOrigin;
     private static bool moveSelectionType;
-    private static bool newCargoFormat;
     private bool _hasPlayer = false;
     private static Planet _leaderPlanet;
     private int _roll = -1;
     private int _temperateType = -1;
     private List<Registry.Ship> _ships = new List<Registry.Ship>();
+    private List<KeyValuePair<int, Registry.Ship>> _reservedShips = new List<KeyValuePair<int, Registry.Ship>>();
+    private int _shipIDs = 0;
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
@@ -60,7 +61,8 @@ public class Planet : MonoBehaviour
     public int TemperateType { get => _temperateType; set => _temperateType = value; }
     public int Roll { get => _roll; set => _roll = value; }
     public List<Registry.Ship> Ships { get => _ships; set => _ships = value; }
-
+    public List<KeyValuePair<int, Registry.Ship>> ReservedShips { get => _reservedShips; set => _reservedShips = value; }
+    public int ShipIDs { get => _shipIDs; set => _shipIDs = value; }
 
     public static void Select(Planet planet)
     {
@@ -93,6 +95,9 @@ public class Planet : MonoBehaviour
         storage._facilitiesOverTime = _facilitiesOverTime;
         storage._consumption = _consumption;
         storage._hasPlayer = _hasPlayer;
+        storage._ships = _ships;
+        storage._reservedShips = _reservedShips;
+        storage._shipIDs = _shipIDs;
         return storage;
     }
 
@@ -114,6 +119,9 @@ public class Planet : MonoBehaviour
         _facilitiesOverTime = planetStorage._facilitiesOverTime;
         _consumption = planetStorage._consumption;
         _hasPlayer = planetStorage._hasPlayer;
+        _ships = planetStorage._ships;
+        _reservedShips = planetStorage._reservedShips;
+        _shipIDs = planetStorage._shipIDs;
     }
 
     public void SetWildcardSlots(int slots)
@@ -561,10 +569,10 @@ public class Planet : MonoBehaviour
             selected = moveSelectionOrigin;
             ShippingSubMenu.Show();
             ShippingSubMenu.ResetMenu();
-            if (moveSelectionType)
-                ShippingSubMenu.Instance.ShowResourcesChoice();
+            if (moveSelectionCount == -1)
+                ShippingSubMenu.Instance.ShowPresidentSending();
             else
-                ShippingSubMenu.Instance.ShowPeopleChoice();
+                ShippingSubMenu.Instance.ShowResourceSending();
             Pausing.Unblock();
 
         }

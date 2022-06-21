@@ -139,17 +139,30 @@ public class CargoChoice : MonoBehaviour
     {
         if(_dropdown.value == 0)
         {
-            Planet.Selected.EngageMoveSelectionMode(_sliderPeople.value.Round(), shipID:ShippingSubMenu.Instance.Ship);
+            var id = Planet.Selected.ShipIDs; // don't wanna pass along a reference
+            Planet.Selected.ShipIDs++;
+            Planet.Selected.ReservedShips.Add(new KeyValuePair<int, Registry.Ship>(id, Planet.Selected.Ships[ShippingSubMenu.Instance.Ship]));
+            Planet.Selected.Ships.RemoveAt(ShippingSubMenu.Instance.Ship);
+            Planet.Selected.EngageMoveSelectionMode(_sliderPeople.value.Round(), shipID: id);
             return;
         }
         if (_advResourceSelected)
         {
-            Planet.Selected.EngageMoveSelectionMode(_advResource, _sliderResource.value.Round(), countPeople: _sliderPeople.value.Round(), shipID:ShippingSubMenu.Instance.Ship);
+            var id = Planet.Selected.ShipIDs;
+            Planet.Selected.ShipIDs++;
+            Planet.Selected.ReservedShips.Add(new KeyValuePair<int, Registry.Ship>(id, Planet.Selected.Ships[ShippingSubMenu.Instance.Ship]));
+            Planet.Selected.Ships.RemoveAt(ShippingSubMenu.Instance.Ship);
+            Planet.Selected.EngageMoveSelectionMode(_advResource, _sliderResource.value.Round(), countPeople: _sliderPeople.value.Round(), shipID: id);
         }
         else
         {
-            Planet.Selected.EngageMoveSelectionMode(_resource, _sliderResource.value.Round(), countPeople: _sliderPeople.value.Round(), shipID: ShippingSubMenu.Instance.Ship);
+            var id = Planet.Selected.ShipIDs;
+            Planet.Selected.ShipIDs++;
+            Planet.Selected.ReservedShips.Add(new KeyValuePair<int, Registry.Ship>(id, Planet.Selected.Ships[ShippingSubMenu.Instance.Ship]));
+            Planet.Selected.Ships.RemoveAt(ShippingSubMenu.Instance.Ship);
+            Planet.Selected.EngageMoveSelectionMode(_resource, _sliderResource.value.Round(), countPeople: _sliderPeople.value.Round(), shipID: id);
         }
+        ShippingSubMenu.Hide();
     }
 
     public void Return()

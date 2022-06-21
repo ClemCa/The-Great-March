@@ -92,6 +92,9 @@ public class Saver : MonoBehaviour
         public List<int> _facilitiesOverTime;
         public float _consumption;
         public bool _hasPlayer;
+        public List<Registry.Ship> _ships;
+        public List<KeyValuePair<int, Registry.Ship>> _reservedShips;
+        public int _shipIDs;
     }
 
     void Start()

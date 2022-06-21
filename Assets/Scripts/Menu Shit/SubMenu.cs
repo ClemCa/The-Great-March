@@ -10,7 +10,7 @@ public class SubMenu : MonoBehaviour
     private bool _enabled;
     private int _slotID;
     private static SubMenu _activeInstance;
-    private static List<SubMenu> _instances;
+    private static List<SubMenu> _instances = new List<SubMenu>();
 
     public enum SubMenuMode
     {
