@@ -3037,6 +3037,19 @@ namespace ClemCAddons
         /// <summary>Find the first matching child. Goes through the whole sub-hierarchy.</summary>
         /// <param name="transform">The base transform.</param>
         /// <param name="predicate">Predicate.</param>
+        public static Transform Find(this Transform transform, Predicate<Transform> predicate)
+        {
+            if (transform.childCount == 0)
+                return null;
+            Transform[] res = transform.GetChildren();
+            var r = Array.Find(res, predicate);
+            if (r != null)
+                return r;
+            return null;
+        }
+        /// <summary>Find the first matching child. Goes through the whole sub-hierarchy.</summary>
+        /// <param name="transform">The base transform.</param>
+        /// <param name="predicate">Predicate.</param>
         public static Transform FindDeep(this Transform transform, Predicate<Transform> predicate)
         {
             if (transform.childCount == 0)
@@ -3134,8 +3147,19 @@ namespace ClemCAddons
             {
                 if (transform.GetChild(i).TryGetComponent(type, out _))
                 {
-                    r.Add(transform.GetChild(i));
+                    r = r.Add(transform.GetChild(i));
                 }
+            }
+            return r;
+        }
+        /// <summary>Returns all the children.</summary>
+        /// <param name="transform">The base transform.</param>
+        public static Transform[] GetChildren(this Transform transform)
+        {
+            Transform[] r = new Transform[] { };
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                 r = r.Add(transform.GetChild(i));
             }
             return r;
         }

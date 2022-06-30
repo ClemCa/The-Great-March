@@ -285,6 +285,15 @@ public class OrderHandler : MonoBehaviour
         return _queue[planet.Name].ToArray();
     }
 
+    public void PermutateOrders(Planet planet, int indexa, int indexb)
+    {
+        var queue = _queue[planet.Name];
+        var save = queue[indexa];
+        queue[indexa] = queue[indexb];
+        queue[indexb] = save;
+        _queue[planet.Name] = queue;
+    }
+
     public void Clear(Order order)
     {
         var i = _queue.Values.ToList().FindIndex(t => t.FindIndex(r => r == order) != -1);
