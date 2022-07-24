@@ -13,6 +13,7 @@ public class Prompt : MonoBehaviour
     [Serializable]
     public class PromptData
     {
+        public bool Extended;
         public string Title;
         public string Description;
         public string Info1;
@@ -23,7 +24,9 @@ public class Prompt : MonoBehaviour
         public ResourceMenu ResourceMenu;
         public SlotMenu SlotMenu;
         public WildcardMenu WildcardMenu;
+        public ShipChoice ShipChoice;
     }
+
 
     void Update()
     {

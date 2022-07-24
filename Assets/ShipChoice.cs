@@ -5,6 +5,7 @@ using System.Linq;
 using ClemCAddons;
 using UnityEngine.UI;
 using System;
+using TMPro;
 
 public class ShipChoice : MonoBehaviour
 {
@@ -18,6 +19,10 @@ public class ShipChoice : MonoBehaviour
     private int _selected = -1;
     private bool _launchStage = false;
 
+    public int Selected { get => _selected; set => _selected = value; }
+    public List<Registry.ShipType> Ships { get => _ships; set => _ships = value; }
+    public Button RefuelButton { get => _refuelButton; set => _refuelButton = value; }
+    public TMP_Text RefuelText { get => _refuelText; set => _refuelText = value; }
 
     void OnEnable()
     {

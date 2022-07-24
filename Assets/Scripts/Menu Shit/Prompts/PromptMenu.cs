@@ -56,7 +56,7 @@ public class PromptMenu : MonoBehaviour
         if (_data.TransformationFacilityMenu != null)
         {
             var info = Registry.Instance.GetFacilityInfo(_data.TransformationFacilityMenu.Facility.Value);
-            if(_data.TransformationFacilityMenu.Facility.Value == Registry.TransformationFacilities.Factory)
+            if(_data.Extended || _data.TransformationFacilityMenu.Facility.Value == Registry.TransformationFacilities.Factory)
             {
                 _rectTransform.sizeDelta = _extendedSize;
             }
@@ -156,11 +156,60 @@ public class PromptMenu : MonoBehaviour
             }
             return;
         }
+        if (_data.ShipChoice != null)
+        {
+            if (_data.ShipChoice.RefuelButton.interactable && _data.ShipChoice.RefuelText.text.StartsWith("Refuel"))
+            {
+                transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = "Refuel";
+                var required = Registry.Instance.GetRequiredFuel(_data.ShipChoice.Ships[_data.ShipChoice.Selected]);
+                var simulated = Planet.Selected.SimulateFuel(required);
+                var gas = simulated[0] == 0 ? "" : Registry.Instance.GetResourceName(Registry.Resources.Gas) + ": -" + simulated[0];
+                var oil = simulated[1] == 0 ? "" : Registry.Instance.GetResourceName(Registry.Resources.Oil) + ": -" + simulated[1];
+                var hydrogen = simulated[2] == 0 ? "" : Registry.Instance.GetResourceName(Registry.Resources.Hydrogen) + ": -" + simulated[2];
+                var highfuel = simulated[3] == 0 ? "" : Registry.Instance.GetResourceName(Registry.AdvancedResources.HighEfficiencyFuel) + ": -" + simulated[3];
+                var hydrogenbat = simulated[4] == 0 ? "" : Registry.Instance.GetResourceName(Registry.AdvancedResources.HydrogenBattery) + ": -" + simulated[4];
+
+                var txt = "";
+                if (gas != "")
+                    txt += gas;
+                if (oil != "")
+                    txt += txt != "" ? "\n" + oil : oil;
+                if (hydrogen != "")
+                    txt += txt != "" ? "\n" + hydrogen : hydrogen;
+                if (highfuel != "")
+                    txt += txt != "" ? "\n" + highfuel : highfuel;
+                if (hydrogenbat != "")
+                    txt += txt != "" ? "\n" + hydrogenbat : hydrogenbat;
+
+                transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = txt;
+                transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
+                transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "";
+                rect.anchorMin = rect.anchorMin.SetY(0.1);
+            }
+            else if (_data.ShipChoice.RefuelText.color == Color.red)
+            {
+                transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = "Refuel";
+                transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = "Missing fuel";
+                transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
+                transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "";
+                rect.anchorMin = rect.anchorMin.SetY(0);
+            }
+            else
+            {
+                _enabled = false;
+            }
+            return;
+        }
         transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Title;
         transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Description;
         transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Info1;
         transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = _data.Info2;
-        rect.anchorMin = rect.anchorMin.SetY(0);
+        if(_data.Info1 == "" && _data.Info2 == "")
+            rect.anchorMin = rect.anchorMin.SetY(0);
+        else if (_data.Info1 == "")
+            rect.anchorMin = rect.anchorMin.SetY(0.15);
+        else
+            rect.anchorMin = rect.anchorMin.SetY(0.25);
     }
 
     private void SetPosition(Vector2 position)

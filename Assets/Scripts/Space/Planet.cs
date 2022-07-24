@@ -170,6 +170,59 @@ public class Planet : MonoBehaviour
         _advancedResources[resource] += count;
     }
 
+    public int[] SimulateFuel(int count)
+    {
+        int gas = GetResource(Registry.Resources.Gas);
+        int oil = GetResource(Registry.Resources.Oil);
+        int hydrogen = GetResource(Registry.Resources.Hydrogen);
+        int highefficiencyfuel = GetResource(Registry.AdvancedResources.HighEfficiencyFuel);
+        int hydrogenbattery = GetResource(Registry.AdvancedResources.HydrogenBattery);
+
+        int consumedGas = 0, consumedOil = 0, consumedHydrogen = 0, consumedHighFuel = 0, consumedHydrogenBat = 0;
+
+        while (count > 0)
+        {
+            if (hydrogenbattery > 0)
+            {
+                count -= 10;
+                hydrogenbattery--;
+                consumedHydrogenBat++;
+                continue;
+            }
+            if (highefficiencyfuel > 0)
+            {
+                count -= 10;
+                highefficiencyfuel--;
+                consumedHighFuel++;
+                continue;
+            }
+            if (hydrogen > 0)
+            {
+                count--;
+                hydrogen--;
+                consumedHydrogen++;
+                continue;
+            }
+            if (oil > 0)
+            {
+                count--;
+                hydrogen--;
+                consumedOil++;
+                continue;
+            }
+            if (gas > 0)
+            {
+                count--;
+                gas--;
+                consumedGas++;
+                continue;
+            }
+            break;
+        }
+
+        return new int[] { consumedGas, consumedOil, consumedHydrogen, consumedHighFuel, consumedHydrogenBat };
+    }
+
     public void ConsumeFuel(int count)
     {
         int gas = GetResource(Registry.Resources.Gas);

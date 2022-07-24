@@ -136,6 +136,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _data:
+    Extended: 1
     Title: Presidential Ship
     Description: With many necessary features for basic space survival, this ship
       is best equiped to deal with any situation
@@ -147,6 +148,7 @@ MonoBehaviour:
     ResourceMenu: {fileID: 0}
     SlotMenu: {fileID: 0}
     WildcardMenu: {fileID: 0}
+    ShipChoice: {fileID: 0}
 --- !u!114 &2517512951309872237
 MonoBehaviour:
   m_ObjectHideFlags: 0
