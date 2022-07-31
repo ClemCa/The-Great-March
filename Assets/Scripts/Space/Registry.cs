@@ -22,14 +22,23 @@ public class Registry : MonoBehaviour
     [SerializeField] private ResourceInfo[] _resourcesNames;
     [SerializeField] private AdvancedResourceInfo[] _advancedResourcesNames;
     [SerializeField] private ShipInfos[] _shipInfos;
+    [SerializeField] private Priorities _defaultPriorities;
+
 
     private static Registry _instance;
 
     public static Registry Instance { get => _instance; set => _instance = value; }
+    public Priorities DefaultPriorities { get => _defaultPriorities; set => _defaultPriorities = value; }
 
     public static Resources[] GetResources()
     {
         return (Resources[])Enum.GetValues(typeof(Resources));
+    }
+    [Serializable]
+    public class Priorities
+    {
+        public List<int> Food;
+        public List<int> Fuel;
     }
 
     [Serializable]
@@ -38,6 +47,7 @@ public class Registry : MonoBehaviour
         public Resources Resource;
         public string Name;
         public string Description;
+        public int Value;
     }
 
     [Serializable]
@@ -46,6 +56,7 @@ public class Registry : MonoBehaviour
         public AdvancedResources Resource;
         public string Name;
         public string Description;
+        public int Value;
     }
 
     [Serializable]
@@ -210,6 +221,16 @@ public class Registry : MonoBehaviour
     public string GetResourceName(AdvancedResources resource)
     {
         return _advancedResourcesNames.First(t => t.Resource == resource).Name;
+    }
+
+    public int GetResourceValue(Resources resource)
+    {
+        return _resourcesNames.First(t => t.Resource == resource).Value;
+    }
+
+    public int GetResourceValue(AdvancedResources resource)
+    {
+        return _advancedResourcesNames.First(t => t.Resource == resource).Value;
     }
 
     public string GetResourceDescription(AdvancedResources resource)

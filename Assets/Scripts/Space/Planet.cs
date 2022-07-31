@@ -40,6 +40,8 @@ public class Planet : MonoBehaviour
     private List<Registry.Ship> _ships = new List<Registry.Ship>();
     private List<KeyValuePair<int, Registry.Ship>> _reservedShips = new List<KeyValuePair<int, Registry.Ship>>();
     private int _shipIDs = 0;
+    private static Registry.Priorities globalPriorities = new Registry.Priorities();
+    private Registry.Priorities localPriorities = new Registry.Priorities();
     #endregion localStorage
     #region Accessibility
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
@@ -63,6 +65,7 @@ public class Planet : MonoBehaviour
     public List<Registry.Ship> Ships { get => _ships; set => _ships = value; }
     public List<KeyValuePair<int, Registry.Ship>> ReservedShips { get => _reservedShips; set => _reservedShips = value; }
     public int ShipIDs { get => _shipIDs; set => _shipIDs = value; }
+    
 
     public static void Select(Planet planet)
     {
@@ -74,8 +77,73 @@ public class Planet : MonoBehaviour
         selected = null;
     }
 
-    
+    public static List<int> GetGlobalPriorities(int type)
+    {
+        switch (type)
+        {
+            case 0:
+                if (globalPriorities.Food == null)
+                    return Registry.Instance.DefaultPriorities.Food;
+                return globalPriorities.Food;
+            case 1:
+                if (globalPriorities.Fuel == null)
+                    return Registry.Instance.DefaultPriorities.Fuel;
+                return globalPriorities.Fuel;
+            default:
+                if (globalPriorities.Food == null)
+                    return Registry.Instance.DefaultPriorities.Food;
+                return globalPriorities.Food;
+        }
+    }
 
+    public List<int> GetLocalPriorities(int type)
+    {
+        switch (type)
+        {
+            case 0:
+                if (localPriorities.Food == null)
+                    return GetGlobalPriorities(type);
+                return localPriorities.Food;
+            case 1:
+                if (localPriorities.Fuel == null)
+                    return GetGlobalPriorities(type);
+                return localPriorities.Fuel;
+            default:
+                if (globalPriorities.Food == null)
+                    return GetGlobalPriorities(type);
+                return localPriorities.Food;
+        }
+    }
+    public static void SetGlobalPriorities(int type, List<int> priorities)
+    {
+        switch (type)
+        {
+            case 0:
+                globalPriorities.Food = new List<int>(priorities);
+                return;
+            case 1:
+                globalPriorities.Fuel = new List<int>(priorities);
+                return;
+            default:
+                globalPriorities.Food = new List<int>(priorities);
+                return;
+        }
+    }
+    public void SetLocalPriorities(int type, List<int> priorities)
+    {
+        switch (type)
+        {
+            case 0:
+                localPriorities.Food = new List<int>(priorities);
+                return;
+            case 1:
+                localPriorities.Fuel = new List<int>(priorities);
+                return;
+            default:
+                localPriorities.Food = new List<int>(priorities);
+                return;
+        }
+    }
     public Saver.PlanetStorage GetPlanetStorage()
     {
         var storage = new Saver.PlanetStorage();
