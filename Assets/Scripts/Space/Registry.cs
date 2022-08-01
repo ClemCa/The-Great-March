@@ -39,6 +39,14 @@ public class Registry : MonoBehaviour
     {
         public List<int> Food;
         public List<int> Fuel;
+        public Priorities()
+        {
+        }
+        public Priorities(List<int> food, List<int> fuel)
+        {
+            Food = food;
+            Fuel = fuel;
+        }
     }
 
     [Serializable]

@@ -1,6 +1,7 @@
 using cakeslice;
 using ClemCAddons;
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -166,6 +167,7 @@ public class Planet : MonoBehaviour
         storage._ships = _ships;
         storage._reservedShips = _reservedShips;
         storage._shipIDs = _shipIDs;
+        storage._localPriorities = localPriorities;
         return storage;
     }
 
@@ -190,6 +192,7 @@ public class Planet : MonoBehaviour
         _ships = planetStorage._ships;
         _reservedShips = planetStorage._reservedShips;
         _shipIDs = planetStorage._shipIDs;
+        localPriorities = planetStorage._localPriorities;
     }
 
     public void SetWildcardSlots(int slots)
@@ -240,6 +243,7 @@ public class Planet : MonoBehaviour
 
     public int[] SimulateFuel(int count)
     {
+        var list = GetLocalPriorities(1);
         int gas = GetResource(Registry.Resources.Gas);
         int oil = GetResource(Registry.Resources.Oil);
         int hydrogen = GetResource(Registry.Resources.Hydrogen);
@@ -248,44 +252,67 @@ public class Planet : MonoBehaviour
 
         int consumedGas = 0, consumedOil = 0, consumedHydrogen = 0, consumedHighFuel = 0, consumedHydrogenBat = 0;
 
-        while (count > 0)
+        for (int i = 0; i < list.Count; i++)
         {
-            if (hydrogenbattery > 0)
+            dynamic resource;
+            if (list[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
+                resource = (Registry.Resources)list[i];
+            else
+                resource = (Registry.AdvancedResources)list[i];
+            var value = Registry.Instance.GetResourceValue(resource);
+            while (count > 0)
             {
-                count -= 10;
-                hydrogenbattery--;
-                consumedHydrogenBat++;
-                continue;
+                switch (resource)
+                {
+                    case Registry.AdvancedResources.HydrogenBattery:
+
+                        if (hydrogenbattery > 0)
+                        {
+                            count -= value;
+                            hydrogenbattery--;
+                            consumedHydrogenBat++;
+                            continue;
+                        }
+                        break;
+                    case Registry.AdvancedResources.HighEfficiencyFuel:
+                        if (highefficiencyfuel > 0)
+                        {
+                            count -= value;
+                            highefficiencyfuel--;
+                            consumedHighFuel++;
+                            continue;
+                        }
+                        break;
+                    case Registry.Resources.Hydrogen:
+                        if (hydrogen > 0)
+                        {
+                            count -= value;
+                            hydrogen--;
+                            consumedHydrogen++;
+                            continue;
+                        }
+                        break;
+                    case Registry.Resources.Oil:
+                        if (oil > 0)
+                        {
+                            count -= value;
+                            hydrogen--;
+                            consumedOil++;
+                            continue;
+                        }
+                        break;
+                    case Registry.Resources.Gas:
+                        if (gas > 0)
+                        {
+                            count -= value;
+                            gas--;
+                            consumedGas++;
+                            continue;
+                        }
+                        break;
+                }
+                break;
             }
-            if (highefficiencyfuel > 0)
-            {
-                count -= 10;
-                highefficiencyfuel--;
-                consumedHighFuel++;
-                continue;
-            }
-            if (hydrogen > 0)
-            {
-                count--;
-                hydrogen--;
-                consumedHydrogen++;
-                continue;
-            }
-            if (oil > 0)
-            {
-                count--;
-                hydrogen--;
-                consumedOil++;
-                continue;
-            }
-            if (gas > 0)
-            {
-                count--;
-                gas--;
-                consumedGas++;
-                continue;
-            }
-            break;
         }
 
         return new int[] { consumedGas, consumedOil, consumedHydrogen, consumedHighFuel, consumedHydrogenBat };
@@ -293,49 +320,73 @@ public class Planet : MonoBehaviour
 
     public void ConsumeFuel(int count)
     {
+        var list = GetLocalPriorities(1);
         int gas = GetResource(Registry.Resources.Gas);
         int oil = GetResource(Registry.Resources.Oil);
         int hydrogen = GetResource(Registry.Resources.Hydrogen);
         int highefficiencyfuel = GetResource(Registry.AdvancedResources.HighEfficiencyFuel);
         int hydrogenbattery = GetResource(Registry.AdvancedResources.HydrogenBattery);
-        while(count > 0)
+        for (int i = 0; i < list.Count; i++)
         {
-            if(hydrogenbattery > 0)
+            dynamic resource;
+            if (list[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
+                resource = (Registry.Resources)list[i];
+            else
+                resource = (Registry.AdvancedResources)list[i];
+            var value = Registry.Instance.GetResourceValue(resource);
+            while (count > 0)
             {
-                count -= 10;
-                hydrogenbattery--;
-                TakeResource(Registry.AdvancedResources.HydrogenBattery);
-                continue;
+                switch (resource)
+                {
+                    case Registry.AdvancedResources.HydrogenBattery:
+
+                        if (hydrogenbattery > 0)
+                        {
+                            count -= value;
+                            hydrogenbattery--;
+                            TakeResource(Registry.AdvancedResources.HydrogenBattery);
+                            continue;
+                        }
+                        break;
+                    case Registry.AdvancedResources.HighEfficiencyFuel:
+                        if (highefficiencyfuel > 0)
+                        {
+                            count -= value;
+                            highefficiencyfuel--;
+                            TakeResource(Registry.AdvancedResources.HighEfficiencyFuel);
+                            continue;
+                        }
+                        break;
+                    case Registry.Resources.Hydrogen:
+                        if (hydrogen > 0)
+                        {
+                            count -= value;
+                            hydrogen--;
+                            TakeResource(Registry.Resources.Hydrogen);
+                            continue;
+                        }
+                        break;
+                    case Registry.Resources.Oil:
+                        if (oil > 0)
+                        {
+                            count -= value;
+                            hydrogen--;
+                            TakeResource(Registry.Resources.Oil);
+                            continue;
+                        }
+                        break;
+                    case Registry.Resources.Gas:
+                        if (gas > 0)
+                        {
+                            count -= value;
+                            gas--;
+                            TakeResource(Registry.Resources.Gas);
+                            continue;
+                        }
+                        break;
+                }
+                break;
             }
-            if (highefficiencyfuel > 0)
-            {
-                count -= 10;
-                highefficiencyfuel--;
-                TakeResource(Registry.AdvancedResources.HighEfficiencyFuel);
-                continue;
-            }
-            if (hydrogen > 0)
-            {
-                count --;
-                hydrogen--;
-                TakeResource(Registry.Resources.Hydrogen);
-                continue;
-            }
-            if (oil > 0)
-            {
-                count--;
-                hydrogen--;
-                TakeResource(Registry.Resources.Oil);
-                continue;
-            }
-            if (gas > 0)
-            {
-                count--;
-                gas--;
-                TakeResource(Registry.Resources.Gas);
-                continue;
-            }
-            break;
         }
     }
 
