@@ -255,11 +255,18 @@ public class Planet : MonoBehaviour
         for (int i = 0; i < list.Count; i++)
         {
             dynamic resource;
+            int value;
             if (list[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
+            {
                 resource = (Registry.Resources)list[i];
+                value = Registry.Instance.GetResourceValue((Registry.Resources)resource);
+            }
             else
-                resource = (Registry.AdvancedResources)list[i];
-            var value = Registry.Instance.GetResourceValue(resource);
+            {
+                resource = (Registry.AdvancedResources)(list[i] - Enum.GetNames(typeof(Registry.Resources)).Length);
+                value = Registry.Instance.GetResourceValue((Registry.AdvancedResources)resource);
+            }
+
             while (count > 0)
             {
                 switch (resource)
@@ -329,11 +336,17 @@ public class Planet : MonoBehaviour
         for (int i = 0; i < list.Count; i++)
         {
             dynamic resource;
+            int value;
             if (list[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
+            {
                 resource = (Registry.Resources)list[i];
+                value = Registry.Instance.GetResourceValue((Registry.Resources)resource);
+            }
             else
-                resource = (Registry.AdvancedResources)list[i];
-            var value = Registry.Instance.GetResourceValue(resource);
+            {
+                resource = (Registry.AdvancedResources)(list[i] - Enum.GetNames(typeof(Registry.Resources)).Length);
+                value = Registry.Instance.GetResourceValue((Registry.AdvancedResources)resource);
+            }
             while (count > 0)
             {
                 switch (resource)
@@ -628,7 +641,7 @@ public class Planet : MonoBehaviour
             return;
         }
         _consumption += Time.deltaTime;
-        if(_consumption > 60)
+        if (_consumption > 60)
         {
             _peopleFed = (int)_peopleOverTime.Average();
             int needFood = (int)Mathf.Ceil(_peopleFed / 10f);
@@ -639,38 +652,76 @@ public class Planet : MonoBehaviour
             int animals = _resources[Registry.Resources.Water];
             int plants = _resources[Registry.Resources.Plants];
             int water = _resources[Registry.Resources.Water];
-            if ((needFood > 0 || needWater > 0) && preparedFood > 0)
+
+            var foodPriorities = GetLocalPriorities(0);
+
+            for (int i = 0; i < foodPriorities.Count; i++)
             {
-                if (needFood > 0)
-                    needFood -= preparedFood * 10;
+                dynamic resource;
+                int value;
+                if (foodPriorities[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
+                {
+                    resource = (Registry.Resources)foodPriorities[i];
+                    value = Registry.Instance.GetResourceValue((Registry.Resources)resource);
+                }
                 else
-                    needWater -= preparedFood * 10;
-                preparedFood = -(int)Mathf.Ceil((needFood.Min(0) + needWater.Min(0)) / 10f); // setting to - negative or 0 value
-                _advancedResources[Registry.AdvancedResources.PreparedFood] = preparedFood;
-            }
-            if (needFood > 0 && food > 0)
-            {
-                needFood -= food;
-                food = -needFood.Min(0); // setting to - negative or 0 value
-                _resources[Registry.Resources.Food] = food;
-            }
-            if (needFood > 0 && animals > 0)
-            {
-                needFood -= animals / 2;
-                animals = -needFood.Min(0) * 2; // setting to - negative or 0 value
-                _resources[Registry.Resources.Animals] = animals;
-            }
-            if (needFood > 0 && plants > 0)
-            {
-                needFood -= plants / 2;
-                plants = -needFood.Min(0) * 2; // setting to - negative or 0 value
-                _resources[Registry.Resources.Plants] = plants;
-            }
-            if (needWater > 0 && water > 0)
-            {
-                needWater -= water;
-                water = -needWater.Min(0); // setting to - negative or 0 value
-                _resources[Registry.Resources.Water] = water;
+                {
+                    resource = (Registry.AdvancedResources)(foodPriorities[i] - Enum.GetNames(typeof(Registry.Resources)).Length);
+                    value = Registry.Instance.GetResourceValue((Registry.AdvancedResources)resource);
+                }
+                while (needFood + needWater > 0)
+                {
+                    switch (resource)
+                    {
+                        case Registry.AdvancedResources.PreparedFood:
+
+                            if (preparedFood > 0)
+                            {
+                                needFood -= value;
+                                preparedFood--;
+                                TakeResource(Registry.AdvancedResources.PreparedFood);
+                                continue;
+                            }
+                            break;
+                        case Registry.Resources.Food:
+                            if (food > 0)
+                            {
+                                needFood -= value;
+                                food--;
+                                TakeResource(Registry.Resources.Food);
+                                continue;
+                            }
+                            break;
+                        case Registry.Resources.Animals:
+                            if (animals > 0)
+                            {
+                                needFood -= value;
+                                animals--;
+                                TakeResource(Registry.Resources.Animals);
+                                continue;
+                            }
+                            break;
+                        case Registry.Resources.Plants:
+                            if (plants > 0)
+                            {
+                                needFood -= value;
+                                plants--;
+                                TakeResource(Registry.Resources.Plants);
+                                continue;
+                            }
+                            break;
+                        case Registry.Resources.Water:
+                            if (water > 0)
+                            {
+                                needWater -= value;
+                                water--;
+                                TakeResource(Registry.Resources.Water);
+                                continue;
+                            }
+                            break;
+                    }
+                    break;
+                }
             }
             var deaths = (needWater / 10).Max(needFood / 10); // floored naturally
             _people -= deaths;
@@ -926,7 +977,7 @@ public class Planet : MonoBehaviour
                      .GetComponent<MeshRenderer>().gameObject.AddComponent<Outline>().color = 0;
                 break;
             case Registry.SystemType.Temperate:
-                if (temperate == 0 || (temperate == -1 && Random.Range(0, 1) == 0))
+                if (temperate == 0 || (temperate == -1 && UnityEngine.Random.Range(0, 1) == 0))
                 {
                     r = Registry.Instance.GetRandomPlanet(Registry.PlanetType.Temperate);
                     _roll = r;

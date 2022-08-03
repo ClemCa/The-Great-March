@@ -9,11 +9,43 @@ public class PriorityUpdater : MonoBehaviour
 {
     [SerializeField] private bool _global;
     [SerializeField] private int _currentDisplay;
-    [SerializeField] private GameObject[] _prioritiesPrefab;
+    [SerializeField] private GameObject _prioritiesPrefab;
+    [SerializeField] private TMPro.TMP_Text _switch;
+    [SerializeField] private TMPro.TMP_Text _title;
+    [SerializeField] private TMPro.TMP_Text _globalText;
 
     private int _currentlyDisplaying = -1;
     private List<int> _actuallydisplaying;
 
+    public void SwitchDisplay()
+    {
+        ChangeDisplay(_currentDisplay == 0 ? 1 : 0);
+    }
+
+    public void SwitchMode()
+    {
+        _global = !_global;
+        ChangeDisplay(_currentDisplay);
+    }
+
+    private void ChangeDisplay(int display)
+    {
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            var target = transform.GetChild(i);
+            target.SetParent(null);
+            Destroy(target.gameObject);
+        }
+        _currentDisplay = display;
+        _actuallydisplaying = null;
+        _switch.text = display == 0 ? "Fuel" : "Food";
+        _title.text = display == 0 ? "Food Consumption" : "Fuel Consumption";
+    }
+
+    void Start()
+    {
+        SwitchMode();
+    }
 
     void Update()
     {
@@ -73,6 +105,7 @@ public class PriorityUpdater : MonoBehaviour
 
     private void Check()
     {
+        _globalText.text = _global ? "Global" : "Local";
         List<int> priorities;
         if (_global)
         {
@@ -109,8 +142,8 @@ public class PriorityUpdater : MonoBehaviour
 
     private void Refresh(List<int> list)
     {
-        int i;
-        for(i = 0; i < transform.childCount; i++)
+        int i = 0;
+        for(_ = i; i < transform.childCount; i++)
         {
             if(i >= list.Count)
             {
@@ -122,9 +155,9 @@ public class PriorityUpdater : MonoBehaviour
             display.GetChild(1).GetComponent<TMPro.TMP_Text>().text = GetNameByID(list[i]);
             display.GetChild(2).GetComponent<TMPro.TMP_Text>().text = (_currentDisplay == 0 ? "Feeding power: " : "Fueling power: ") + GetValueByID(list[i]);
         }
-        for(_ = i; i < list.Count; i++)
+        for (_ = i; i < list.Count; i++)
         {
-            var display = Instantiate(_prioritiesPrefab[_currentDisplay], transform).transform;
+            var display = Instantiate(_prioritiesPrefab, transform).transform;
             display.GetChild(1).GetComponent<TMPro.TMP_Text>().text = GetNameByID(list[i]);
             display.GetChild(2).GetComponent<TMPro.TMP_Text>().text = (_currentDisplay == 0 ? "Feeding power: " : "Fueling power: ") + GetValueByID(list[i]);
         }

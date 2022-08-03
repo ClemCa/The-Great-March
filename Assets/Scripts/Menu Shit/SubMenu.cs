@@ -17,7 +17,8 @@ public class SubMenu : MonoBehaviour
         TransformationFacilitySubMenu,
         FacilitySubMenu,
         DeveloperSubMenu,
-        CreditsSubMenu
+        CreditsSubMenu,
+        PrioritySubMenu
     }
 
     void Awake()
@@ -28,14 +29,14 @@ public class SubMenu : MonoBehaviour
 
     void Update()
     {
-        if(_mode == SubMenuMode.DeveloperSubMenu || _mode == SubMenuMode.CreditsSubMenu)
+        if (_mode == SubMenuMode.DeveloperSubMenu || _mode == SubMenuMode.CreditsSubMenu)
         {
             if (!_enabled)
             {
                 _rectTransform.anchoredPosition = new Vector3(0, 0);
                 return;
             }
-            _rectTransform.anchoredPosition = Vector3.Lerp(_rectTransform.anchoredPosition, new Vector3(_rectTransform.sizeDelta.x, 0), Time.deltaTime * 5);
+            _rectTransform.anchoredPosition = Vector3.Lerp(_rectTransform.anchoredPosition, new Vector3(_rectTransform.sizeDelta.x, 0), Time.unscaledDeltaTime * 5);
         }
         else
         {
@@ -50,7 +51,7 @@ public class SubMenu : MonoBehaviour
                 return;
             }
         }
-        _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.deltaTime * 5);
+        _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.unscaledDeltaTime * 5);
     }
 
     private void ExecuteFlip(Transform target, int slotID)
@@ -65,8 +66,10 @@ public class SubMenu : MonoBehaviour
             _enabled = true;
         else
             _enabled = !_enabled;
+
         _slotID = slotID;
         _target = target;
+
         if (_enabled)
         {
             _activeInstance = this;
@@ -124,6 +127,11 @@ public class SubMenu : MonoBehaviour
     public void Flip(Transform target, int slotID = -1)
     {
         ExecuteFlip(target, slotID);
+    }
+
+    public void Flip(Transform target)
+    {
+        ExecuteFlip(target, -1);
     }
 
     public void Hide()

@@ -29,7 +29,7 @@ public class FacilitySubMenu : MonoBehaviour
             _instance._enabled = false;
             return;
         }
-        _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.deltaTime * 5);
+        _rectTransform.position = Vector3.Lerp(_rectTransform.position, _target.position, Time.unscaledDeltaTime * 5);
     }
 
     private void ExecuteFlip(Transform target, Registry.Resources resource)
