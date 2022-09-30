@@ -7,10 +7,13 @@ using static GreatMarchOverloads;
 
 public class EvolutiveStory : MonoBehaviour
 {
+    [Serializable]
     public struct Character
     {
         // Name
-        public string Name;
+        public NameInfo Name;
+        // Gender
+        public Gender Gender;
         // Knowledge
         public Knowledge Knowledge;
         // Personality
@@ -95,6 +98,7 @@ public class EvolutiveStory : MonoBehaviour
     #endregion Present
 
     #region Relationships
+    [Serializable]
     public struct Relationships
     {
         // Relationships
@@ -121,12 +125,17 @@ public class EvolutiveStory : MonoBehaviour
                 return All.MinWhere(t => t.Opinion.Opinion);
             }
         }
+        public Relationship GetByName(string name)
+        {
+            return All.Find(t => t.Name.Name == name);
+        }
     }
 
     #endregion Relationships
 
     #region Memory
 
+    [Serializable]
     public struct Memory
     {
         // Memory
@@ -180,7 +189,7 @@ public class EvolutiveStory : MonoBehaviour
             return Memory.First(t => t.Name.Name == topic).OpinionAverage;
         }
     }
-
+    [Serializable]
     public struct FactMemory
     {
         public List<Fact> Memory;
@@ -210,6 +219,7 @@ public class EvolutiveStory : MonoBehaviour
         }
     }
 
+    [Serializable]
     public struct PastRelationship
     {
         public Relationship Relationship;
@@ -306,6 +316,7 @@ public class EvolutiveStory : MonoBehaviour
         public string Source;
     }
 
+    [Serializable]
     public struct Relationship
     {
         public NameInfo Name;
@@ -439,6 +450,14 @@ public class EvolutiveStory : MonoBehaviour
     {
         public float Opinion;
         public float Trend;
+    }
+
+    public enum Gender
+    {
+        Object,
+        Neutral,
+        Male,
+        Female
     }
 
     [Serializable]

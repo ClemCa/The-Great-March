@@ -11,7 +11,7 @@ public class DialogueGenerator : MonoBehaviour
 {
     [SerializeField] private FlagDatabase _flagDatabase;
     [SerializeField] private StructureDatabase _structureDatabase;
-    [SerializeField] private EvolutiveStory.Fact[] _testFacts;
+    [SerializeField] private EvolutiveStory.Character _testCharacter;
     [SerializeField] private float _testOpinion = 0.5f;
     [SerializeField] private Intent _testIntent;
     [SerializeField] private string _verbDataSource;
@@ -160,10 +160,66 @@ public class DialogueGenerator : MonoBehaviour
 
     void Start()
     {
-        Debug.Log(GenerateSentence(_testFacts, _testIntent, _testOpinion));
+        var fact1 = _testCharacter.Memory.Fact.Memory[0];
+        var fact2 = _testCharacter.Memory.Fact.Memory[1];
+        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1 }, _testIntent, _testOpinion));
+        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact2 }, _testIntent, _testOpinion));
+        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1, fact2 }, _testIntent, _testOpinion));
     }
 
-    public string GenerateSentence(EvolutiveStory.Fact[] facts, Intent intent, float tone)
+    private EvolutiveStory.Character GetCharacterByName(string name)
+    {
+        // FOR TEST PURPOSES RN
+        return new EvolutiveStory.Character { Gender = EvolutiveStory.Gender.Female };
+    }
+
+    private string BuildSubject(EvolutiveStory.Fact fact, EvolutiveStory.Character character, float tone, bool isGivenCharacterSelf, int mentionID = 0, int maxMention = 0)
+    {
+        var relationship = character.Relationships.GetByName(fact.Subject);
+        float relationshipScore = relationship.Opinion.Opinion;
+        var owner = relationship.Name.GetOpiniatedName(relationshipScore).RandomAltName;
+        var target = fact.Name.GetOpiniatedName(tone).RandomAltName;
+        var targetChar = GetCharacterByName(fact.Subject);
+        string toUse;
+        if(mentionID == 0)
+        {
+            toUse = (isGivenCharacterSelf ? "my " : character.Name + "'s ") + owner;
+        } else if (mentionID < maxMention)
+        {
+            toUse = targetChar.Gender switch
+            {
+                EvolutiveStory.Gender.Object => ", its",
+                EvolutiveStory.Gender.Neutral => ", their",
+                EvolutiveStory.Gender.Male => ", his",
+                EvolutiveStory.Gender.Female => ", her",
+                _ => ", its"
+            };
+        }
+        else if (mentionID == 1) // and superior or equal to max mention
+        {
+            toUse = targetChar.Gender switch
+            {
+                EvolutiveStory.Gender.Object => " and its",
+                EvolutiveStory.Gender.Neutral => " and their",
+                EvolutiveStory.Gender.Male => " and his",
+                EvolutiveStory.Gender.Female => " and her",
+                _ => " and its"
+            };
+        } else
+        {
+            toUse = targetChar.Gender switch
+            {
+                EvolutiveStory.Gender.Object => ", and its",
+                EvolutiveStory.Gender.Neutral => ", and their",
+                EvolutiveStory.Gender.Male => ", and his",
+                EvolutiveStory.Gender.Female => ", and her",
+                _ => ", and its"
+            };
+        }
+        return toUse + "'s "+target;
+    }
+
+    public string GenerateSentence(EvolutiveStory.Character self, EvolutiveStory.Fact[] facts, Intent intent, float tone)
     {
         var subjects = facts.Select(t => t.Subject).Distinct().ToArray();
         var factsC = facts.Count();
@@ -179,22 +235,59 @@ public class DialogueGenerator : MonoBehaviour
         ).Distinct().ToArray();
         // if there is no problem with the number of contextual data, we can eliminate redundancies
         // (the context is all about the same data)
-        var structure = FetchStructure(subjects.Count(), factsC, contexts.Count(), intent, tone);
-        return BuildSentence(structure, subjects, facts, contexts, tone);
+        var structure = FetchStructure(subjects.Count(), contexts.Count(), intent, tone);
+        return BuildSentence(self, structure, subjects, facts, contexts, tone);
     }
 
-    public string BuildSentence(string structure, string[] subjects, EvolutiveStory.Fact[] facts, EvolutiveStory.NameInfo[] contexts, float opinion)
+    public string BuildSentence(EvolutiveStory.Character self, string structure, string[] subjects, EvolutiveStory.Fact[] facts, EvolutiveStory.NameInfo[] contexts, float opinion)
     {
         var regex = new Regex("VBH");
+        List<int> subjectMaximums = new List<int>(); // how many times do subjects repeat, it's inefficient but it's fine, we don't run this often
+        string subject = facts[0].Subject;
+        int last = 0;
+        for (int i = 1; i < facts.Length; i++)
+        {
+            if(facts[i].Subject != subject)
+            {
+                subject = facts[i].Subject;
+                subjectMaximums.Add(i - last);
+                last = i;
+                continue;
+            }
+            if (i == facts.Length - 1)
+            {
+                subjectMaximums.Add(i - last);
+            }
+        }
+        if (facts.Length == 1)
+            subjectMaximums.Add(1);
+        last = 0;
+        int id = -1;
+        bool doRegex = false;
+        string res = "";
         for (int i = 0; i < facts.Length; i++)
         {
             var fact = facts[i];
             var subjectID = Array.IndexOf(subjects, fact.Subject);
-            structure = structure.Replace("S" + subjectID + "Data" + i, fact.Data);
-            structure = structure.Replace("S" + subjectID + "Fact" + i, fact.Name.GetOpiniatedName(opinion).RandomAltName);
+            if (subjectID != id)
+            {
+                id = subjectID;
+                last = 0;
+                if(res != "")
+                {
+                    structure = regex.Replace(structure, res, 1);
+                    res = "";
+                }
+            }
+            else
+                last++;
+            var content = BuildSubject(fact, self, opinion, true, last, subjectMaximums[id]);
             var verb = GetConjugation(ChooseVerb(fact.Flag, EvolutiveStory.Conjugation.Present), EvolutiveStory.Conjugation.Present, 0, 0); // NUMBER => number of subject (0 if self), GENDER => gender of subject
-            structure = regex.Replace(structure, verb, 1);
+            content += " "+verb;
+            content += " "+fact.Data;
+            res += content;
         }
+        structure = regex.Replace(structure, res, 1);
         for (int i = 0; i < contexts.Length; i++)
         {
             // we don't care for the subject here because context only exists if it matches the number of facts in the first place
@@ -208,18 +301,18 @@ public class DialogueGenerator : MonoBehaviour
         return s.ToString();
     }
 
-    public string FetchStructure(int subjectCount, int factCount, int contextualDataCount, Intent intent, float tone)
+    public string FetchStructure(int subjectCount, int contextualDataCount, Intent intent, float tone)
     {
-        var all = _structureDatabase.GetAllMatchingStructures(subjectCount, factCount, contextualDataCount, intent, tone);
+        var all = _structureDatabase.GetAllMatchingStructures(subjectCount, contextualDataCount, intent, tone);
         if (all.Length > 0)
             return all.Random();
-        all = _structureDatabase.GetAllMatchingStructureNoContext(subjectCount, factCount, intent, tone);
+        all = _structureDatabase.GetAllMatchingStructureNoContext(subjectCount, intent, tone);
         if (all.Length > 0)
             return all.Random();
-        var r = _structureDatabase.GetClosestMatchingStructure(subjectCount, factCount, contextualDataCount, intent, tone);
+        var r = _structureDatabase.GetClosestMatchingStructure(subjectCount, contextualDataCount, intent, tone);
         if (r != null)
             return r;
-        return _structureDatabase.GetClosestMatchingStructureNoContext(subjectCount, factCount, intent, tone);
+        return _structureDatabase.GetClosestMatchingStructureNoContext(subjectCount, intent, tone);
 
         // return "You wouldn't believe it, Fact0 Data0 Contextual0";
     }
@@ -250,22 +343,22 @@ public class DialogueGenerator : MonoBehaviour
     public struct StructureDatabase
     {
         public List<Structure> Structures;
-        public string[] GetAllMatchingStructures(int subjects, int facts, int contextualData, Intent intent, float tone)
+        public string[] GetAllMatchingStructures(int subjects, int contextualData, Intent intent, float tone)
         {
-            return Structures.Where(t => t.Matches(subjects, facts, contextualData, intent, tone)).Select(t => t.Sentence).ToArray();
+            return Structures.Where(t => t.Matches(subjects, contextualData, intent, tone)).Select(t => t.Sentence).ToArray();
         }
-        public string[] GetAllMatchingStructureNoContext(int subjects, int facts, Intent intent, float tone)
+        public string[] GetAllMatchingStructureNoContext(int subjects, Intent intent, float tone)
         {
-            return Structures.Where(t => t.Matches(subjects, facts, intent, tone)).Select(t => t.Sentence).ToArray();
+            return Structures.Where(t => t.Matches(subjects, intent, tone)).Select(t => t.Sentence).ToArray();
         }
-        public string GetClosestMatchingStructure(int subjects, int facts, int contextualData, Intent intent, float tone)
+        public string GetClosestMatchingStructure(int subjects, int contextualData, Intent intent, float tone)
         {
-            var c = Structures.Where(t => t.Matches(subjects, facts, contextualData, intent)).ClosestOrNullWhere(t => t.Tone, tone);
+            var c = Structures.Where(t => t.Matches(subjects, contextualData, intent)).ClosestOrNullWhere(t => t.Tone, tone);
             return c.HasValue ? c.Value.Sentence : null;
         }
-        public string GetClosestMatchingStructureNoContext(int subjects, int facts, Intent intent, float tone)
+        public string GetClosestMatchingStructureNoContext(int subjects, Intent intent, float tone)
         {
-            return Structures.Where(t => t.Matches(subjects, facts, intent)).ClosestWhere(t => t.Tone, tone).Sentence;
+            return Structures.Where(t => t.Matches(subjects, intent)).ClosestWhere(t => t.Tone, tone).Sentence;
         }
     }
 
@@ -273,27 +366,26 @@ public class DialogueGenerator : MonoBehaviour
     public struct Structure
     {
         public int Subjects;
-        public int Facts;
         public int ContextualData;
         public Intent Intent;
         public float Tone;
         public string Sentence;
 
-        public bool Matches(int subjects, int facts, int contextualData, Intent intent, float tone)
+        public bool Matches(int subjects, int contextualData, Intent intent, float tone)
         {
-            return subjects == Subjects && facts == Facts && contextualData == ContextualData && intent == Intent && tone == Tone;
+            return subjects == Subjects && contextualData == ContextualData && intent == Intent && tone == Tone;
         }
-        public bool Matches(int subjects, int facts, Intent intent, float tone)
+        public bool Matches(int subjects, Intent intent, float tone)
         {
-            return subjects == Subjects && facts == Facts && tone == Tone && intent == Intent;
+            return subjects == Subjects && tone == Tone && intent == Intent;
         }
-        public bool Matches(int subjects, int facts, int contextualData, Intent intent)
+        public bool Matches(int subjects, int contextualData, Intent intent)
         {
-            return subjects == Subjects && facts == Facts && contextualData == ContextualData && intent == Intent;
+            return subjects == Subjects && contextualData == ContextualData && intent == Intent;
         }
-        public bool Matches(int subjects, int facts, Intent intent)
+        public bool Matches(int subjects, Intent intent)
         {
-            return subjects == Subjects && facts == Facts && intent == Intent;
+            return subjects == Subjects && intent == Intent;
         }
     }
 }

@@ -525,6 +525,12 @@ MonoBehaviour:
         Prefix: 
         Suffix: 
         ValidConjugations: 192
+    - Flag: Sneeze
+      Verbs:
+      - Verb: be
+        Prefix: 
+        Suffix: 
+        ValidConjugations: -229
     - Flag: Activity
       Verbs:
       - Verb: be
@@ -556,45 +562,86 @@ MonoBehaviour:
   _structureDatabase:
     Structures:
     - Subjects: 1
-      Facts: 1
       ContextualData: 0
       Intent: 8
       Tone: 1
-      Sentence: You wouldn't believe it, S0Fact0 VBH S0Data0!
+      Sentence: You wouldn't believe it, VBH
     - Subjects: 1
-      Facts: 1
       ContextualData: 0
       Intent: 8
       Tone: 0
-      Sentence: It was an unwelcome surprise, to learn that S0Fact0 VBH S0Data0.
+      Sentence: It was an unwelcome surprise, to learn that VBH
     - Subjects: 1
-      Facts: 1
       ContextualData: 0
       Intent: 6
       Tone: 0.5
-      Sentence: S0Fact0 VBH S0Data0.
+      Sentence: VBH
     - Subjects: 1
-      Facts: 1
       ContextualData: 1
       Intent: 6
       Tone: 0.5
-      Sentence: S0Fact0 VBH S0Data0. It was Contextual0.
-  _testFacts:
-  - Name:
-      Name: my mother's name
+      Sentence: VBH. It was Contextual0.
+  _testCharacter:
+    Name:
+      Name: Jean
       OpiniatedNames: []
-    Subject: Mother
-    Flag: Name
-    Data: Maria
-    Context:
-      hasDate: 0
-      hasPlace: 0
-      Date:
-        Name: 
-        OpiniatedNames: []
-      Place:
-        Name: 
-        OpiniatedNames: []
+    Gender: 0
+    Memory:
+      Fact:
+        Memory:
+        - Name:
+            Name: name
+            OpiniatedNames: []
+          Subject: Mother
+          Flag: Name
+          Data: Mary
+          Context:
+            hasDate: 0
+            hasPlace: 0
+            Date:
+              Name: 
+              OpiniatedNames: []
+            Place:
+              Name: 
+              OpiniatedNames: []
+        - Name:
+            Name: sneeze
+            OpiniatedNames: []
+          Subject: Mother
+          Flag: Sneeze
+          Data: atchoo
+          Context:
+            hasDate: 0
+            hasPlace: 0
+            Date:
+              Name: 
+              OpiniatedNames: []
+            Place:
+              Name: 
+              OpiniatedNames: []
+    Relationships:
+      All:
+      - Name:
+          Name: Mother
+          OpiniatedNames:
+          - Name: dear Mother
+            AltNames: []
+            Opinion:
+              Opinion: 1
+              Trend: 0
+          - Name: mom
+            AltNames: []
+            Opinion:
+              Opinion: 0.5
+              Trend: 0
+          - Name: Mother
+            AltNames: []
+            Opinion:
+              Opinion: 0.3
+              Trend: 0
+        Opinion:
+          Opinion: 0.5
+          Trend: 0
   _testOpinion: 1
   _testIntent: 6
   _verbDataSource: Story/Verbs - most-common-verbs-english.csv
