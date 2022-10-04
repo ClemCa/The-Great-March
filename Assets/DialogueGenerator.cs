@@ -15,7 +15,10 @@ public class DialogueGenerator : MonoBehaviour
     [SerializeField] private float _testOpinion = 0.5f;
     [SerializeField] private Intent _testIntent;
     [SerializeField] private string _verbDataSource;
+    [SerializeField] private MindVisualizer _mindVisualizer;
     private Dictionary<string, VerbData> _verbData = new Dictionary<string, VerbData>();
+
+    public EvolutiveStory.Character TestCharacter { get => _testCharacter; set => _testCharacter = value; }
 
     void Awake()
     {
@@ -27,6 +30,214 @@ public class DialogueGenerator : MonoBehaviour
                 var values = line.Split(',', StringSplitOptions.None);
                 _verbData.Add(values[0], new VerbData(values[0], values[1], values[2], values[3], values[4], values[5]));
             }
+        }
+        _mindVisualizer.GenerateFrom("test", _testCharacter, 10);
+    }
+
+    void Start()
+    {
+        var fact1 = _testCharacter.Memory.Fact.Memory[0];
+        var fact2 = _testCharacter.Memory.Fact.Memory[1];
+        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1 }, _testIntent, _testOpinion));
+        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact2 }, _testIntent, _testOpinion));
+        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1, fact2 }, _testIntent, _testOpinion));
+    }
+
+    public void GenerateFromField(EvolutiveStory.Character origin, object obj)
+    {
+        // To note cases where lists are empty are unhandled, will result in an error due to Random.Range(0,0) being invalid.
+        switch (obj)
+        {
+            case EvolutiveStory.NameInfo o:
+                Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "name" }, Subject = origin.Name.Name, Data = origin.Name.Name, Flag = "Name" } }, Intent.SeriousAnnecdote, 0.5f));
+                break;
+            case EvolutiveStory.Gender o:
+                Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "gender" }, Subject = origin.Name.Name, Data = o switch
+                {
+                    EvolutiveStory.Gender.Male => "male",
+                    EvolutiveStory.Gender.Female => "female",
+                    EvolutiveStory.Gender.Neutral => "non-binary",
+                    EvolutiveStory.Gender.Object => "undefined",
+                    _ => "unknown"
+                }, Flag = "Gender" } }, Intent.SeriousAnnecdote, 0.5f));
+                break;
+            case EvolutiveStory.Knowledge o:
+                {
+                    // Call the same function, but with the topic just a bit more defined
+                    var hasOngoingEvents = o.OngoingEvents.Count > 0;
+                    var randomField = UnityEngine.Random.Range(0, hasOngoingEvents ? 4 : 3);
+                    switch (randomField)
+                    {
+                        case 0:
+                            GenerateFromField(origin, o.Job);
+                            break;
+                        case 1:
+                            GenerateFromField(origin, o.Hobbies.Random());
+                            break;
+                        case 2:
+                            GenerateFromField(origin, o.Role);
+                            break;
+                        case 3:
+                            GenerateFromField(origin, o.OngoingEvents.Random());
+                            break;
+                        default:
+                            Debug.LogError("Something is wrong");
+                            break;
+                    }
+                }
+                break;
+            case EvolutiveStory.Personality o:
+                {
+                    // Call the same function, but with the topic just a bit more defined
+                    var randomField = UnityEngine.Random.Range(0, 10);
+                    // 0 = specific topic loved
+                    // 1 < 2 = topics loved (can end up on the favorite topic)
+                    // 3 - 6 = random topic
+                    // 7 - 8 = topics hated (can end up on the hated topic)
+                    // 9 = specific topic hated
+                    switch (randomField)
+                    {
+                        case 0:
+                            GenerateFromField(origin, o.PreferedTopic);
+                            break;
+                        case 1:
+                        case 2:
+                            GenerateFromField(origin, o.Topics.Where(t => t.LikeRatio > 0.5f).Random());
+                            break;
+                        case 4:
+                        case 5:
+                        case 6:
+                            GenerateFromField(origin, o.Topics.Random());
+                            break;
+                        case 7:
+                        case 8:
+                            GenerateFromField(origin, o.Topics.Where(t => t.LikeRatio < 0.5f).Random());
+                            break;
+                        case 9:
+                            GenerateFromField(origin, o.HatedTopic);
+                            break;
+                        default:
+                            Debug.LogError("Something is wrong");
+                            break;
+                    }
+                }
+                break;
+            case EvolutiveStory.Memory o:
+                {
+                    // Call the same function, but with the topic just a bit more defined
+                    var hasEvents = o.Event.Memory.Count > 0;
+                    var randomField = UnityEngine.Random.Range(0, hasEvents ? 3 : 2);
+                    switch (randomField)
+                    {
+                        case 0:
+                            GenerateFromField(origin, o.Fact.Memory.Random());
+                            break;
+                        case 1:
+                            GenerateFromField(origin, o.Relationships.Memory.Random());
+                            break;
+                        case 2:
+                            GenerateFromField(origin, o.Event.Memory.Random());
+                            break;
+                        default:
+                            Debug.LogError("Something is wrong");
+                            break;
+                    }
+                }
+                break;
+            case EvolutiveStory.Relationships o:
+                {
+                    // Call the same function, but with the topic just a bit more defined
+                    var randomField = UnityEngine.Random.Range(0, 10);
+                    // 0 = specific person loved
+                    // 1 < 2 = persons loved (can end up on the favorite topic)
+                    // 3 - 6 = random person
+                    // 7 - 8 = persons hated (can end up on the hated topic)
+                    // 9 = specific person hated
+                    switch (randomField)
+                    {
+                        case 0:
+                            GenerateFromField(origin, o.Friendliest);
+                            break;
+                        case 1:
+                        case 2:
+                            GenerateFromField(origin, o.All.Where(t => t.Opinion.Opinion > 0.5f).Random());
+                            break;
+                        case 4:
+                        case 5:
+                        case 6:
+                            GenerateFromField(origin, o.All.Random());
+                            break;
+                        case 7:
+                        case 8:
+                            GenerateFromField(origin, o.All.Where(t => t.Opinion.Opinion < 0.5f).Random());
+                            break;
+                        case 9:
+                            GenerateFromField(origin, o.Muddiest);
+                            break;
+                        default:
+                            Debug.LogError("Something is wrong");
+                            break;
+                    }
+                }
+                break;
+            case EvolutiveStory.Present o:
+                {
+                    // Call the same function, but with the topic just a bit more defined
+                    var hasActions = o.Actions.Count > 0;
+                    var hasTroubles = o.Troubles.Count > 0;
+                    var hasWeaknesses = o.Weaknesses.Count > 0;
+                    var count = new[] { hasActions, hasTroubles, hasWeaknesses }.Count(t => t);
+                    if (count == 0)
+                    {
+                        Debug.LogError("Unhandled for now: nothing to say on present");
+                        return;
+                    }
+                    var randomField = UnityEngine.Random.Range(0, count);
+                    switch (randomField)
+                    {
+                        case 0:
+                            if (hasActions)
+                                GenerateFromField(origin, o.Actions.Random());
+                            else if (hasTroubles)
+                                GenerateFromField(origin, o.Troubles.Random());
+                            else
+                                GenerateFromField(origin, o.Weaknesses.Random());
+                            break;
+                        case 1:
+                            if (hasActions)
+                            {
+                                if(hasTroubles)
+                                    GenerateFromField(origin, o.Troubles);
+                                else
+                                    GenerateFromField(origin, o.Weaknesses);
+                            }
+                            else
+                                GenerateFromField(origin, o.Weaknesses);
+                            break;
+                        case 2:
+                            GenerateFromField(origin, o.Weaknesses);
+                            break;
+                        default:
+                            Debug.LogError("Something is wrong");
+                            break;
+                    }
+                }
+                break;
+            case EvolutiveStory.Job:
+            case EvolutiveStory.Hobby:
+            case EvolutiveStory.StoryRole:
+            case EvolutiveStory.Event:
+            case EvolutiveStory.Topic:
+            case EvolutiveStory.Fact:
+            case EvolutiveStory.Relationship:
+            case EvolutiveStory.PastRelationship:
+            case EvolutiveStory.PresentFact:
+            case EvolutiveStory.PresentExpiringFact:
+                Debug.LogError("left to do");
+                break;
+            default:
+                Debug.LogError("Field can't be generated from");
+                break;
         }
     }
 
@@ -158,14 +369,6 @@ public class DialogueGenerator : MonoBehaviour
         SurprisingAnnecdote
     }
 
-    void Start()
-    {
-        var fact1 = _testCharacter.Memory.Fact.Memory[0];
-        var fact2 = _testCharacter.Memory.Fact.Memory[1];
-        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1 }, _testIntent, _testOpinion));
-        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact2 }, _testIntent, _testOpinion));
-        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1, fact2 }, _testIntent, _testOpinion));
-    }
 
     private EvolutiveStory.Character GetCharacterByName(string name)
     {
@@ -181,6 +384,8 @@ public class DialogueGenerator : MonoBehaviour
         var target = fact.Name.GetOpiniatedName(tone).RandomAltName;
         var targetChar = GetCharacterByName(fact.Subject);
         string toUse;
+        if (isGivenCharacterSelf && fact.Subject == character.Name.Name)
+            return "my " + target;
         if(mentionID == 0)
         {
             toUse = (isGivenCharacterSelf ? "my " : character.Name + "'s ") + owner;

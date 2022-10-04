@@ -7,22 +7,29 @@ using static GreatMarchOverloads;
 
 public class EvolutiveStory : MonoBehaviour
 {
-    [Serializable]
+    [Serializable, Visualizable]
     public struct Character
     {
         // Name
+        [Visualizable]
         public NameInfo Name;
         // Gender
+        [Visualizable]
         public Gender Gender;
         // Knowledge
+        [Visualizable]
         public Knowledge Knowledge;
         // Personality
+        [Visualizable]
         public Personality Personality;
         // Memory
+        [Visualizable]
         public Memory Memory;
         // Relationships
+        [Visualizable]
         public Relationships Relationships;
         // Present
+        [Visualizable]
         public Present Present;
         // Memory-building
             // What was just said
@@ -118,7 +125,7 @@ public class EvolutiveStory : MonoBehaviour
                 return All.MaxWhere(t => t.Opinion.Opinion);
             }
         }
-        public Relationship Mudiest
+        public Relationship Muddiest
         {
             get
             {
@@ -263,9 +270,13 @@ public class EvolutiveStory : MonoBehaviour
             // Background
                 // Random (pre-rolled)
             // Role (in story terms)
+        [Visualizable]
         public List<Event> OngoingEvents;
+        [Visualizable]
         public Job Job;
+        [Visualizable]
         public List<Hobby> Hobbies;
+        [Visualizable]
         public Background Background;
         public StoryRole Role;
     }
@@ -368,6 +379,7 @@ public class EvolutiveStory : MonoBehaviour
             // Prefered topics, disliked topics
             // Opinions
             // Opinions within said topics
+        [Visualizable]
         public List<Topic> Topics;
         public List<Topic> TopicsByLove
         {
@@ -383,6 +395,7 @@ public class EvolutiveStory : MonoBehaviour
                 return Topics.OrderByDescending(t => t.OpinionAverage).ToList();
             }
         }
+        [Visualizable]
         public Topic PreferedTopic
         {
             get
@@ -390,6 +403,7 @@ public class EvolutiveStory : MonoBehaviour
                 return Topics.MaxWhere(t => t.OpinionAverage);
             }
         }
+        [Visualizable]
         public Topic HatedTopic
         {
             get
@@ -467,7 +481,7 @@ public class EvolutiveStory : MonoBehaviour
         public OpiniatedName[] OpiniatedNames;
         public OpiniatedName GetOpiniatedName(float opinion)
         {
-            if (OpiniatedNames.Length == 0)
+            if (OpiniatedNames == null || OpiniatedNames.Length == 0)
                 return new OpiniatedName() { Name = Name };
             return OpiniatedNames.ClosestWhere(t => t.Opinion.Opinion, opinion);
         }
