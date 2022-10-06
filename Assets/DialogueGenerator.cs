@@ -38,9 +38,42 @@ public class DialogueGenerator : MonoBehaviour
     {
         var fact1 = _testCharacter.Memory.Fact.Memory[0];
         var fact2 = _testCharacter.Memory.Fact.Memory[1];
-        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1 }, _testIntent, _testOpinion));
-        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact2 }, _testIntent, _testOpinion));
-        Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { fact1, fact2 }, _testIntent, _testOpinion));
+        Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { fact1 }, _testIntent, _testOpinion));
+        Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { fact2 }, _testIntent, _testOpinion));
+        Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { fact1, fact2 }, _testIntent, _testOpinion));
+
+        var expressableData = new ExpressableData(new List<ExpressableDataPiece>()
+        {
+            new ExpressableDataPiece()
+            {
+                DataType = EvolutiveStory.DataType.Are,
+                Subject = "Mother",
+                Property = "Name",
+                Value = "Maria"
+            },
+            new ExpressableDataPiece()
+            {
+                DataType = EvolutiveStory.DataType.Have,
+                Subject = "Mother",
+                Property = "Grin",
+                Value = "Nice"
+            },
+            new ExpressableDataPiece()
+            {
+                DataType = EvolutiveStory.DataType.Are,
+                Subject = "Dad",
+                Property = "Face",
+                Value = "Hella weird"
+            },
+            new ExpressableDataPiece()
+            {
+                DataType = EvolutiveStory.DataType.Are,
+                Subject = "Mother",
+                Property = "Sneeze",
+                Value = "Atchoo"
+            }
+        });
+        Debug.Log(JsonUtility.ToJson(expressableData));
     }
 
     public void GenerateFromField(EvolutiveStory.Character origin, object obj)
@@ -49,10 +82,10 @@ public class DialogueGenerator : MonoBehaviour
         switch (obj)
         {
             case EvolutiveStory.NameInfo o:
-                Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "name" }, Subject = origin.Name.Name, Data = origin.Name.Name, Flag = "Name" } }, Intent.SeriousAnnecdote, 0.5f));
+                Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "name" }, Subject = origin.Name.Name, Data = origin.Name.Name, Flag = "Name" } }, Intent.SeriousAnnecdote, 0.5f));
                 break;
             case EvolutiveStory.Gender o:
-                Debug.Log(GenerateSentence(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "gender" }, Subject = origin.Name.Name, Data = o switch
+                Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "gender" }, Subject = origin.Name.Name, Data = o switch
                 {
                     EvolutiveStory.Gender.Male => "male",
                     EvolutiveStory.Gender.Female => "female",
@@ -369,11 +402,124 @@ public class DialogueGenerator : MonoBehaviour
         SurprisingAnnecdote
     }
 
+    [Serializable]
+    public struct ExpressableDataIntermediary
+    {
+        public ExpressableDataPiece Piece;
+        public bool MentionSubject;
+        public int PropertyID;
+        public int SubjectID;
+        public int MaxProperty;
+        public int MaxSubject;
+    }
+
+    [Serializable]
+    public struct ExpressableData
+    {
+        public List<ExpressableDataPiece> Pieces;
+
+        // I know this one is really bad, but it only runs once, even if it is O(n^4) and attributes memory it doesn't matter
+        public ExpressableData(List<ExpressableDataPiece> pieces)
+        {
+            // EXTRACT PIECES TO GET SIMILAR PIECES OF DATA TOGETHER, SAME OVERALL ORDER
+            // ELIMINATE SIMILAR PIECES OF DATA
+            // PRIORITY:
+            // 1) PUT DATA WITH THE SAME SUBJECT TOGETHER
+            // 2) PUT DATA WITH THE SAME PROPERTY TOGETHER
+            // 3) PUT DATA WITH THE SAME DATA TYPE TOGETHER
+            //
+            var dp = new List<ExpressableDataPiece>();
+            string subject = "";
+            while(pieces.Count > 0) // Same subject together, by order of first appearance
+            {
+                var currentSubject = pieces[0].Subject;
+                // doing the check even though it is always true, to keep in mind the assumption that is made
+                // when I need to reread it
+                if (currentSubject != subject)
+                {
+                    subject = currentSubject;
+                    var indexes = pieces.FindAllIndexes(t => t.Subject == subject);
+                    var tmp = new List<ExpressableDataPiece>();
+                    indexes.ForEach(i => tmp.Add(pieces[i]));
+                    for (int i = indexes.Count - 1; i >= 0; i--)
+                    {
+                        pieces.RemoveAt(indexes[i]);
+                    }
+                    string property = "";
+                    while (tmp.Count > 0)
+                    {
+                        var currentProperty = tmp[0].Property;
+                        if (property != currentProperty)
+                        {
+                            var tmp2 = new List<ExpressableDataPiece>();
+                            property = currentProperty;
+                            indexes = tmp.FindAllIndexes(t => t.Property == currentProperty);
+                            indexes.ForEach(i => tmp2.Add(tmp[i]));
+                            for (int i = indexes.Count - 1; i >= 0; i--)
+                            {
+                                tmp.RemoveAt(indexes[i]);
+                            }
+                            EvolutiveStory.DataType dataType = (EvolutiveStory.DataType)(-1);
+                            while (tmp2.Count > 0)
+                            {
+                                var currentDataType = tmp2[0].DataType;
+                                if (dataType != currentDataType)
+                                {
+                                    dataType = currentDataType;
+                                    indexes = tmp2.FindAllIndexes(t => t.DataType == currentDataType);
+                                    indexes.ForEach(i => dp.Add(tmp2[i]));
+                                    for (int i = indexes.Count - 1; i >= 0; i--)
+                                    {
+                                        tmp2.RemoveAt(indexes[i]);
+                                    }
+                                }
+                                else
+                                {
+                                    throw new Exception("Something has gone terribly wrong");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Something has gone terribly wrong");
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception("Something has gone terribly wrong");
+                }
+            }
+            Pieces = dp;
+        }
+    }
+
+    [Serializable]
+    public struct ExpressableDataPiece
+    {
+        public string Owner;
+        public string Subject;
+        public string Property;
+        public string Value;
+        public EvolutiveStory.DataType DataType;
+    }
+
 
     private EvolutiveStory.Character GetCharacterByName(string name)
     {
         // FOR TEST PURPOSES RN
         return new EvolutiveStory.Character { Gender = EvolutiveStory.Gender.Female };
+    }
+
+    private EvolutiveStory.Character GetSelf()
+    {
+        // FOR TEST PURPOSES RN
+        return _testCharacter;
+    }
+
+    private bool IsCharacter(string name)
+    {
+        return true;
     }
 
     private string BuildSubject(EvolutiveStory.Fact fact, EvolutiveStory.Character character, float tone, bool isGivenCharacterSelf, int mentionID = 0, int maxMention = 0)
@@ -424,7 +570,349 @@ public class DialogueGenerator : MonoBehaviour
         return toUse + "'s "+target;
     }
 
-    public string GenerateSentence(EvolutiveStory.Character self, EvolutiveStory.Fact[] facts, Intent intent, float tone)
+    public string GenerateSentence(EvolutiveStory.Character self, ExpressableData data)
+    {
+        EvolutiveStory.DataType dataType = (EvolutiveStory.DataType)(-1);
+        List<string> subjects = new List<string>();
+        List<string> properties = new List<string>();
+        ExpressableDataIntermediary[] pieceSave = data.Pieces.Select(t => new ExpressableDataIntermediary() { Piece = t, MentionSubject = true, PropertyID = 0 }).ToArray();
+        List<int> sentences = new List<int>();
+        int count = 0;
+
+        // Split and process our data
+        while (data.Pieces.Count > 0)
+        {
+            var piece = data.Pieces[0];
+            if (dataType != piece.DataType)
+            {
+                // RESET
+                subjects.Clear();
+                properties.Clear();
+                dataType = piece.DataType;
+                sentences.Add(count);
+            }
+            GreatMarchOverloads.AddUnique(ref subjects, piece.Subject);
+            GreatMarchOverloads.AddUnique(ref properties, piece.Property);
+            // We want:
+            // Unlimited: same subject & same property
+            // Max 3: same subject different property
+            // Max 3: different subjects same property
+
+            // Rules:
+            // 1) Can't have both several subjects and several properties
+            // 2) Can't have over 3 subjects
+            // 3) Can't have over 3 properties
+
+            if ((subjects.Count > 1 && properties.Count > 1) || subjects.Count > 3 || properties.Count > 3)
+            {
+                // RESET
+                subjects.Clear();
+                properties.Clear();
+                dataType = piece.DataType;
+                subjects.Add(piece.Subject);
+                properties.Add(piece.Property);
+                sentences.Add(count);
+            }
+
+            if (properties.Count > 1)
+                pieceSave[count].MentionSubject = false; // Would be weird to repeat the subject instead of using a pronoun
+
+            // This will give us info on what needs to be mentioned and formatted in what way, and save on future logic
+            pieceSave[count].PropertyID = properties.Count - 1;
+            pieceSave[count].SubjectID = subjects.Count - 1;
+
+            count++;
+        }
+
+        // Build each sentence individually
+        for (int i = 0; i < sentences.Count; i++)
+        {
+            var sentencePieces = pieceSave.ToList().GetRange(sentences[i], (i < sentences.Count - 1 ? sentences[i + 1] : sentences[sentences.Count - 1]) - i);
+            var pieces = new List<string>();
+            // Build each part of the sentence
+            foreach(var piece in sentencePieces)
+            {
+                pieces.Add(GenerateFromExpressableData(piece));
+            }
+        }
+        return "";
+    }
+
+    private string GenerateFromExpressableData(ExpressableDataIntermediary expressableData)
+    {
+        string result = "";
+        //  public ExpressableDataPiece Piece;
+        //  public bool MentionSubject;
+        //  public int PropertyID;
+        //  public int SubjectID;
+        if (expressableData.MentionSubject)
+        {
+            result = BuildSubject(expressableData);
+        }
+
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // STOPPED HERE
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+        // *******************************************************************************************************************
+
+        return result;
+    }
+
+    private string BuildSubject(ExpressableDataIntermediary data)
+    {
+        // data type doesn't matter for subjects
+        EvolutiveStory.Character self = GetSelf();
+        bool isOwner = data.Piece.Owner == self.Name.Name;
+        if (isOwner)
+        {
+            bool isSelf = data.Piece.Subject == data.Piece.Owner;
+            if (isSelf) // talking about yourself directly
+            {
+                if (!data.MentionSubject)
+                {
+                    return "and";
+                }
+                if (self.SelfWorth.Opinion > 0.95)
+                    return "yours truly";
+                else if (self.SelfWorth.Opinion > 0.8)
+                    return "we";
+                else if (self.SelfWorth.Opinion > 0.05)
+                    return "I";
+                else
+                    return "this pitiful self";
+            } else if (IsCharacter(data.Piece.Subject)) // talking about another NPC
+            {
+                var character = GetCharacterByName(data.Piece.Subject);
+                string toUse;
+                var gender = character.Gender;
+                var relationship = self.Relationships.GetByName(data.Piece.Subject);
+                var name = data.MaxSubject == 1 ? relationship.Name.GetOpiniatedName(relationship.Opinion.Opinion).RandomAltName : character.Name.Name;
+                if (data.MaxProperty > 1) // We're going to list properties
+                {
+                    if (data.PropertyID == 0)
+                    {
+                        toUse = name + "'s";
+                    }
+                    else if (data.PropertyID < data.MaxProperty)
+                    {
+                        toUse = gender switch
+                        {
+                            EvolutiveStory.Gender.Object => ", its",
+                            EvolutiveStory.Gender.Neutral => ", their",
+                            EvolutiveStory.Gender.Male => ", his",
+                            EvolutiveStory.Gender.Female => ", her",
+                            _ => ", its"
+                        };
+                    }
+                    else if (data.PropertyID == 1) // and superior or equal to max property
+                    {
+                        toUse = gender switch
+                        {
+                            EvolutiveStory.Gender.Object => " and its",
+                            EvolutiveStory.Gender.Neutral => " and their",
+                            EvolutiveStory.Gender.Male => " and his",
+                            EvolutiveStory.Gender.Female => " and her",
+                            _ => " and its"
+                        };
+                    }
+                    else // simply superior or equal to max property
+                    {
+                        toUse = gender switch
+                        {
+                            EvolutiveStory.Gender.Object => ", and its",
+                            EvolutiveStory.Gender.Neutral => ", and their",
+                            EvolutiveStory.Gender.Male => ", and his",
+                            EvolutiveStory.Gender.Female => ", and her",
+                            _ => ", and its"
+                        };
+                    }
+                    return toUse + " " + data.Piece.Property;
+                }
+                else // we're going to list subjects
+                {
+                    if (data.SubjectID == 0)
+                    {
+                        toUse = name;
+                    }
+                    else if (data.SubjectID < data.MaxSubject)
+                    {
+                        toUse = ", " + name;
+                    }
+                    else if (data.PropertyID == 1) // and superior or equal to max property
+                    {
+                        toUse = " and " + name;
+                    }
+                    else // simply superior or equal to max property
+                    {
+                        toUse = " and " + name + "'s " + ToPlural(data.Piece.Property);
+                    }
+                    return toUse;
+                }
+            } else // talking about something or someone related to you, called by their relationship to you (ex: my x)
+            {
+                var isCharacter = self.Relationships.HasRelationship(data.Piece.Subject);
+                string toUse;
+                string name;
+                EvolutiveStory.Gender gender;
+                if (isCharacter)
+                {
+                    var character = GetCharacterByName(data.Piece.Subject);
+                    gender = character.Gender;
+                    var relationship = self.Relationships.GetByName(data.Piece.Subject);
+                    name = data.MaxSubject == 1 ? relationship.Name.GetOpiniatedName(relationship.Opinion.Opinion).RandomAltName : character.Name.Name;
+                }
+                else
+                {
+                    gender = EvolutiveStory.Gender.Object;
+                    name = data.Piece.Subject;
+                }
+                if (data.PropertyID == 0)
+                {
+                    toUse = "my " + name + "'s";
+                }
+                else if (data.PropertyID < data.MaxProperty)
+                {
+                    toUse = gender switch
+                    {
+                        EvolutiveStory.Gender.Object => ", its",
+                        EvolutiveStory.Gender.Neutral => ", their",
+                        EvolutiveStory.Gender.Male => ", his",
+                        EvolutiveStory.Gender.Female => ", her",
+                        _ => ", its"
+                    };
+                }
+                else if (data.PropertyID == 1) // and superior or equal to max property
+                {
+                    toUse = gender switch
+                    {
+                        EvolutiveStory.Gender.Object => " and its",
+                        EvolutiveStory.Gender.Neutral => " and their",
+                        EvolutiveStory.Gender.Male => " and his",
+                        EvolutiveStory.Gender.Female => " and her",
+                        _ => " and its"
+                    };
+                }
+                else // simply superior or equal to max property
+                {
+                    toUse = gender switch
+                    {
+                        EvolutiveStory.Gender.Object => ", and its",
+                        EvolutiveStory.Gender.Neutral => ", and their",
+                        EvolutiveStory.Gender.Male => ", and his",
+                        EvolutiveStory.Gender.Female => ", and her",
+                        _ => ", and its"
+                    };
+                }
+                return toUse + " " + data.Piece.Property;
+            }
+        } else // is not owner, there is a layer of abstraction between me and the subject
+        {      // we don't check for self, any mention of self would be a mistake
+            var isCharacter = IsCharacter(data.Piece.Subject);
+            string toUse;
+            string name;
+            EvolutiveStory.Gender gender;
+            if (isCharacter)
+            {
+                var character = GetCharacterByName(data.Piece.Subject);
+                gender = character.Gender;
+                name = character.Name.Name;
+            }
+            else
+            {
+                gender = EvolutiveStory.Gender.Object;
+                name = data.Piece.Subject;
+            }
+            if (data.MaxProperty > 1) // We're going to list properties
+            {
+                if (data.PropertyID == 0)
+                {
+                    toUse = name + "'s";
+                }
+                else if (data.PropertyID < data.MaxProperty)
+                {
+                    toUse = gender switch
+                    {
+                        EvolutiveStory.Gender.Object => ", its",
+                        EvolutiveStory.Gender.Neutral => ", their",
+                        EvolutiveStory.Gender.Male => ", his",
+                        EvolutiveStory.Gender.Female => ", her",
+                        _ => ", its"
+                    };
+                }
+                else if (data.PropertyID == 1) // and superior or equal to max property
+                {
+                    toUse = gender switch
+                    {
+                        EvolutiveStory.Gender.Object => " and its",
+                        EvolutiveStory.Gender.Neutral => " and their",
+                        EvolutiveStory.Gender.Male => " and his",
+                        EvolutiveStory.Gender.Female => " and her",
+                        _ => " and its"
+                    };
+                }
+                else // simply superior or equal to max property
+                {
+                    toUse = gender switch
+                    {
+                        EvolutiveStory.Gender.Object => ", and its",
+                        EvolutiveStory.Gender.Neutral => ", and their",
+                        EvolutiveStory.Gender.Male => ", and his",
+                        EvolutiveStory.Gender.Female => ", and her",
+                        _ => ", and its"
+                    };
+                }
+                return toUse + " " + data.Piece.Property;
+            }
+            else // we're going to list subjects
+            {
+                if (data.SubjectID == 0)
+                {
+                    toUse = name;
+                }
+                else if (data.SubjectID < data.MaxSubject)
+                {
+                    toUse = ", " + name;
+                }
+                else if (data.PropertyID == 1) // and superior or equal to max property
+                {
+                    toUse = " and " + name;
+                }
+                else // simply superior or equal to max property
+                {
+                    toUse = " and " + name + "'s " + ToPlural(data.Piece.Property);
+                }
+                return toUse;
+            }
+        }
+    }
+
+    private string ToPlural(string singular)
+    {
+        if (singular.Last() == 's')
+            return singular;
+        return string.Concat(singular.SkipLast(1)) + 's';
+    }
+
+    private string GenerateSentenceFacts(EvolutiveStory.Character self, EvolutiveStory.Fact[] facts, Intent intent, float tone)
     {
         var subjects = facts.Select(t => t.Subject).Distinct().ToArray();
         var factsC = facts.Count();
@@ -468,7 +956,6 @@ public class DialogueGenerator : MonoBehaviour
             subjectMaximums.Add(1);
         last = 0;
         int id = -1;
-        bool doRegex = false;
         string res = "";
         for (int i = 0; i < facts.Length; i++)
         {
@@ -594,3 +1081,4 @@ public class DialogueGenerator : MonoBehaviour
         }
     }
 }
+

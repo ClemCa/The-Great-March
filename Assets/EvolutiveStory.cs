@@ -16,6 +16,8 @@ public class EvolutiveStory : MonoBehaviour
         // Gender
         [Visualizable]
         public Gender Gender;
+        [Visualizable]
+        public OpinionInfo SelfWorth;
         // Knowledge
         [Visualizable]
         public Knowledge Knowledge;
@@ -135,6 +137,10 @@ public class EvolutiveStory : MonoBehaviour
         public Relationship GetByName(string name)
         {
             return All.Find(t => t.Name.Name == name);
+        }
+        public bool HasRelationship(string name)
+        {
+            return All.FindIndex(t => t.Name.Name == name) != -1;
         }
     }
 
@@ -459,6 +465,14 @@ public class EvolutiveStory : MonoBehaviour
 
     #region General Data
 
+    public enum DataType
+    {
+        Are,
+        Have,
+        Own,
+        Do
+    }
+
     [Serializable]
     public struct OpinionInfo
     {
@@ -533,6 +547,27 @@ public class EvolutiveStory : MonoBehaviour
 }
 public static class GreatMarchOverloads
 {
+
+    public static List<int> FindAllIndexes<T>(this List<T> source, Predicate<T> match)
+    {
+        List<int> list = new List<int>();
+        for (int i = 0; i < source.Count; i++)
+        {
+            if (match(source[i]))
+            {
+                list.Add(i);
+            }
+        }
+
+        return list;
+    }
+
+    public static void AddUnique<T>(ref List<T> source, T value)
+    {
+        if (!source.Contains(value))
+            source.Add(value);
+    }
+
     public static T MaxWhere<T>(this IEnumerable<T> source, Func<T, long> selector)
     {
         int highestID = -1;

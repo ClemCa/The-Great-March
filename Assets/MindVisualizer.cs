@@ -14,6 +14,7 @@ public class MindVisualizer : MonoBehaviour
 
     private void Init()
     {
+        menu.MindVisualizer = this;
         currentPath = menu.Name;
         options.Navigation += UpdatePath;
         options.Options = menu.GetOptions(currentPath);
@@ -90,6 +91,7 @@ public class MindVisualizer : MonoBehaviour
     [Serializable]
     public struct Menu
     {
+        [NonSerialized]
         public MindVisualizer MindVisualizer;
         public string Name;
         public List<Menu> Children;
