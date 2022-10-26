@@ -60,7 +60,8 @@ public class MindVisualizer : MonoBehaviour
     {
         var p = path.Split(".").Skip(1).ToArray();
         var field = GetFieldFromPath(p, dialogueGenerator.TestCharacter);
-        dialogueGenerator.GenerateFromField(dialogueGenerator.TestCharacter, field);
+        var res = dialogueGenerator.GenerateFromField(dialogueGenerator.TestCharacter, field);
+        Debug.Log(res);
     }
 
     private object GetFieldFromPath(string[] path, object current)
@@ -123,7 +124,6 @@ public class MindVisualizer : MonoBehaviour
                 case -1:
                     return string.Join(".", p.SkipLast(1));
                 case 0:
-                    Debug.Log("supposed to do something");
                     MindVisualizer.GenerateDialogueFromPath(path + "." + target);
                     return path;
                 case 1:

@@ -1,3 +1,4 @@
+using ClemCAddons;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using static DialogueGenerator;
+using static EvolutiveStory;
 
 public class DialogueGenerator : MonoBehaviour
 {
@@ -36,64 +39,25 @@ public class DialogueGenerator : MonoBehaviour
 
     void Start()
     {
-        var fact1 = _testCharacter.Memory.Fact.Memory[0];
-        var fact2 = _testCharacter.Memory.Fact.Memory[1];
-        Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { fact1 }, _testIntent, _testOpinion));
-        Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { fact2 }, _testIntent, _testOpinion));
-        Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { fact1, fact2 }, _testIntent, _testOpinion));
 
-        var expressableData = new ExpressableData(new List<ExpressableDataPiece>()
-        {
-            new ExpressableDataPiece()
-            {
-                DataType = EvolutiveStory.DataType.Are,
-                Subject = "Mother",
-                Property = "Name",
-                Value = "Maria"
-            },
-            new ExpressableDataPiece()
-            {
-                DataType = EvolutiveStory.DataType.Have,
-                Subject = "Mother",
-                Property = "Grin",
-                Value = "Nice"
-            },
-            new ExpressableDataPiece()
-            {
-                DataType = EvolutiveStory.DataType.Are,
-                Subject = "Dad",
-                Property = "Face",
-                Value = "Hella weird"
-            },
-            new ExpressableDataPiece()
-            {
-                DataType = EvolutiveStory.DataType.Are,
-                Subject = "Mother",
-                Property = "Sneeze",
-                Value = "Atchoo"
-            }
-        });
-        Debug.Log(JsonUtility.ToJson(expressableData));
     }
 
-    public void GenerateFromField(EvolutiveStory.Character origin, object obj)
+    public string GenerateFromField(EvolutiveStory.Character origin, object obj)
     {
         // To note cases where lists are empty are unhandled, will result in an error due to Random.Range(0,0) being invalid.
         switch (obj)
         {
             case EvolutiveStory.NameInfo o:
-                Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "name" }, Subject = origin.Name.Name, Data = origin.Name.Name, Flag = "Name" } }, Intent.SeriousAnnecdote, 0.5f));
-                break;
+                return GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "name" }, Subject = origin.Name.Name, Data = origin.Name.Name, Flag = "Name" } }, Intent.SeriousAnnecdote, 0.5f);
             case EvolutiveStory.Gender o:
-                Debug.Log(GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "gender" }, Subject = origin.Name.Name, Data = o switch
+                return GenerateSentenceFacts(_testCharacter, new EvolutiveStory.Fact[] { new EvolutiveStory.Fact() { Name = new EvolutiveStory.NameInfo() { Name = "gender" }, Subject = origin.Name.Name, Data = o switch
                 {
                     EvolutiveStory.Gender.Male => "male",
                     EvolutiveStory.Gender.Female => "female",
                     EvolutiveStory.Gender.Neutral => "non-binary",
                     EvolutiveStory.Gender.Object => "undefined",
                     _ => "unknown"
-                }, Flag = "Gender" } }, Intent.SeriousAnnecdote, 0.5f));
-                break;
+                }, Flag = "Gender" } }, Intent.SeriousAnnecdote, 0.5f);
             case EvolutiveStory.Knowledge o:
                 {
                     // Call the same function, but with the topic just a bit more defined
@@ -102,23 +66,20 @@ public class DialogueGenerator : MonoBehaviour
                     switch (randomField)
                     {
                         case 0:
-                            GenerateFromField(origin, o.Job);
-                            break;
+                            return GenerateFromField(origin, o.Job);
                         case 1:
-                            GenerateFromField(origin, o.Hobbies.Random());
                             break;
+                            return GenerateFromField(origin, o.Hobbies.Random());
                         case 2:
                             GenerateFromField(origin, o.Role);
-                            break;
+                            return GenerateFromField(origin, o.Role);
                         case 3:
-                            GenerateFromField(origin, o.OngoingEvents.Random());
-                            break;
+                            return GenerateFromField(origin, o.OngoingEvents.Random());
                         default:
                             Debug.LogError("Something is wrong");
-                            break;
+                            return "";
                     }
                 }
-                break;
             case EvolutiveStory.Personality o:
                 {
                     // Call the same function, but with the topic just a bit more defined
@@ -131,30 +92,24 @@ public class DialogueGenerator : MonoBehaviour
                     switch (randomField)
                     {
                         case 0:
-                            GenerateFromField(origin, o.PreferedTopic);
-                            break;
+                            return GenerateFromField(origin, o.PreferedTopic);
                         case 1:
                         case 2:
-                            GenerateFromField(origin, o.Topics.Where(t => t.LikeRatio > 0.5f).Random());
-                            break;
+                            return GenerateFromField(origin, o.Topics.Where(t => t.LikeRatio > 0.5f).Random());
                         case 4:
                         case 5:
                         case 6:
-                            GenerateFromField(origin, o.Topics.Random());
-                            break;
+                            return GenerateFromField(origin, o.Topics.Random());
                         case 7:
                         case 8:
-                            GenerateFromField(origin, o.Topics.Where(t => t.LikeRatio < 0.5f).Random());
-                            break;
+                            return GenerateFromField(origin, o.Topics.Where(t => t.LikeRatio < 0.5f).Random());
                         case 9:
-                            GenerateFromField(origin, o.HatedTopic);
-                            break;
+                            return GenerateFromField(origin, o.HatedTopic);
                         default:
                             Debug.LogError("Something is wrong");
-                            break;
+                            return "";
                     }
                 }
-                break;
             case EvolutiveStory.Memory o:
                 {
                     // Call the same function, but with the topic just a bit more defined
@@ -163,20 +118,16 @@ public class DialogueGenerator : MonoBehaviour
                     switch (randomField)
                     {
                         case 0:
-                            GenerateFromField(origin, o.Fact.Memory.Random());
-                            break;
+                            return GenerateFromField(origin, o.Fact.Memory.Random());
                         case 1:
-                            GenerateFromField(origin, o.Relationships.Memory.Random());
-                            break;
+                            return GenerateFromField(origin, o.Relationships.Memory.Random());
                         case 2:
-                            GenerateFromField(origin, o.Event.Memory.Random());
-                            break;
+                            return GenerateFromField(origin, o.Event.Memory.Random());
                         default:
                             Debug.LogError("Something is wrong");
-                            break;
+                            return "";
                     }
                 }
-                break;
             case EvolutiveStory.Relationships o:
                 {
                     // Call the same function, but with the topic just a bit more defined
@@ -189,30 +140,24 @@ public class DialogueGenerator : MonoBehaviour
                     switch (randomField)
                     {
                         case 0:
-                            GenerateFromField(origin, o.Friendliest);
-                            break;
+                            return GenerateFromField(origin, o.Friendliest);
                         case 1:
                         case 2:
-                            GenerateFromField(origin, o.All.Where(t => t.Opinion.Opinion > 0.5f).Random());
-                            break;
+                            return GenerateFromField(origin, o.All.Where(t => t.Opinion.Opinion > 0.5f).Random());
                         case 4:
                         case 5:
                         case 6:
-                            GenerateFromField(origin, o.All.Random());
-                            break;
+                            return GenerateFromField(origin, o.All.Random());
                         case 7:
                         case 8:
-                            GenerateFromField(origin, o.All.Where(t => t.Opinion.Opinion < 0.5f).Random());
-                            break;
+                            return GenerateFromField(origin, o.All.Where(t => t.Opinion.Opinion < 0.5f).Random());
                         case 9:
-                            GenerateFromField(origin, o.Muddiest);
-                            break;
+                            return GenerateFromField(origin, o.Muddiest);
                         default:
                             Debug.LogError("Something is wrong");
-                            break;
+                            return "";
                     }
                 }
-                break;
             case EvolutiveStory.Present o:
                 {
                     // Call the same function, but with the topic just a bit more defined
@@ -223,39 +168,39 @@ public class DialogueGenerator : MonoBehaviour
                     if (count == 0)
                     {
                         Debug.LogError("Unhandled for now: nothing to say on present");
-                        return;
+                        return "";
                     }
                     var randomField = UnityEngine.Random.Range(0, count);
                     switch (randomField)
                     {
                         case 0:
                             if (hasActions)
-                                GenerateFromField(origin, o.Actions.Random());
+                                return GenerateFromField(origin, o.Actions.Random());
                             else if (hasTroubles)
-                                GenerateFromField(origin, o.Troubles.Random());
+                                return GenerateFromField(origin, o.Troubles.Random());
                             else
-                                GenerateFromField(origin, o.Weaknesses.Random());
-                            break;
+                                return GenerateFromField(origin, o.Weaknesses.Random());
                         case 1:
                             if (hasActions)
                             {
                                 if(hasTroubles)
-                                    GenerateFromField(origin, o.Troubles);
+                                    return GenerateFromField(origin, o.Troubles);
                                 else
-                                    GenerateFromField(origin, o.Weaknesses);
+                                    return GenerateFromField(origin, o.Weaknesses);
                             }
                             else
-                                GenerateFromField(origin, o.Weaknesses);
-                            break;
+                                return GenerateFromField(origin, o.Weaknesses);
                         case 2:
-                            GenerateFromField(origin, o.Weaknesses);
-                            break;
+                            return GenerateFromField(origin, o.Weaknesses);
                         default:
                             Debug.LogError("Something is wrong");
-                            break;
+                            return "";
                     }
                 }
-                break;
+            case EvolutiveStory.OpinionInfo: // No origin, can only be self
+                {
+                    return GenerateSentenceOpinion(_testCharacter, _testCharacter.Name.Name, _testCharacter.Name, (OpinionInfo)obj);
+                }
             case EvolutiveStory.Job:
             case EvolutiveStory.Hobby:
             case EvolutiveStory.StoryRole:
@@ -267,10 +212,10 @@ public class DialogueGenerator : MonoBehaviour
             case EvolutiveStory.PresentFact:
             case EvolutiveStory.PresentExpiringFact:
                 Debug.LogError("left to do");
-                break;
+                return "";
             default:
                 Debug.LogError("Field can't be generated from");
-                break;
+                return "";
         }
     }
 
@@ -288,7 +233,7 @@ public class DialogueGenerator : MonoBehaviour
         var v = verb.Verb;
         v = conjugation switch
         {
-            EvolutiveStory.Conjugation.Present => v == "be" ? "is" : v, // literally the only special case
+            EvolutiveStory.Conjugation.Present => v == "be" ? (number == 0 ? "am" : "is") : v, // literally the only special case
             EvolutiveStory.Conjugation.Present3 => _verbData[v].Singular3,
             EvolutiveStory.Conjugation.PresentParticiple => "is " + _verbData[v].PresentParticiple,
             EvolutiveStory.Conjugation.SimplePast => _verbData[v].SimplePast,
@@ -522,20 +467,22 @@ public class DialogueGenerator : MonoBehaviour
         return true;
     }
 
-    private string BuildSubject(EvolutiveStory.Fact fact, EvolutiveStory.Character character, float tone, bool isGivenCharacterSelf, int mentionID = 0, int maxMention = 0)
+    private string BuildSubject(EvolutiveStory.Character character, string subject, string target, string opiniatedName, float tone, bool isGivenCharacterSelf, int mentionID = 0, int maxMention = 0)
     {
-        var relationship = character.Relationships.GetByName(fact.Subject);
+        if (character.Name.Name == target)
+            return "I";
+        var relationship = character.Relationships.GetByName(subject);
         float relationshipScore = relationship.Opinion.Opinion;
         var owner = relationship.Name.GetOpiniatedName(relationshipScore).RandomAltName;
-        var target = fact.Name.GetOpiniatedName(tone).RandomAltName;
-        var targetChar = GetCharacterByName(fact.Subject);
+        var targetChar = GetCharacterByName(subject);
         string toUse;
-        if (isGivenCharacterSelf && fact.Subject == character.Name.Name)
-            return "my " + target;
-        if(mentionID == 0)
+        if (isGivenCharacterSelf && subject == character.Name.Name)
+            return "my " + opiniatedName;
+        if (mentionID == 0)
         {
             toUse = (isGivenCharacterSelf ? "my " : character.Name + "'s ") + owner;
-        } else if (mentionID < maxMention)
+        }
+        else if (mentionID < maxMention)
         {
             toUse = targetChar.Gender switch
             {
@@ -556,7 +503,8 @@ public class DialogueGenerator : MonoBehaviour
                 EvolutiveStory.Gender.Female => " and her",
                 _ => " and its"
             };
-        } else
+        }
+        else
         {
             toUse = targetChar.Gender switch
             {
@@ -567,7 +515,7 @@ public class DialogueGenerator : MonoBehaviour
                 _ => ", and its"
             };
         }
-        return toUse + "'s "+target;
+        return toUse + "'s " + opiniatedName;
     }
 
     public string GenerateSentence(EvolutiveStory.Character self, ExpressableData data)
@@ -912,6 +860,52 @@ public class DialogueGenerator : MonoBehaviour
         return string.Concat(singular.SkipLast(1)) + 's';
     }
 
+    private string GenerateSentenceOpinion(EvolutiveStory.Character self, string subject, NameInfo nameInfo, EvolutiveStory.OpinionInfo opinion)
+    {
+        var structure = FetchStructure(1, 0, Intent.SeriousAnnecdote, 0.5f);
+        string change = "";
+        string changeEnd = "";
+        if(Mathf.Abs(opinion.Trend) > 0.1)
+        {
+            change = "lately, ";
+        } else if (Mathf.Abs(opinion.Trend) > 0.25)
+        {
+            change = "recently, ";
+        }
+        string flag;
+        if (opinion.Opinion <= 0.25f)
+        {
+            flag = "Hate";
+        }
+        else if (opinion.Opinion <= 0.4f)
+        {
+            flag = "Dislike";
+        }
+        else if (opinion.Opinion <= 0.6f)
+        {
+            Debug.LogError("add a way to have more variety to that");
+            return "I don't know how I feel about " + nameInfo.Name;
+        }
+        else if (opinion.Opinion <= 0.75f)
+        {
+            flag = "Like";
+        }
+        else
+        {
+            flag = "Love";
+        }
+        SubjectData subjectData;
+        if (_testCharacter.Name.Name == nameInfo.Name)
+        {
+            subjectData = new SubjectData(subject, nameInfo, new string[] { "myself" }, new string[] { flag });
+        }
+        else
+        {
+            subjectData = new SubjectData(subject, nameInfo, new string[] { nameInfo.Name }, new string[] { flag });
+        }
+        return BuildSentence(self, change+structure+changeEnd, new SentenceData(new SubjectData[] { subjectData }, new NameInfo[0], Conjugation.Present, 0));
+    }
+
     private string GenerateSentenceFacts(EvolutiveStory.Character self, EvolutiveStory.Fact[] facts, Intent intent, float tone)
     {
         var subjects = facts.Select(t => t.Subject).Distinct().ToArray();
@@ -929,69 +923,99 @@ public class DialogueGenerator : MonoBehaviour
         // if there is no problem with the number of contextual data, we can eliminate redundancies
         // (the context is all about the same data)
         var structure = FetchStructure(subjects.Count(), contexts.Count(), intent, tone);
-        return BuildSentence(self, structure, subjects, facts, contexts, tone);
+
+        var subjectData = new SubjectData[subjects.Length];
+        for (int i = 0; i < subjects.Length; i++)
+        {
+            var concernedFacts = facts.Where(t => t.Subject == subjects[i]);
+            subjectData[i] = new SubjectData(subjects[i], facts.First(t => t.Subject == subjects[i]).Name, concernedFacts.Select(t => t.Data).ToArray(), concernedFacts.Select(t => t.Flag).ToArray());
+        }
+
+        return BuildSentence(self, structure, new SentenceData(subjectData, contexts, Conjugation.Present, tone));
     }
 
-    public string BuildSentence(EvolutiveStory.Character self, string structure, string[] subjects, EvolutiveStory.Fact[] facts, EvolutiveStory.NameInfo[] contexts, float opinion)
+    public struct SentenceData
+    {
+        public SubjectData[] SubjectData;
+        public EvolutiveStory.NameInfo[] ContextData;
+        public Conjugation TargetTense;
+        public float Tone;
+
+        public SentenceData(SubjectData[] subjectData, NameInfo[] contextData, Conjugation targetTense, float tone)
+        {
+            SubjectData = subjectData;
+            ContextData = contextData;
+            TargetTense = targetTense;
+            Tone = tone;
+
+            Debug.LogError("Missing:\n" +
+                "Limits on alternative names that can be used\n" +
+                "ARE / HAVE / OWN / DO distinction");
+        }
+    }
+
+    public struct SubjectData
+    {
+        public string Subject;
+        public int Number;
+        public int Gender;
+        public NameInfo Name;
+        public string[] Data;
+        public string[] Flags;
+
+        public SubjectData(string subject, NameInfo name, string[] data, string[] flags, int number = 1, int gender = 0)
+        {
+            Subject = subject;
+            Name = name;
+            Data = data;
+            Flags = flags;
+            Number = number;
+            Gender = gender;
+        }
+    }
+
+    public string BuildSentence(EvolutiveStory.Character self, string structure, SentenceData sentenceData)
     {
         var regex = new Regex("VBH");
-        List<int> subjectMaximums = new List<int>(); // how many times do subjects repeat, it's inefficient but it's fine, we don't run this often
-        string subject = facts[0].Subject;
-        int last = 0;
-        for (int i = 1; i < facts.Length; i++)
-        {
-            if(facts[i].Subject != subject)
-            {
-                subject = facts[i].Subject;
-                subjectMaximums.Add(i - last);
-                last = i;
-                continue;
-            }
-            if (i == facts.Length - 1)
-            {
-                subjectMaximums.Add(i - last);
-            }
-        }
-        if (facts.Length == 1)
-            subjectMaximums.Add(1);
-        last = 0;
-        int id = -1;
         string res = "";
-        for (int i = 0; i < facts.Length; i++)
+        for (int i = 0; i < sentenceData.SubjectData.Length; i++)
         {
-            var fact = facts[i];
-            var subjectID = Array.IndexOf(subjects, fact.Subject);
-            if (subjectID != id)
+            var subject = sentenceData.SubjectData[i];
+            int number;
+            if(subject.Name.Name == self.Name.Name)
             {
-                id = subjectID;
-                last = 0;
-                if(res != "")
-                {
-                    structure = regex.Replace(structure, res, 1);
-                    res = "";
-                }
+                number = 0;
             }
             else
-                last++;
-            var content = BuildSubject(fact, self, opinion, true, last, subjectMaximums[id]);
-            var verb = GetConjugation(ChooseVerb(fact.Flag, EvolutiveStory.Conjugation.Present), EvolutiveStory.Conjugation.Present, 0, 0); // NUMBER => number of subject (0 if self), GENDER => gender of subject
-            content += " "+verb;
-            content += " "+fact.Data;
-            res += content;
+            {
+                number = 1;
+                Debug.LogWarning("Right now, singular and plural are both singular");
+            }
+            for (int d = 0; d < subject.Data.Length; d++)
+            {
+                var content = BuildSubject(self, subject.Subject, subject.Name.Name, subject.Name.GetOpiniatedName(sentenceData.Tone).RandomAltName, sentenceData.Tone, true, d, subject.Data.Length);
+                var verb = GetConjugation(ChooseVerb(subject.Flags[d], EvolutiveStory.Conjugation.Present), EvolutiveStory.Conjugation.Present, number, 0); // NUMBER => number of subject (0 if self), GENDER => gender of subject
+                content += " " + verb;
+                content += " " + subject.Data[d];
+                res += content;
+            }
+            structure = regex.Replace(structure, res, 1);
+
         }
         structure = regex.Replace(structure, res, 1);
-        for (int i = 0; i < contexts.Length; i++)
+        for (int i = 0; i < sentenceData.ContextData.Length; i++)
         {
             // we don't care for the subject here because context only exists if it matches the number of facts in the first place
             // we don't care about which subject is which
-            var context = contexts[i];
-            structure = structure.Replace("Contextual"+i, context.GetOpiniatedName(opinion).RandomAltName);
+            var context = sentenceData.ContextData[i];
+            structure = structure.Replace("Contextual" + i, context.GetOpiniatedName(sentenceData.Tone).RandomAltName);
         }
         var s = new StringBuilder(structure);
         s[0] = char.ToUpper(structure[0]);
         // capitalize the first letter
         return s.ToString();
     }
+
 
     public string FetchStructure(int subjectCount, int contextualDataCount, Intent intent, float tone)
     {

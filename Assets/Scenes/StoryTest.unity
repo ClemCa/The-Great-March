@@ -676,26 +676,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   menu:
-    MindVisualizer: {fileID: 0}
     Name: Anna
     Children:
-    - MindVisualizer: {fileID: 0}
-      Name: Knowledge
+    - Name: Knowledge
       Children:
-      - MindVisualizer: {fileID: 0}
-        Name: Metallurgy
+      - Name: Metallurgy
         Children: []
-    - MindVisualizer: {fileID: 0}
-      Name: Personality
+    - Name: Personality
       Children: []
-    - MindVisualizer: {fileID: 0}
-      Name: '"Personality"'
+    - Name: '"Personality"'
       Children:
-      - MindVisualizer: {fileID: 0}
-        Name: Size
+      - Name: Size
         Children:
-        - MindVisualizer: {fileID: 0}
-          Name: A
+        - Name: A
           Children: []
   options: {fileID: 866164506}
   currentPath: Anna
@@ -1149,6 +1142,34 @@ MonoBehaviour:
         Prefix: 
         Suffix: 
         ValidConjugations: 3
+    - Flag: Hate
+      Verbs:
+      - Verb: hate
+        Prefix: 
+        Suffix: 
+        ValidConjugations: 3
+      - Verb: despise
+        Prefix: 
+        Suffix: 
+        ValidConjugations: 3
+    - Flag: Love
+      Verbs:
+      - Verb: love
+        Prefix: 
+        Suffix: 
+        ValidConjugations: 3
+    - Flag: Dislike
+      Verbs:
+      - Verb: dislike
+        Prefix: 
+        Suffix: 
+        ValidConjugations: 3
+    - Flag: Be
+      Verbs:
+      - Verb: be
+        Prefix: 
+        Suffix: 
+        ValidConjugations: 3
   _structureDatabase:
     Structures:
     - Subjects: 1
@@ -1176,6 +1197,9 @@ MonoBehaviour:
       Name: Jean
       OpiniatedNames: []
     Gender: 0
+    SelfWorth:
+      Opinion: 0
+      Trend: 0
     Memory:
       Fact:
         Memory:
