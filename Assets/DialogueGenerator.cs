@@ -68,10 +68,8 @@ public class DialogueGenerator : MonoBehaviour
                         case 0:
                             return GenerateFromField(origin, o.Job);
                         case 1:
-                            break;
                             return GenerateFromField(origin, o.Hobbies.Random());
                         case 2:
-                            GenerateFromField(origin, o.Role);
                             return GenerateFromField(origin, o.Role);
                         case 3:
                             return GenerateFromField(origin, o.OngoingEvents.Random());
