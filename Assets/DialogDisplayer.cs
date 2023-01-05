@@ -128,11 +128,11 @@ public class DialogDisplayer : MonoBehaviour
         target.text = current;
         if(_delays.Length > 0)
         {
-            await System.Threading.Tasks.Task.Delay(_delays[0]);
+            await Cysharp.Threading.Tasks.UniTask.Delay(_delays[0], true);
         }
         for (int i = 0; i < text.Length; i++)
         {
-            await System.Threading.Tasks.Task.Delay((_writingDelay / _speed).Round());
+            await Cysharp.Threading.Tasks.UniTask.Delay((_writingDelay / _speed).Round(), true);
             if(text.Length > i + 5) // 4+1
             {
                 var t = "";
@@ -147,7 +147,7 @@ public class DialogDisplayer : MonoBehaviour
                     target.text = current;
                     delayID++;
                     if (delayID < _delays.Length)
-                        await System.Threading.Tasks.Task.Delay(_delays[_speedID]);
+                        await Cysharp.Threading.Tasks.UniTask.Delay(_delays[_speedID], true);
                     continue;
                 }
                 if (t == "<sd>")
@@ -169,7 +169,7 @@ public class DialogDisplayer : MonoBehaviour
                     if (_speedID < _speeds.Length)
                         _speed = _speeds[_speedID];
                     if (delayID < _delays.Length)
-                        await System.Threading.Tasks.Task.Delay(_delays[_speedID]);
+                        await Cysharp.Threading.Tasks.UniTask.Delay(_delays[_speedID], true);
                     continue;
                 }
             }
@@ -177,7 +177,7 @@ public class DialogDisplayer : MonoBehaviour
             target.text = current;
         }
         _delays = new int[0]; // reset delays
-        await System.Threading.Tasks.Task.Delay(_choiceDelay);
+        await Cysharp.Threading.Tasks.UniTask.Delay(_choiceDelay, true);
         var buttons = transform.FindDeep("Buttons");
         if (_choices != null)
         {

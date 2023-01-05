@@ -9,8 +9,8 @@ public class Pausing : MonoBehaviour
 {
     private static Pausing _instance;
 
-    private static bool _paused;
-    private static bool _blocked;
+    private static bool _paused = false;
+    private static bool _blocked = false;
     private static float _timeTarget = 1;
 
     public static bool Paused { get => _paused; }
@@ -79,6 +79,7 @@ public class Pausing : MonoBehaviour
         var dir = (_timeTarget - Time.timeScale).Sign();
         Time.timeScale = (Time.timeScale + dir * Time.unscaledDeltaTime).Clamp(Time.timeScale.Min(_timeTarget), Time.timeScale.Max(_timeTarget));
 
+        Debug.Log(_paused);
         if (Input.GetKeyDown(KeyCode.Escape) && !_blocked)
         {
             FlipPause();

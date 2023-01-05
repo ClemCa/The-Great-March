@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using ClemCAddons.Utilities;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using System.Diagnostics;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
@@ -3018,23 +3018,23 @@ namespace ClemCAddons
 #endregion Vector2 Additions
 #region Async
             public delegate void Call();
-            public static async Task DelayedCall(int delayms, Call call)
+            public static async UniTask DelayedCall(int delayms, Call call)
             {
-                await Task.Delay(delayms);
+                await UniTask.Delay(delayms, true);
                 call.Invoke();
             }
-            public static async Task MoveTo(Transform transform, Vector3 destination, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3 destination, float speed = 1f)
             {
                 Vector3 basePosition = transform.position;
                 float max = speed * 200; // 1000 (1s) / 5
                 for (int i = 0; i <= max; i++)
                 {
                     transform.position = Vector3.Lerp(basePosition, destination, i / max);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 return;
             }
-            public static async Task MoveTo(Transform transform, Vector3 destination, Quaternion destinationRotation, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3 destination, Quaternion destinationRotation, float speed = 1f)
             {
                 Quaternion baseRotation = transform.rotation;
                 Vector3 basePosition = transform.position;
@@ -3043,11 +3043,11 @@ namespace ClemCAddons
                 {
                     transform.position = Vector3.Lerp(basePosition, destination, i / max);
                     transform.rotation = Quaternion.Lerp(baseRotation, destinationRotation, i / max);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 return;
             }
-            public static async Task MoveTo(Transform transform, Vector3[] points, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3[] points, float speed = 1f)
             {
                 for (int i = 0; i < points.Length; i++)
                 {
@@ -3055,7 +3055,7 @@ namespace ClemCAddons
                 }
                 return;
             }
-            public static async Task MoveTo(Transform transform, Vector3[] points, Quaternion[] rotations, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3[] points, Quaternion[] rotations, float speed = 1f)
             {
                 for (int i = 0; i < points.Length; i++)
                 {
@@ -3118,7 +3118,7 @@ namespace ClemCAddons
         {
             private async static void InvokeNow<T>(Action<T> action, T value, bool standardInvoke)
             {
-                await Task.Delay(1);
+                await UniTask.Delay(1, true);
                 if (!standardInvoke)
                 {
                     _ = action.BeginInvoke(value, action.EndInvoke, null);
@@ -3208,13 +3208,13 @@ namespace ClemCAddons
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5, true);
                 while ((origin - destination).Abs() > tolerance)
                 {
                     origin = Mathf.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3227,7 +3227,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Mathf.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3295,13 +3295,13 @@ namespace ClemCAddons
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5, true);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector3.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3314,7 +3314,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector3.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3382,13 +3382,13 @@ namespace ClemCAddons
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5, true);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector2.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3401,7 +3401,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector2.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3468,13 +3468,13 @@ namespace ClemCAddons
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5, true);
                 while (!origin.IsApproximatelyEqual(destination, tolerance))
                 {
                     origin = Quaternion.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3487,7 +3487,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Quaternion.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                 }
                 setter.Invoke(destination);
             }
@@ -3578,7 +3578,7 @@ namespace ClemCAddons
             {
                 while (stopwatch.IsRunning)
                 {
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                     if (stopwatch.ElapsedMilliseconds > delay && stopwatch.IsRunning)
                     {
                         stopwatch.Stop();
@@ -3592,7 +3592,7 @@ namespace ClemCAddons
                 int objectiveDelay = delay;
                 while (stopwatch.IsRunning)
                 {
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                     if (stopwatch.ElapsedMilliseconds < objectiveDelay)
                         continue;
                     if (stopwatch.IsRunning)
@@ -3613,7 +3613,7 @@ namespace ClemCAddons
                 int objectiveDelay = delay;
                 while (stopwatch.IsRunning)
                 {
-                    await Task.Delay(5);
+                    await UniTask.Delay(5, true);
                     if (stopwatch.ElapsedMilliseconds < objectiveDelay)
                         continue;
                     if (stopwatch.IsRunning)
