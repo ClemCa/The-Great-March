@@ -8,11 +8,9 @@ using System.Diagnostics;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Text;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
@@ -53,7 +51,7 @@ namespace ClemCAddons
         {
             var type = Type.GetType(typeName);
             if (type != null) return type;
-            foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var a in UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies())
             {
                 type = a.GetType(typeName);
                 if (type != null)
@@ -80,28 +78,21 @@ namespace ClemCAddons
         /// <param name="type">The type to be cast to.</param>
         public static dynamic ToType(this byte[] bytes, Type type)
         {
-            var binformatter = new BinaryFormatter();
-            var stream = new MemoryStream(bytes);
-            return Convert.ChangeType(binformatter.Deserialize(stream), type);
+            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), type);
         } // noice. Am actually impressed with it
         /// <summary>
         /// Deserialize a set of bytes
         /// </summary>
         public static object ToObject(this byte[] bytes)
         {
-            var binformatter = new BinaryFormatter();
-            var stream = new MemoryStream(bytes);
-            return binformatter.Deserialize(stream);
+            return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
         }
         /// <summary>
         /// Serializes an object into bytes
         /// </summary>
         public static byte[] ToBytes(this object value)
         {
-            var binformatter = new BinaryFormatter();
-            var stream = new MemoryStream();
-            binformatter.Serialize(stream, value);
-            return stream.ToArray();
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value));
         }
         /// <summary>
         /// Serializes a string into bytes
@@ -122,10 +113,7 @@ namespace ClemCAddons
         /// </summary>
         public static Stream ToSerializedStream(this object value)
         {
-            var binformatter = new BinaryFormatter();
-            var stream = new MemoryStream();
-            binformatter.Serialize(stream, value);
-            return stream;
+            return new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value)));
         }
         #endregion Byte formatting
         //good
@@ -3080,23 +3068,23 @@ namespace ClemCAddons
         /// <summary>Find the first child with the target uid. Goes through the whole sub-hierarchy.</summary>
         /// <param name="gameObject">The base gameobject.</param>
         /// <param name="uid">The UID to search for.</param>
-        public static GameObject FindDeepUID(this GameObject gameObject, int uid)
+        public static GameObject FindDeepUID(this GameObject gameObject, EntityId uid)
         {
             Transform[] res = gameObject.GetComponentsInChildren<Transform>(true);
             foreach (Transform r in res)
             {
-                if (r.GetInstanceID() == uid)
+                if (r.GetEntityId() == uid)
                 {
                     return r.gameObject;
                 }
-                if (r.gameObject.GetInstanceID() == uid)
+                if (r.gameObject.GetEntityId() == uid)
                 {
                     return r.gameObject;
                 }
                 var components = r.GetComponents<Component>();
                 foreach (Component component in components)
                 {
-                    if (component.GetInstanceID() == uid)
+                    if (component.GetEntityId() == uid)
                     {
                         return r.gameObject;
                     }
@@ -5314,7 +5302,7 @@ namespace ClemCAddons
             public static void CollectGarbage(GameObject gameObject, int delay)
             {
                 Action<GameObject> destroy = (g) => { UnityEngine.Object.Destroy(g); };
-                StartTimer(gameObject.GetInstanceID(), delay, destroy, gameObject, false);
+                StartTimer(gameObject.GetEntityId().GetHashCode(), delay, destroy, gameObject, false);
             }
             private async static void HandleClear(Stopwatch stopwatch, int delay)
             {

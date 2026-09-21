@@ -19,7 +19,7 @@ public class ReorderButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        baseWorldPos = rectTransform.position.SetY(Input.mousePosition.y);
+        baseWorldPos = rectTransform.position.SetY(InputHelper.MousePosition.y);
         yOffset = baseWorldPos.y - rectTransform.position.y;
         transform.SetParent(parentRect.transform.parent, true);
         down = true;
@@ -38,7 +38,7 @@ public class ReorderButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         basePos = rectTransform.localPosition;
         parentRect = transform.FindParentWithComponent(typeof(ScrollRect)).GetComponent<ScrollRect>();
         parentLayoutGroup = transform.FindParentWithComponent(typeof(LayoutGroup)).GetComponent<LayoutGroup>();
-        parentToReorder = parentLayoutGroup.transform.Find(t => t.FindDeep(r => r.gameObject.GetInstanceID() == originalParent.gameObject.GetInstanceID()) != null).GetComponent<RectTransform>();
+        parentToReorder = parentLayoutGroup.transform.Find(t => t.FindDeep(r => r.gameObject.GetEntityId() == originalParent.gameObject.GetEntityId()) != null).GetComponent<RectTransform>();
     }
 
 
@@ -49,8 +49,8 @@ public class ReorderButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
             rectTransform.localPosition = basePos;
             return;
         }
-        rectTransform.position = rectTransform.position.SetY(Input.mousePosition.y - yOffset);
-        var diff = baseWorldPos.y - Input.mousePosition.y;
+        rectTransform.position = rectTransform.position.SetY(InputHelper.MousePosition.y - yOffset);
+        var diff = baseWorldPos.y - InputHelper.MousePosition.y;
         diff = diff / rectTransform.GetWorldRect().size.y;
         RefreshPosition(Mathf.FloorToInt(diff.Abs()) * diff.SignInt());
     }

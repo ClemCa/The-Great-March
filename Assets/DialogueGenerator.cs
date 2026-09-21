@@ -15,7 +15,9 @@ public class DialogueGenerator : MonoBehaviour
     [SerializeField] private FlagDatabase _flagDatabase;
     [SerializeField] private StructureDatabase _structureDatabase;
     [SerializeField] private EvolutiveStory.Character _testCharacter;
+#pragma warning disable 0414
     [SerializeField] private float _testOpinion = 0.5f;
+#pragma warning restore 0414
     [SerializeField] private Intent _testIntent;
     [SerializeField] private string _verbDataSource;
     [SerializeField] private MindVisualizer _mindVisualizer;

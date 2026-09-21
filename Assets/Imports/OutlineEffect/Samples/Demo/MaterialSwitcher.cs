@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace cakeslice
 {
@@ -11,7 +12,7 @@ namespace cakeslice
 
         public void Update()
         {
-            if(Input.GetKeyDown(KeyCode.M))
+            if(Keyboard.current != null && Keyboard.current.mKey.wasPressedThisFrame)
             {
                 Material[] materials = GetComponent<Renderer>().materials;
                 materials[index] = target;

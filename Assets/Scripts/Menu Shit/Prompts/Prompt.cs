@@ -31,7 +31,7 @@ public class Prompt : MonoBehaviour
     void Update()
     {
         PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
+        pointerEventData.position = InputHelper.MousePosition;
         List<RaycastResult> r = new List<RaycastResult>();
         EventSystem.current.RaycastAll(pointerEventData, r);
         if (r.Count != 0 && (r[0].gameObject == gameObject || r[0].gameObject.transform.IsChildOf(transform)))

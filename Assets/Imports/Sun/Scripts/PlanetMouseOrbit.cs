@@ -26,10 +26,10 @@ public class PlanetMouseOrbit:MonoBehaviour{
     	
           
     		
-    		x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
-            y -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+    		x += InputHelper.MouseAxis.x * xSpeed * 0.02f;
+            y -= InputHelper.MouseAxis.y * ySpeed * 0.02f;
           
-            distance += -(Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime) * zoomRate * Mathf.Abs(distance);
+            distance += -(InputHelper.ScrollAxis * Time.deltaTime) * zoomRate * Mathf.Abs(distance);
           
            		
      		y = ClampAngle(y, (float)yMinLimit, (float)yMaxLimit);

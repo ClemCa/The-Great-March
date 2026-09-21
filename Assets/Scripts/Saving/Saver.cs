@@ -23,7 +23,7 @@ public class Saver : MonoBehaviour
         public SystemSave[] Systems;
         public ScoringData Scoring;
         public string CloudPosition;
-        public Dictionary<string, List<OrderHandler.Order>> Queue;
+        [SerializeField] public Dictionary<string, List<OrderHandler.Order>> Queue;
         public string SelectedPlanet;
         public string CargoSave;
         public bool LeaderInTransit;
@@ -218,7 +218,7 @@ public class Saver : MonoBehaviour
     private SaveData SetCargo(SaveData save)
     {
         var s = new string[] { };
-        var cargos = FindObjectsOfType<Cargo>();
+        var cargos = FindObjectsByType<Cargo>();
         foreach(var cargo in cargos)
         {
             s = s.Add(JsonUtility.ToJson(cargo.GetSave()));
@@ -230,7 +230,7 @@ public class Saver : MonoBehaviour
 
     private void LoadCargo(string[] cargos, bool leaderInTransit)
     {
-        var t = FindObjectsOfType<Cargo>();
+        var t = FindObjectsByType<Cargo>();
         foreach(var toDestroy in t)
         {
             Destroy(toDestroy.gameObject); // clear all current cargo

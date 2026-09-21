@@ -92,7 +92,7 @@ public class Cargo : MonoBehaviour
     public void LoadSave(CargoSave save)
     {
         transform.position = save.Position.Value;
-        var planets = FindObjectsOfType<Planet>(false);
+        var planets = FindObjectsByType<Planet>(FindObjectsInactive.Exclude);
         Origin = Array.Find(planets, t => t.Name == save.Origin);
         Destination = Array.Find(planets, t => t.Name == save.Destination);
         _stage = save.Stage;

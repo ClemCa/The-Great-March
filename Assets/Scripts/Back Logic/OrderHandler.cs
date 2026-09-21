@@ -121,7 +121,7 @@ public class OrderHandler : MonoBehaviour
 
         public void Invoke()
         {
-            var planets = FindObjectsOfType<Planet>();
+            var planets = FindObjectsByType<Planet>();
             var planet = Array.Find(planets, t => t.Name == Planet);
             if (planet == null)
                 return;
@@ -195,7 +195,7 @@ public class OrderHandler : MonoBehaviour
         }
         public void Cancel()
         {
-            var planets = FindObjectsOfType<Planet>();
+            var planets = FindObjectsByType<Planet>();
             var planet = Array.Find(planets, t => t.Name == Planet);
             if (planet == null)
                 return;
@@ -329,7 +329,7 @@ public class OrderHandler : MonoBehaviour
         var array = _queue.Keys.ToArray();
         foreach (var r in array)
         {
-            var planet = FindObjectsOfType<Planet>().First(t => t.Name == r);
+            var planet = FindObjectsByType<Planet>().First(t => t.Name == r);
             int distribution = planet.GetPeople();
             foreach(var t in _queue[r])
             {

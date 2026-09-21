@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace cakeslice
 {
@@ -15,7 +16,7 @@ namespace cakeslice
         // Update is called once per frame
         void Update()
         {
-            if(Input.GetKeyDown(KeyCode.K))
+            if(Keyboard.current != null && Keyboard.current.kKey.wasPressedThisFrame)
             {
                 GetComponent<Outline>().enabled = !GetComponent<Outline>().enabled;
             }

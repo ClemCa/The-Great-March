@@ -43,6 +43,7 @@ public class EvolutiveStory : MonoBehaviour
     }
 
     #region Present
+    [Serializable]
     public struct Present
     {
         // Present
@@ -81,6 +82,7 @@ public class EvolutiveStory : MonoBehaviour
         }
     }
 
+    [Serializable]
     public struct PresentExpiringFact
     {
         public Fact Fact;
@@ -92,6 +94,7 @@ public class EvolutiveStory : MonoBehaviour
         }
     }
 
+    [Serializable]
     public struct PresentFact
     {
         public Fact Fact;
@@ -172,16 +175,19 @@ public class EvolutiveStory : MonoBehaviour
         public RelationshipMemory Relationships;
     }
 
+    [Serializable]
     public struct RelationshipMemory
     {
         public List<PastRelationship> Memory;
     }
 
+    [Serializable]
     public struct EventMemory
     {
         public List<EventFacts> Memory;
     }
 
+    [Serializable]
     public struct TopicMemory
     {
         public List<Topic> Memory;
@@ -239,6 +245,7 @@ public class EvolutiveStory : MonoBehaviour
         public NameInfo Reason;
     }
 
+    [Serializable]
     public struct EventFacts
     {
         public Event Event;
@@ -267,6 +274,7 @@ public class EvolutiveStory : MonoBehaviour
     #endregion Memory
 
     #region Knowledge
+    [Serializable]
     public struct Knowledge
     {
         // Knowledge
@@ -287,17 +295,20 @@ public class EvolutiveStory : MonoBehaviour
         public StoryRole Role;
     }
 
+    [Serializable]
     public struct StoryRole
     {
         public string RoleName;
     }
 
+    [Serializable]
     public struct Job
     {
         public NameInfo Name;
         public string[] SpecializedKnowledge;
     }
 
+    [Serializable]
     public struct Hobby
     {
         // Defined from a job, has random knowledge, from beginner level up to that of a job
@@ -322,11 +333,13 @@ public class EvolutiveStory : MonoBehaviour
         }
     }
 
+    [Serializable]
     public struct Background
     {
         public List<AdditionalKnowledge> AdditionalKnowledge;
     }
 
+    [Serializable]
     public struct AdditionalKnowledge
     {
         public string SpecializedKnowledge;
@@ -340,6 +353,7 @@ public class EvolutiveStory : MonoBehaviour
         public OpinionInfo Opinion;
     }
 
+    [Serializable]
     public struct Event
     {
         // Event
@@ -355,6 +369,7 @@ public class EvolutiveStory : MonoBehaviour
         public List<EventAffectedTopic> AffectedTopics;
     }
 
+    [Serializable]
     public struct EventLimit
     {
         public EventLimitType Type;
@@ -368,6 +383,7 @@ public class EvolutiveStory : MonoBehaviour
         AreaLimited
     }
 
+    [Serializable]
     public struct EventAffectedTopic
     {
         public NameInfo Name;
@@ -378,6 +394,7 @@ public class EvolutiveStory : MonoBehaviour
 
     #region Personality & Topics
 
+    [Serializable]
     public struct Personality
     {
         // Personality
@@ -419,6 +436,7 @@ public class EvolutiveStory : MonoBehaviour
         }
     }
 
+    [Serializable]
     public struct Topic
     {
         public NameInfo Name;
@@ -440,6 +458,7 @@ public class EvolutiveStory : MonoBehaviour
         public List<Subtopic> Subtopics;
     }
 
+    [Serializable]
     public struct Subtopic
     {
         public NameInfo Name;
@@ -455,6 +474,7 @@ public class EvolutiveStory : MonoBehaviour
         }
     }
 
+    [Serializable]
     public struct FlaggedSentence
     {
         public string Flag;

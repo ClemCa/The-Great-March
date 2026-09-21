@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class Planet : MonoBehaviour
 {
@@ -550,7 +551,7 @@ public class Planet : MonoBehaviour
         moveSelectionOrigin = selected;
         moveSelectionType = true;
         selected = null;
-        var planets = FindObjectsOfType<Planet>();
+        var planets = FindObjectsByType<Planet>();
         foreach(var planet in planets)
         {
             planet.GetComponentInChildren<Outline>().color = 1;
@@ -567,7 +568,7 @@ public class Planet : MonoBehaviour
         moveSelectionOrigin = selected;
         moveSelectionType = true;
         selected = null;
-        var planets = FindObjectsOfType<Planet>();
+        var planets = FindObjectsByType<Planet>();
         foreach (var planet in planets)
         {
             planet.GetComponentInChildren<Outline>().color = 1;
@@ -774,19 +775,19 @@ public class Planet : MonoBehaviour
         {
             pointerId = -1,
         };
-        pointerData.position = Input.mousePosition;
+        pointerData.position = InputHelper.MousePosition;
         List<RaycastResult> results = new List<RaycastResult>();
 
         EventSystem.current.RaycastAll(pointerData, results);
 
-        var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        var ray = Camera.main.ScreenPointToRay(InputHelper.MousePosition);
 
         if (moveSelectionOrigin == this)
         {
             GetComponentInChildren<Outline>().color = 0;
             return;
         }
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (InputHelper.KeyDown(Key.Escape))
         {
             moveSelectionCount = 0;
             selected = moveSelectionOrigin;
@@ -803,7 +804,7 @@ public class Planet : MonoBehaviour
         {
             if (transform == hit.transform || transform.FindDeep(t => t == hit.transform))
             {
-                if (Input.GetMouseButtonDown(0))
+                if (InputHelper.MouseLeftDown)
                 {
                     MenuAudioManager.Instance.PlayClick();
                     if(moveSelectionCount == -1)
@@ -882,13 +883,13 @@ public class Planet : MonoBehaviour
     }
     private void StandardUpdate()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (InputHelper.MouseLeftDown)
         {
             PointerEventData pointerData = new PointerEventData(EventSystem.current)
             {
                 pointerId = -1,
             };
-            pointerData.position = Input.mousePosition;
+            pointerData.position = InputHelper.MousePosition;
             List<RaycastResult> results = new List<RaycastResult>();
 
             EventSystem.current.RaycastAll(pointerData, results);
@@ -900,7 +901,7 @@ public class Planet : MonoBehaviour
                     return;
             }
 
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            var ray = Camera.main.ScreenPointToRay(InputHelper.MousePosition);
             if (Physics.Raycast(ray, out var hit, 100))
             {
                 if (transform == hit.transform || transform.FindDeep(t => t == hit.transform))

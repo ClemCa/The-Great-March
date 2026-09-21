@@ -30,7 +30,7 @@ public class PromptMenu : MonoBehaviour
             if(_visibility > 0)
             {
                 _visibility -= Time.unscaledDeltaTime * 5;
-                SetPosition(Input.mousePosition - new Vector3(1, 1));
+                SetPosition(InputHelper.MousePosition - new Vector2(1, 1));
             }
             else
             {
@@ -39,7 +39,7 @@ public class PromptMenu : MonoBehaviour
             return;
         }
         _visibility = 1;
-        SetPosition(Input.mousePosition - new Vector3(1,1));
+        SetPosition(InputHelper.MousePosition - new Vector2(1,1));
         var rect = transform.FindDeep("Description").GetComponent<RectTransform>();
 
         if (_data.FacilityMenu != null)

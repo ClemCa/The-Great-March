@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using ClemCAddons;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -79,7 +80,7 @@ public class Pausing : MonoBehaviour
         var dir = (_timeTarget - Time.timeScale).Sign();
         Time.timeScale = (Time.timeScale + dir * Time.unscaledDeltaTime).Clamp(Time.timeScale.Min(_timeTarget), Time.timeScale.Max(_timeTarget));
 
-        if ((Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Space)) && !_blocked)
+        if ((InputHelper.KeyDown(Key.Escape) || InputHelper.KeyDown(Key.Space)) && !_blocked)
         {
             FlipPause();
         }

@@ -99,11 +99,11 @@ public class CargoChoice : MonoBehaviour
         list.Add(new TMPro.TMP_Dropdown.OptionData("None"));
         foreach (var resource in resources)
         {
-            list.Add(new TMPro.TMP_Dropdown.OptionData(Registry.Instance.GetResourceName(resource), Registry.Instance.GetResourceSprite(resource)));
+            list.Add(new TMPro.TMP_Dropdown.OptionData(Registry.Instance.GetResourceName(resource), Registry.Instance.GetResourceSprite(resource), Color.white));
         }
         foreach (var resource in advresources)
         {
-            list.Add(new TMPro.TMP_Dropdown.OptionData(Registry.Instance.GetResourceName(resource), Registry.Instance.GetAdvancedResourceSprite(resource)));
+            list.Add(new TMPro.TMP_Dropdown.OptionData(Registry.Instance.GetResourceName(resource), Registry.Instance.GetAdvancedResourceSprite(resource), Color.white));
         }
         _dropdown.AddOptions(list);
         once = true;

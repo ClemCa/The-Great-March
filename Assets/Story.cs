@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Yarn.Unity;
 
-public class Story : DialogueViewBase
+public class Story : DialoguePresenterBase
 {
     [SerializeField] private DialogDisplayer _displayer;
     [SerializeField] private DialogueRunner _runner;
@@ -20,49 +18,62 @@ public class Story : DialogueViewBase
         _skipNext = true;
     }
 
-    public override void DialogueStarted()
+    public override YarnTask OnDialogueStartedAsync()
     {
         Pausing.Block();
         Pausing.InstantPause();
         _dialogueRunning = true;
+        return YarnTask.CompletedTask;
     }
 
-    public override void RunLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+    public override async YarnTask RunLineAsync(LocalizedLine dialogueLine, LineCancellationToken token)
     {
-        if (_skipNext)
+        bool skip = _skipNext;
+        _skipNext = false;
+
+        var completionSource = new YarnTaskCompletionSource();
+        _displayer.Initialize(dialogueLine.CharacterName, dialogueLine.TextWithoutCharacterName.Text, () => completionSource.TrySetResult());
+
+        // SkipAhead advances to the next content immediately instead of waiting for player input.
+        if (skip)
         {
-            _skipNext = false;
-            onDialogueLineFinished.Invoke();
+            completionSource.TrySetResult();
+            return;
         }
-        if (onDialogueLineFinished != null)
-            _displayer.Initialize(dialogueLine.CharacterName, dialogueLine.TextWithoutCharacterName.Text, onDialogueLineFinished);
+
+        using (token.NextContentToken.Register(() => completionSource.TrySetResult()))
+        {
+            await completionSource.Task;
+        }
     }
 
-    public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
+    public override async YarnTask<DialogueOption> RunOptionsAsync(DialogueOption[] dialogueOptions, LineCancellationToken token)
     {
-        onDialogueLineFinished?.Invoke();
+        var completionSource = new YarnTaskCompletionSource<DialogueOption>();
+
+        Action[] actions = dialogueOptions.Select<DialogueOption, Action>(option =>
+        {
+            if (option.IsAvailable)
+            {
+                return () => completionSource.TrySetResult(option);
+            }
+            return () => { };
+        }).ToArray();
+
+        _displayer.SetOptions(dialogueOptions.Select(option => option.Line.TextWithoutCharacterName.Text).ToArray(), actions);
+
+        using (token.NextContentToken.Register(() => completionSource.TrySetResult(null)))
+        {
+            return await completionSource.Task;
+        }
     }
 
-    public override void DismissLine(Action onDismissalComplete)
-    {
-        onDismissalComplete?.Invoke();
-    }
-
-    public override void RunOptions(DialogueOption[] dialogueOptions, Action<int> onOptionSelected)
-    {
-        Action[] actions = dialogueOptions.Select<DialogueOption, Action>(t => () => { onOptionSelected.Invoke(t.DialogueOptionID); } ).ToArray();
-        _displayer.SetOptions(dialogueOptions.Select(t => t.Line.TextWithoutCharacterName.Text).ToArray(), actions);
-    }
-
-    public override void DialogueComplete()
+    public override YarnTask OnDialogueCompleteAsync()
     {
         Pausing.Unblock();
         Pausing.Unpause();
         _dialogueRunning = false;
         _displayer.Hide();
-    }
-
-    public override void UserRequestedViewAdvancement()
-    {
+        return YarnTask.CompletedTask;
     }
 }
