@@ -1402,22 +1402,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -6417548058817968688, guid: aa3c686faab837e44b6dc630e642bc67, type: 3}
-      propertyPath: farAwayStars.Array.data[6]
-      value: 
-      objectReference: {fileID: 3546608549815285461, guid: c2c6077a0b8342a438725a157e8f25a4, type: 3}
-    - target: {fileID: -6417548058817968688, guid: aa3c686faab837e44b6dc630e642bc67, type: 3}
-      propertyPath: farAwayStars.Array.data[7]
-      value: 
-      objectReference: {fileID: 3546608549815285461, guid: c2c6077a0b8342a438725a157e8f25a4, type: 3}
-    - target: {fileID: -6417548058817968688, guid: aa3c686faab837e44b6dc630e642bc67, type: 3}
-      propertyPath: farAwayStars.Array.data[8]
-      value: 
-      objectReference: {fileID: 3546608549815285461, guid: c2c6077a0b8342a438725a157e8f25a4, type: 3}
-    - target: {fileID: -6417548058817968688, guid: aa3c686faab837e44b6dc630e642bc67, type: 3}
-      propertyPath: farAwayStars.Array.data[9]
-      value: 
-      objectReference: {fileID: 3546608549815285461, guid: f3284ecc5ec8cb04d81ba6ddb536b4ad, type: 3}
     - target: {fileID: 1351367775710243693, guid: aa3c686faab837e44b6dc630e642bc67, type: 3}
       propertyPath: m_Name
       value: UniverseParallax
