@@ -47,7 +47,10 @@ public class LLMDialogueManager : MonoBehaviour
         string question = string.IsNullOrEmpty(playerQuestion) ? query : playerQuestion;
         string finalText = resolution.RawText;
 
-        if (LLMSettings.Mode == LLMMode.LLM)
+        bool useLlm = LLMSettings.Mode == LLMMode.LLM
+            && !LLMThinking.IsUnreliable(LLMSettings.EffectiveModel());
+
+        if (useLlm)
         {
             character.RefreshMood(GameClock.Now);
             character.History.UpdateSummaries(LLMSettings.VerbatimHistory, LLMSettings.SummarizedHistory, null);
@@ -83,6 +86,8 @@ public class LLMDialogueManager : MonoBehaviour
         }
         else
         {
+            // Raw mode, or a thinking model that never reaches a visible reply: let the Raw thought
+            // stand in rather than paying for an empty call every turn.
             var displayer = Displayer;
             if (displayer != null)
                 displayer.Initialize(character.DisplayName, resolution.RawText);
@@ -94,18 +99,6 @@ public class LLMDialogueManager : MonoBehaviour
 
     private LLMRequest BuildRequest(ThoughtCharacter character, string query, string rawReply, string question)
     {
-        var request = new LLMRequest
-        {
-            BaseUrl = LLMSettings.EffectiveBaseUrl(),
-            ApiKey = LLMSettings.ApiKey,
-            Model = LLMSettings.EffectiveModel(),
-            Temperature = LLMSettings.Temperature,
-            SystemPrompt = ContextBuilder.BuildSystemPrompt(character),
-            Messages = new List<LLMMessage>()
-        };
-
-        string context = ContextBuilder.BuildContextJson(character, query, rawReply, GameClock.Now);
-        request.Messages.Add(new LLMMessage("user", "Context:\n" + context + "\n\nThe player asks: " + question));
-        return request;
+        return ContextBuilder.BuildRequest(character, query, rawReply, question, GameClock.Now);
     }
 }

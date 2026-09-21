@@ -21,7 +21,7 @@ public static class LLMSettings
 
     public const string OllamaDefaultBase = "http://localhost:11434";
     public const string OpenAIDefaultBase = "https://api.openai.com/v1";
-    public const string DefaultOllamaModel = "llama3.1";
+    public const string DefaultOllamaModel = "llama3.2:3b";
     public const string DefaultOpenAIModel = "gpt-4o-mini";
 
     public static LLMMode Mode

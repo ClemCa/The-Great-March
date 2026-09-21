@@ -6,7 +6,8 @@ using Newtonsoft.Json.Linq;
 using UnityEngine.Networking;
 
 /// <summary>
-/// Local Ollama provider using the streaming NDJSON /api/chat endpoint.
+/// Local Ollama provider using the streaming NDJSON /api/chat endpoint. Thinking models stream
+/// their reasoning in a separate field; we watch for it and stop asking models that never reply.
 /// </summary>
 public class OllamaProvider : ILLMProvider
 {
@@ -15,18 +16,28 @@ public class OllamaProvider : ILLMProvider
         string baseUrl = LLMSettings.NormalizeBase(request.BaseUrl, LLMSettings.OllamaDefaultBase);
         string url = baseUrl + "/api/chat";
 
+        string model = request.Model;
+        bool noThink = LLMThinking.SupportsNoThink(model);
+
         var messages = new JArray();
         if (!string.IsNullOrEmpty(request.SystemPrompt))
             messages.Add(new JObject { ["role"] = "system", ["content"] = request.SystemPrompt });
-        foreach (var message in request.Messages)
-            messages.Add(new JObject { ["role"] = message.Role, ["content"] = message.Content });
+        for (int i = 0; i < request.Messages.Count; i++)
+        {
+            string content = request.Messages[i].Content;
+            if (noThink && i == request.Messages.Count - 1)
+                content = LLMThinking.AppendNoThink(content);
+            messages.Add(new JObject { ["role"] = request.Messages[i].Role, ["content"] = content });
+        }
 
+        var options = new JObject { ["temperature"] = request.Temperature, ["num_predict"] = request.MaxTokens };
         var body = new JObject
         {
-            ["model"] = request.Model,
+            ["model"] = model,
             ["stream"] = true,
+            ["think"] = !noThink,
             ["messages"] = messages,
-            ["options"] = new JObject { ["temperature"] = request.Temperature }
+            ["options"] = options
         };
 
         var handler = new LLMStreamHandler();
@@ -36,13 +47,20 @@ public class OllamaProvider : ILLMProvider
         www.timeout = request.TimeoutSeconds;
         www.SetRequestHeader("Content-Type", "application/json");
 
-        yield return LLMStreamer.Stream(www, ParseLine, onToken, onComplete, onError);
-    }
+        bool sawThinking = false;
+        bool sawContent = false;
+        Func<string, string> parse = line =>
+        {
+            var token = LLMResponseParser.Ollama(line);
+            if (!string.IsNullOrEmpty(token.Thinking))
+                sawThinking = true;
+            if (!string.IsNullOrEmpty(token.Content))
+                sawContent = true;
+            return token.Content;
+        };
 
-    private static string ParseLine(string line)
-    {
-        JObject parsed = JObject.Parse(line);
-        var content = (string)parsed["message"]?["content"];
-        return content;
+        yield return LLMStreamer.Stream(www, parse, onToken, onComplete, onError);
+
+        LLMThinking.Observe(model, sawThinking, sawContent);
     }
 }

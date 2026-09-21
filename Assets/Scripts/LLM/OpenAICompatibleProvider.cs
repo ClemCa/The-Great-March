@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 
 /// <summary>
 /// Any OpenAI-compatible chat completions endpoint (OpenAI, DeepSeek, LM Studio, OpenRouter, ...)
-/// using server-sent events.
+/// using server-sent events. Reasoning models expose hidden thinking as delta.reasoning_content.
 /// </summary>
 public class OpenAICompatibleProvider : ILLMProvider
 {
@@ -27,6 +27,7 @@ public class OpenAICompatibleProvider : ILLMProvider
             ["model"] = request.Model,
             ["stream"] = true,
             ["temperature"] = request.Temperature,
+            ["max_tokens"] = request.MaxTokens,
             ["messages"] = messages
         };
 
@@ -39,20 +40,21 @@ public class OpenAICompatibleProvider : ILLMProvider
         if (!string.IsNullOrEmpty(request.ApiKey))
             www.SetRequestHeader("Authorization", "Bearer " + request.ApiKey);
 
-        yield return LLMStreamer.Stream(www, ParseLine, onToken, onComplete, onError);
-    }
+        string model = request.Model;
+        bool sawThinking = false;
+        bool sawContent = false;
+        Func<string, string> parse = line =>
+        {
+            var token = LLMResponseParser.OpenAI(line);
+            if (!string.IsNullOrEmpty(token.Thinking))
+                sawThinking = true;
+            if (!string.IsNullOrEmpty(token.Content))
+                sawContent = true;
+            return token.Content;
+        };
 
-    private static string ParseLine(string line)
-    {
-        if (!line.StartsWith("data:"))
-            return null;
-        string payload = line.Substring(5).Trim();
-        if (payload == "[DONE]")
-            return null;
-        var parsed = JObject.Parse(payload);
-        var choices = parsed["choices"] as JArray;
-        if (choices == null || choices.Count == 0)
-            return null;
-        return (string)choices[0]["delta"]?["content"];
+        yield return LLMStreamer.Stream(www, parse, onToken, onComplete, onError);
+
+        LLMThinking.Observe(model, sawThinking, sawContent);
     }
 }

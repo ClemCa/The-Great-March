@@ -13,8 +13,10 @@ public static class ContextBuilder
     public static string BuildSystemPrompt(ThoughtCharacter character)
     {
         var sb = new System.Text.StringBuilder();
-        sb.Append("You are ").Append(character.DisplayName).Append(", a character in a living sci-fi world. ");
-        sb.Append("Always stay in character. Reply with natural spoken dialogue only: no narration, no stage directions, no markdown, no JSON. Keep replies to one to four short sentences. ");
+        sb.Append("You are ").Append(character.DisplayName).Append(", a person living in a sci-fi world. ");
+        sb.Append("Speak only as they would out loud, in natural conversation, one to two sentences. ");
+        sb.Append("Never narrate, never describe actions or expressions, no asterisks, no markdown, no lists, and never wrap the whole reply in quotation marks. ");
+        sb.Append("Never mention being an AI, the context, JSON, or any field name. ");
 
         var mood = character.CurrentMood;
         if (mood != null)
@@ -22,11 +24,40 @@ public static class ContextBuilder
             if (mood.Traits.Count > 0)
                 sb.Append("Right now your manner is ").Append(string.Join(", ", mood.Traits)).Append(". ");
             if (!string.IsNullOrEmpty(mood.Sample))
-                sb.Append("An example of how you sound: \"").Append(mood.Sample).Append("\" ");
+                sb.Append("You might sound like: \"").Append(mood.Sample).Append("\" ");
         }
 
-        sb.Append("The JSON that follows describes what you know and feel. Draw on it to answer, but never read it aloud verbatim and never invent facts that contradict it.");
+        sb.Append("A JSON snapshot follows describing what you know and feel. Treat its private fields as feelings you would never say out loud: ");
+        sb.Append("playerInquiry is what the player asked and the fragment on your mind right now; ");
+        sb.Append("thoughts are keyed by topic, each with a raw fragment, a feeling word, and a weight word describing how strongly it sits with you; ");
+        sb.Append("knowledge and relationships are facts about your life; recentEvents are things that happened; conversationHistory is what you two said before. ");
+        sb.Append("Answer the player's actual question, leaning on the most relevant parts. If something is not in the snapshot, admit you don't know or deflect in character. Never invent facts that contradict it, and never add new specifics (people, places, events, or numbers) that are not in the snapshot.");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Single source of truth for the outgoing request, shared by the game and the
+    /// off-Unity prompt harness so refinements are tested exactly as shipped.
+    /// </summary>
+    public static LLMRequest BuildRequest(ThoughtCharacter character, string query, string reply, string question, long now)
+    {
+        var request = new LLMRequest
+        {
+            BaseUrl = LLMSettings.EffectiveBaseUrl(),
+            ApiKey = LLMSettings.ApiKey,
+            Model = LLMSettings.EffectiveModel(),
+            Temperature = LLMSettings.Temperature,
+            SystemPrompt = BuildSystemPrompt(character),
+            Messages = new List<LLMMessage>()
+        };
+        request.Messages.Add(new LLMMessage("user", BuildUserMessage(character, query, reply, question, now)));
+        return request;
+    }
+
+    public static string BuildUserMessage(ThoughtCharacter character, string query, string reply, string question, long now)
+    {
+        string context = BuildContextJson(character, query, reply, now);
+        return "Context:\n" + context + "\n\nThe player asks: " + question;
     }
 
     public static string BuildContextJson(ThoughtCharacter character, string query, string reply, long now)
@@ -174,13 +205,21 @@ public static class ContextBuilder
 
             group[entry.Subject] = new JObject
             {
-                ["sentiment"] = entry.Sentiment,
-                ["decay"] = entry.Decay,
-                ["impact"] = strength,
+                ["feeling"] = RawRenderer.SentimentWord(entry.Sentiment),
+                ["weight"] = WeightWord(strength),
                 ["raw"] = RawRenderer.Render(entry)
             };
         }
         return thoughts;
+    }
+
+    private static string WeightWord(float weight)
+    {
+        if (weight >= 0.6f)
+            return "heavy";
+        if (weight >= 0.3f)
+            return "noticeable";
+        return "faint";
     }
 
     private static JArray BuildHistory(ThoughtCharacter character)
