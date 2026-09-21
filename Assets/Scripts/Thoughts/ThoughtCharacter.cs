@@ -20,6 +20,7 @@ public class ThoughtCharacter
     public string Id = "";
     public string DisplayName = "";
     public string Gender = "neutral";
+    public bool Canonical = false;   // fixed-history character; major random events never touch them
 
     public List<string> TraitIds = new List<string>();
     public List<MoodInfo> Moods = MoodResolver.CreateStarter();

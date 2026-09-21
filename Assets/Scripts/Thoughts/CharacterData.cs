@@ -12,6 +12,7 @@ public class CharacterData
     [JsonProperty("id")] public string Id = "";
     [JsonProperty("displayName")] public string DisplayName = "";
     [JsonProperty("gender")] public string Gender = "neutral";
+    [JsonProperty("canonical")] public bool Canonical = false;
     [JsonProperty("traits")] public List<string> Traits = new List<string>();
     [JsonProperty("moods")] public List<MoodData> Moods = new List<MoodData>();
     [JsonProperty("talkPolicies")] public List<TalkPolicyData> TalkPolicies = new List<TalkPolicyData>();
@@ -25,6 +26,7 @@ public class CharacterData
     {
         var character = new ThoughtCharacter(Id, DisplayName, taxonomy, traits);
         character.Gender = Gender;
+        character.Canonical = Canonical;
         character.TraitIds = new List<string>(Traits);
 
         character.Moods = new List<MoodInfo>();
@@ -113,4 +115,10 @@ public class ThoughtData
 public class EventDataFile
 {
     [JsonProperty("events")] public List<GameEventDefinition> Events = new List<GameEventDefinition>();
+}
+
+[Serializable]
+public class CanonDataFile
+{
+    [JsonProperty("events")] public List<CanonEventDefinition> Events = new List<CanonEventDefinition>();
 }

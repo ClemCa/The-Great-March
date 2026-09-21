@@ -8,6 +8,7 @@ public class ThoughtSaveData
 {
     public List<ThoughtCharacter> Characters = new List<ThoughtCharacter>();
     public List<GameEvent> Events = new List<GameEvent>();
+    public List<string> FiredCanonical = new List<string>();
     public long ClockMinutes = 0L;
 }
 
@@ -26,7 +27,10 @@ public static class ThoughtPersistence
 
         var system = WorldEventSystem.Instance;
         if (system != null)
+        {
             data.Events.AddRange(system.Live);
+            data.FiredCanonical.AddRange(system.FiredCanonical);
+        }
 
         data.ClockMinutes = GameClock.Now;
         return JsonConvert.SerializeObject(data);
@@ -66,6 +70,9 @@ public static class ThoughtPersistence
 
         var system = WorldEventSystem.Instance;
         if (system != null)
+        {
             system.RestoreEvents(data.Events);
+            system.RestoreCanonicalFired(data.FiredCanonical);
+        }
     }
 }

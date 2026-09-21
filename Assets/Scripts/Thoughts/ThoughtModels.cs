@@ -29,6 +29,16 @@ public enum EventScope
 }
 
 /// <summary>
+/// How disruptive a (non-canon) event is. Major events are too world-shaping to be allowed to
+/// touch canonical characters, whose history is fixed; minor beats can colour anyone.
+/// </summary>
+public enum EventImportance
+{
+    Minor,
+    Major
+}
+
+/// <summary>
 /// A single thing a character "has a feeling about". Mirrors the JSON ingested by the LLM:
 /// ex { "Event X": { "sentiment": -0.6, "decay": 0.2, "impact": 0.7 } }
 /// </summary>
@@ -154,7 +164,31 @@ public class GameEventDefinition
     public float BaseSentiment = 0f;
     public float Impact = 0.5f;
     public float Decay = 0.05f;
+    public string Detail = "";
+    public bool Canonical = false;
+    public EventImportance Importance = EventImportance.Minor;
     public List<string> AffectedNodeIds = new List<string>();
+}
+
+/// <summary>
+/// A fixed timeline anchor: it fires at one precise in-game moment, in every playthrough, and can
+/// name the exact people it lands on. Deterministic, so it is never re-rolled.
+/// </summary>
+[Serializable]
+public class CanonEventDefinition
+{
+    public string Id = "";
+    public string Name = "";
+    public EventScope Scope = EventScope.Local;
+    public long Day = 1L;
+    public int MinuteOfDay = 0;
+    public List<string> Tags = new List<string>();
+    public float BaseSentiment = 0f;
+    public float Impact = 0.5f;
+    public float Decay = 0.05f;
+    public string Detail = "";
+    public List<string> AffectedNodeIds = new List<string>();
+    public List<string> AffectedCharacterIds = new List<string>();
 }
 
 /// <summary>
@@ -173,6 +207,9 @@ public class GameEvent
     public float BaseSentiment = 0f;
     public float Impact = 0.5f;
     public float Decay = 0.05f;
+    public string Detail = "";
+    public bool Canonical = false;
+    public EventImportance Importance = EventImportance.Minor;
     public List<string> AffectedCharacterIds = new List<string>();
     public List<string> AffectedNodeIds = new List<string>();
     public List<string> Tags = new List<string>();

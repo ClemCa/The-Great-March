@@ -103,6 +103,37 @@ public class ThoughtBootstrap : MonoBehaviour
                         system.Register(file.Events[i]);
             }
         }
+
+        LoadCanonical();
+    }
+
+    private void LoadCanonical()
+    {
+        var canonAsset = Resources.Load<TextAsset>("Thoughts/canon");
+        if (canonAsset == null)
+            return;
+
+        var system = WorldEventSystem.Instance;
+        if (system == null)
+            system = UnityEngine.Object.FindAnyObjectByType<WorldEventSystem>();
+        if (system == null)
+            return;
+
+        system.EnsureInitialized();
+        CanonDataFile file;
+        try
+        {
+            file = JsonConvert.DeserializeObject<CanonDataFile>(canonAsset.text);
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogError("Failed to parse canon events: " + exception.Message);
+            return;
+        }
+        if (file == null)
+            return;
+        for (int i = 0; i < file.Events.Count; i++)
+            system.RegisterCanonical(file.Events[i]);
     }
 
     private void RegisterCharacters()

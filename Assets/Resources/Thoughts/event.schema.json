@@ -17,6 +17,7 @@
         "id": { "type": "string" },
         "name": { "type": "string" },
         "scope": { "enum": ["Personal", "Local", "Region", "World"] },
+        "importance": { "enum": ["Minor", "Major"], "description": "Major events are withheld from canonical characters." },
         "tags": { "type": "array", "items": { "type": "string" } },
         "baseSentiment": { "type": "number", "minimum": -1, "maximum": 1 },
         "impact": { "type": "number", "minimum": 0, "maximum": 1 },

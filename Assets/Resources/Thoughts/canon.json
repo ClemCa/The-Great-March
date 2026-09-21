@@ -1,0 +1,47 @@
+{
+  "$schema": "./canon.schema.json",
+  "events": [
+    {
+      "id": "the_old_war",
+      "name": "The old war",
+      "scope": "World",
+      "day": 0,
+      "minuteOfDay": 0,
+      "tags": ["war", "history"],
+      "baseSentiment": -0.4,
+      "impact": 0.5,
+      "decay": 0.01,
+      "detail": "The war ended before anyone here was born, but the rubble never got cleared.",
+      "affectedNodeIds": ["history/world", "world/events"],
+      "affectedCharacterIds": ["testy", "anne"]
+    },
+    {
+      "id": "the_crack",
+      "name": "The sky cracked over the capital",
+      "scope": "World",
+      "day": 2,
+      "minuteOfDay": 540,
+      "tags": ["omen", "world"],
+      "baseSentiment": -0.6,
+      "impact": 0.9,
+      "decay": 0.02,
+      "detail": "A seam of light split the sky at breakfast and did not close.",
+      "affectedNodeIds": ["world/events", "feelings/fears"],
+      "affectedCharacterIds": ["testy", "anne"]
+    },
+    {
+      "id": "testy_first_trial",
+      "name": "Testy's first trial",
+      "scope": "Personal",
+      "day": 3,
+      "minuteOfDay": 600,
+      "tags": ["work", "test"],
+      "baseSentiment": 0.4,
+      "impact": 0.8,
+      "decay": 0.08,
+      "detail": "They put Testy in the chair for the first real trial, and everyone was watching.",
+      "affectedNodeIds": ["history/turningpoints", "relationships/self/selfworth"],
+      "affectedCharacterIds": ["testy"]
+    }
+  ]
+}

@@ -10,6 +10,7 @@
     "id": { "type": "string", "description": "Stable unique id." },
     "displayName": { "type": "string" },
     "gender": { "enum": ["male", "female", "neutral", "object"] },
+    "canonical": { "type": "boolean", "description": "Fixed-history character; major random events never touch them." },
     "traits": { "type": "array", "items": { "type": "string" }, "description": "Trait ids from TraitLibrary." },
     "moods": { "type": "array", "items": { "$ref": "#/definitions/mood" } },
     "talkPolicies": { "type": "array", "items": { "$ref": "#/definitions/talkPolicy" } },

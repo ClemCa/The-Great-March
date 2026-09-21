@@ -5,15 +5,19 @@ using UnityEngine;
 /// <summary>
 /// Raises world/region/local/personal events and lets every registered character react to them.
 /// Events scale from a private moment (one character) up to galaxy-shaking news (everyone).
+/// Canon events are separate: fixed timeline anchors fired by the clock at a precise moment.
 /// </summary>
 public class WorldEventSystem : MonoBehaviour
 {
     private static WorldEventSystem _instance;
 
     [SerializeField] private List<GameEventDefinition> _authored = new List<GameEventDefinition>();
+    [SerializeField] private List<CanonEventDefinition> _authoredCanonical = new List<CanonEventDefinition>();
 
     private readonly Dictionary<string, GameEventDefinition> _definitions = new Dictionary<string, GameEventDefinition>();
     private readonly List<GameEvent> _live = new List<GameEvent>();
+    private readonly List<CanonEventDefinition> _canonical = new List<CanonEventDefinition>();
+    private readonly HashSet<string> _canonicalFired = new HashSet<string>();
     private readonly System.Random _rng = new System.Random();
 
     private int _counter = 0;
@@ -21,6 +25,7 @@ public class WorldEventSystem : MonoBehaviour
 
     public static WorldEventSystem Instance { get { return _instance; } }
     public IReadOnlyList<GameEvent> Live { get { return _live; } }
+    public IReadOnlyCollection<string> FiredCanonical { get { return _canonicalFired; } }
     public event Action<GameEvent> Raised;
 
     private void Awake()
@@ -35,6 +40,11 @@ public class WorldEventSystem : MonoBehaviour
         EnsureInitialized();
     }
 
+    private void Update()
+    {
+        AdvanceCanonical();
+    }
+
     public void EnsureInitialized()
     {
         if (_initialized)
@@ -42,9 +52,8 @@ public class WorldEventSystem : MonoBehaviour
         _initialized = true;
         foreach (var def in _authored)
             Register(def);
-        if (_definitions.Count == 0)
-            foreach (var def in CreateStarter())
-                Register(def);
+        foreach (var def in _authoredCanonical)
+            RegisterCanonical(def);
     }
 
     public void Register(GameEventDefinition definition)
@@ -52,6 +61,21 @@ public class WorldEventSystem : MonoBehaviour
         if (definition == null || string.IsNullOrEmpty(definition.Id))
             return;
         _definitions[definition.Id] = definition;
+    }
+
+    public void RegisterCanonical(CanonEventDefinition definition)
+    {
+        if (definition == null || string.IsNullOrEmpty(definition.Id))
+            return;
+        for (int i = 0; i < _canonical.Count; i++)
+        {
+            if (_canonical[i].Id == definition.Id)
+            {
+                _canonical[i] = definition;
+                return;
+            }
+        }
+        _canonical.Add(definition);
     }
 
     public GameEventDefinition GetDefinition(string id)
@@ -91,21 +115,102 @@ public class WorldEventSystem : MonoBehaviour
             BaseSentiment = definition.BaseSentiment,
             Impact = definition.Impact,
             Decay = definition.Decay,
+            Detail = definition.Detail,
+            Canonical = definition.Canonical,
+            Importance = definition.Importance,
             AffectedNodeIds = new List<string>(definition.AffectedNodeIds),
             Tags = new List<string>(definition.Tags)
         };
         if (affected != null)
             ev.AffectedCharacterIds.AddRange(affected);
 
+        Publish(ev);
+        return ev;
+    }
+
+    /// <summary>
+    /// Fires every canon event now due, oldest first. Safe to call every frame: each anchor fires
+    /// exactly once per campaign, and overdue anchors (e.g. after restoring a later save) catch up
+    /// in their authored order.
+    /// </summary>
+    public int AdvanceCanonical()
+    {
+        EnsureInitialized();
+        if (_canonical.Count == 0)
+            return 0;
+
+        long now = GameClock.Now;
+        bool anyDue = false;
+        for (int i = 0; i < _canonical.Count; i++)
+        {
+            var candidate = _canonical[i];
+            if (candidate == null || string.IsNullOrEmpty(candidate.Id))
+                continue;
+            if (_canonicalFired.Contains(candidate.Id))
+                continue;
+            if (CanonScheduler.TriggerTick(candidate) > now)
+                continue;
+            anyDue = true;
+            break;
+        }
+        if (!anyDue)
+            return 0;
+
+        var due = CanonScheduler.Due(_canonical, _canonicalFired, now);
+        for (int i = 0; i < due.Count; i++)
+            RaiseCanonical(due[i]);
+        return due.Count;
+    }
+
+    public GameEvent RaiseCanonical(CanonEventDefinition definition)
+    {
+        if (definition == null)
+            return null;
+
+        _counter++;
+        var ev = new GameEvent
+        {
+            Id = "ev" + _counter,
+            DefinitionId = definition.Id,
+            Name = definition.Name,
+            Scope = definition.Scope,
+            StartedTick = CanonScheduler.TriggerTick(definition),
+            BaseSentiment = definition.BaseSentiment,
+            Impact = definition.Impact,
+            Decay = definition.Decay,
+            Detail = definition.Detail,
+            Canonical = true,
+            Importance = EventImportance.Major,
+            AffectedNodeIds = new List<string>(definition.AffectedNodeIds),
+            AffectedCharacterIds = new List<string>(definition.AffectedCharacterIds),
+            Tags = new List<string>(definition.Tags)
+        };
+
+        Publish(ev);
+        return ev;
+    }
+
+    private void Publish(GameEvent ev)
+    {
         _live.Add(ev);
 
         var characters = ThoughtCharacterRegistry.AllList();
         for (int i = 0; i < characters.Count; i++)
-            ThoughtPropagation.Apply(ev, characters[i], _rng);
+        {
+            var character = characters[i];
+            bool direct;
+            if (!ThoughtPropagation.ShouldApply(ev, character, out direct))
+            {
+                if (direct)
+                    Debug.LogWarning("Major event '" + ev.DefinitionId + "' names canonical character '" + character.Id + "'; ignored to protect the timeline.");
+                continue;
+            }
+
+            ThoughtPropagation.Apply(ev, character, _rng, direct);
+        }
 
         if (Raised != null)
             Raised(ev);
-        return ev;
     }
 
     public void RestoreEvents(List<GameEvent> events)
@@ -113,6 +218,16 @@ public class WorldEventSystem : MonoBehaviour
         _live.Clear();
         if (events != null)
             _live.AddRange(events);
+    }
+
+    public void RestoreCanonicalFired(IEnumerable<string> fired)
+    {
+        _canonicalFired.Clear();
+        if (fired == null)
+            return;
+        foreach (var id in fired)
+            if (!string.IsNullOrEmpty(id))
+                _canonicalFired.Add(id);
     }
 
     public int Purge(long now, float minStrength)
@@ -132,20 +247,5 @@ public class WorldEventSystem : MonoBehaviour
             }
         }
         return removed;
-    }
-
-    public static List<GameEventDefinition> CreateStarter()
-    {
-        return new List<GameEventDefinition>
-        {
-            new GameEventDefinition { Id = "war_declared", Name = "A war was declared", Scope = EventScope.World, Tags = new List<string> { "war", "politics" }, BaseSentiment = -0.7f, Impact = 0.8f, Decay = 0.03f, AffectedNodeIds = new List<string> { "opinions/politics", "world/events" } },
-            new GameEventDefinition { Id = "plague", Name = "A plague is spreading", Scope = EventScope.Region, Tags = new List<string> { "disease", "death" }, BaseSentiment = -0.9f, Impact = 0.85f, Decay = 0.02f, AffectedNodeIds = new List<string> { "present/troubles", "world/events" } },
-            new GameEventDefinition { Id = "harvest_festival", Name = "The harvest festival", Scope = EventScope.Local, Tags = new List<string> { "festival", "celebration" }, BaseSentiment = 0.6f, Impact = 0.4f, Decay = 0.15f, AffectedNodeIds = new List<string> { "present/news", "world/events" } },
-            new GameEventDefinition { Id = "scandal", Name = "A political scandal", Scope = EventScope.Local, Tags = new List<string> { "politics", "scandal" }, BaseSentiment = -0.5f, Impact = 0.5f, Decay = 0.08f, AffectedNodeIds = new List<string> { "opinions/politics", "world/rumors" } },
-            new GameEventDefinition { Id = "trade_boom", Name = "A trade boom", Scope = EventScope.Region, Tags = new List<string> { "trade", "economy" }, BaseSentiment = 0.5f, Impact = 0.5f, Decay = 0.08f, AffectedNodeIds = new List<string> { "present/news", "knowledge/job" } },
-            new GameEventDefinition { Id = "personal_loss", Name = "The death of someone close", Scope = EventScope.Personal, Tags = new List<string> { "death", "grief" }, BaseSentiment = -0.9f, Impact = 0.9f, Decay = 0.05f, AffectedNodeIds = new List<string> { "relationships/family" } },
-            new GameEventDefinition { Id = "promotion", Name = "A promotion at work", Scope = EventScope.Personal, Tags = new List<string> { "work" }, BaseSentiment = 0.7f, Impact = 0.6f, Decay = 0.1f, AffectedNodeIds = new List<string> { "knowledge/job" } },
-            new GameEventDefinition { Id = "new_friend", Name = "A new friendship", Scope = EventScope.Personal, Tags = new List<string> { "friendship" }, BaseSentiment = 0.6f, Impact = 0.5f, Decay = 0.06f, AffectedNodeIds = new List<string> { "relationships/friends" } }
-        };
     }
 }

@@ -8,21 +8,56 @@ using UnityEngine;
 /// </summary>
 public static class ThoughtPropagation
 {
-    public static bool Apply(GameEvent ev, ThoughtCharacter character, System.Random rng)
+    /// <summary>
+    /// Decides whether an event reaches a character. Anyone the event names directly is always
+    /// affected (unfiltered). A major non-canon event is withheld from canonical characters, whose
+    /// fixed history a random upheaval must not rewrite.
+    /// </summary>
+    public static bool ShouldApply(GameEvent ev, ThoughtCharacter character, out bool direct)
+    {
+        direct = false;
+        if (ev == null || character == null)
+            return false;
+
+        direct = ev.AffectedCharacterIds.Contains(character.Id);
+        if (!ev.Canonical && ev.Importance == EventImportance.Major && character.Canonical)
+            return false;
+
+        return true;
+    }
+
+    public static bool Apply(GameEvent ev, ThoughtCharacter character, System.Random rng, bool force = false)
     {
         if (ev == null || character == null || character.Taxonomy == null || character.Traits == null)
             return false;
 
         var profile = character.Traits.Aggregate(character.TraitIds);
-        float relevance = Relevance(ev, character, profile);
-        if (relevance <= 0.001f)
-            return false;
 
-        float sentiment = Mathf.Clamp(ev.BaseSentiment * profile.SentimentMultiplier, -1f, 1f);
-        float impact = Mathf.Clamp01(ev.Impact * relevance * profile.ImpactMultiplier);
-        float decay = Mathf.Clamp01(ev.Decay * profile.DecayMultiplier);
+        float sentiment;
+        float impact;
+        float decay;
+        List<string> nodes;
 
-        var nodes = RelevantNodes(ev, character);
+        if (force)
+        {
+            // Canon events land on their named people unchanged: fixed feeling, fixed weight,
+            // on the exact topics the event touches, regardless of traits or prior links.
+            sentiment = Mathf.Clamp(ev.BaseSentiment, -1f, 1f);
+            impact = Mathf.Clamp01(ev.Impact);
+            decay = Mathf.Clamp01(ev.Decay);
+            nodes = ForcedNodes(ev, character);
+        }
+        else
+        {
+            float relevance = Relevance(ev, character, profile);
+            if (relevance <= 0.001f)
+                return false;
+            sentiment = Mathf.Clamp(ev.BaseSentiment * profile.SentimentMultiplier, -1f, 1f);
+            impact = Mathf.Clamp01(ev.Impact * relevance * profile.ImpactMultiplier);
+            decay = Mathf.Clamp01(ev.Decay * profile.DecayMultiplier);
+            nodes = RelevantNodes(ev, character);
+        }
+
         for (int i = 0; i < nodes.Count; i++)
         {
             character.Thoughts.Add(new ThoughtEntry
@@ -34,11 +69,28 @@ public static class ThoughtPropagation
                 Decay = decay,
                 CreatedTick = ev.StartedTick,
                 LastTick = ev.StartedTick,
+                RawLabel = ev.Name,
+                Detail = ev.Detail,
                 SourceEventId = ev.Id,
                 Tags = new List<string>(ev.Tags)
             });
         }
         return true;
+    }
+
+    /// <summary>Every topic the canon event touches that the taxonomy knows, ignoring links.</summary>
+    private static List<string> ForcedNodes(GameEvent ev, ThoughtCharacter character)
+    {
+        var nodes = new List<string>();
+        for (int i = 0; i < ev.AffectedNodeIds.Count; i++)
+        {
+            var node = ev.AffectedNodeIds[i];
+            if (character.Taxonomy.Exists(node) && !nodes.Contains(node))
+                nodes.Add(node);
+        }
+        if (nodes.Count == 0)
+            nodes.Add(ScopeDefault(ev.Scope));
+        return nodes;
     }
 
     /// <summary>

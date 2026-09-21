@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CanonDataFile",
+  "type": "object",
+  "required": ["events"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "events": { "type": "array", "items": { "$ref": "#/definitions/canonEvent" } }
+  },
+  "definitions": {
+    "canonEvent": {
+      "type": "object",
+      "required": ["id", "name", "day"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "scope": { "enum": ["Personal", "Local", "Region", "World"] },
+        "day": { "type": "integer", "description": "1-based day of the campaign. Use 0 or negative for backstory that has already happened at start." },
+        "minuteOfDay": { "type": "integer", "description": "Minutes past midnight; 540 = 09:00. May be negative to reach before the start of the day." },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "baseSentiment": { "type": "number", "minimum": -1, "maximum": 1 },
+        "impact": { "type": "number", "minimum": 0, "maximum": 1 },
+        "decay": { "type": "number", "minimum": 0, "maximum": 1 },
+        "detail": { "type": "string" },
+        "affectedNodeIds": { "type": "array", "items": { "type": "string" } },
+        "affectedCharacterIds": { "type": "array", "items": { "type": "string" }, "description": "Exact people the event is guaranteed to land on." }
+      }
+    }
+  }
+}
