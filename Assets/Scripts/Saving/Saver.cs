@@ -29,6 +29,7 @@ public class Saver : MonoBehaviour
         public bool LeaderInTransit;
         public int StoryStage;
         public Registry.Priorities GlobalPriorities;
+        public string ThoughtState;
     }
 
     [Serializable]
@@ -124,6 +125,7 @@ public class Saver : MonoBehaviour
         CloudMoveScript.Instance.enabled = true;
         StoryScript.StoryStage = save.StoryStage;
         StoryScript.CheckStage();
+        ThoughtPersistence.Restore(save.ThoughtState);
         Planet.SetGlobalPriorities(0, save.GlobalPriorities.Food);
         Planet.SetGlobalPriorities(1, save.GlobalPriorities.Fuel);
         return true;
@@ -211,6 +213,7 @@ public class Saver : MonoBehaviour
         save.SelectedPlanet = Planet.Selected == null ? "" : Planet.Selected.Name;
         save.StoryStage = StoryScript.StoryStage;
         save.GlobalPriorities = new Registry.Priorities(Planet.GetGlobalPriorities(0), Planet.GetGlobalPriorities(1));
+        save.ThoughtState = ThoughtPersistence.Capture();
 
         SaveSave(save, slot);
     }

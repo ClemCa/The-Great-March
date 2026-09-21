@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Character",
+  "description": "Authored character definition for the thought/dialogue system.",
+  "type": "object",
+  "required": ["id", "displayName"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "description": "Stable unique id." },
+    "displayName": { "type": "string" },
+    "gender": { "enum": ["male", "female", "neutral", "object"] },
+    "traits": { "type": "array", "items": { "type": "string" }, "description": "Trait ids from TraitLibrary." },
+    "moods": { "type": "array", "items": { "$ref": "#/definitions/mood" } },
+    "talkPolicies": { "type": "array", "items": { "$ref": "#/definitions/talkPolicy" } },
+    "relationships": { "type": "array", "items": { "$ref": "#/definitions/relationship" } },
+    "knowledge": { "type": "array", "items": { "$ref": "#/definitions/knowledge" } },
+    "notes": { "type": "array", "items": { "type": "string" }, "description": "Always injected into the LLM context." },
+    "examples": { "type": "array", "items": { "type": "string" }, "description": "Always injected voice examples." },
+    "thoughts": { "type": "array", "items": { "$ref": "#/definitions/thought" } }
+  },
+  "definitions": {
+    "mood": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "examples": ["normal", "depressed"] },
+        "valenceCenter": { "type": "number", "minimum": 0, "maximum": 1 },
+        "traits": { "type": "array", "items": { "type": "string" } },
+        "sample": { "type": "string" }
+      }
+    },
+    "talkPolicy": {
+      "type": "object",
+      "required": ["nodeId", "policy"],
+      "additionalProperties": false,
+      "properties": {
+        "nodeId": { "type": "string", "description": "Taxonomy node id; applies to descendants." },
+        "policy": { "enum": ["Open", "Reluctant", "Secretive", "Unknown"] }
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "required": ["personName", "nodeId"],
+      "additionalProperties": false,
+      "properties": {
+        "personId": { "type": "string" },
+        "personName": { "type": "string" },
+        "label": { "type": "string", "examples": ["mother", "father", "friend"] },
+        "nodeId": { "type": "string", "examples": ["relationships/family/mother"] },
+        "opinion": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "knowledge": {
+      "type": "object",
+      "required": ["key", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string" },
+        "value": { "type": "string" },
+        "nodeId": { "type": "string" }
+      }
+    },
+    "thought": {
+      "type": "object",
+      "required": ["nodeId", "subject"],
+      "additionalProperties": false,
+      "properties": {
+        "nodeId": { "type": "string" },
+        "subject": { "type": "string" },
+        "sentiment": { "type": "number", "minimum": -1, "maximum": 1 },
+        "impact": { "type": "number", "minimum": 0, "maximum": 1 },
+        "decay": { "type": "number", "minimum": 0, "maximum": 1, "description": "Fraction of strength lost per in-game day." },
+        "ageDays": { "type": "number", "minimum": 0 },
+        "rawLabel": { "type": "string" },
+        "detail": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

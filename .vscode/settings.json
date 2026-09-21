@@ -51,5 +51,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "The-Great-March.slnx"
+    "dotnet.defaultSolution": "The-Great-March.slnx",
+    "dotnet.preferCSharpExtension": true
 }

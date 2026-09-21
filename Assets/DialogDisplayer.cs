@@ -5,6 +5,7 @@ using ClemCAddons;
 using UnityEditor;
 using System;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using Yarn.Unity;
 
 public class DialogDisplayer : MonoBehaviour
@@ -21,9 +22,14 @@ public class DialogDisplayer : MonoBehaviour
     private static DialogDisplayer _instance;
 
     private RectTransform rectTransform;
-    
+    private TMPro.TMP_Text _contentText;
+    private TMPro.TMP_Text _nameText;
+    private Transform _buttons;
+    private readonly List<GameObject> _choiceButtons = new List<GameObject>();
+
     private Action[] _choices;
     private Action _followUp;
+    private bool _streaming;
 
     public static DialogDisplayer Instance { get => _instance; }
     public DialogueRunner Runner { get => _runner; }
@@ -62,25 +68,67 @@ public class DialogDisplayer : MonoBehaviour
     {
         _instance = this;
         rectTransform = GetComponent<RectTransform>();
+        _nameText = transform.FindDeep("Name").GetComponentInChildren<TMPro.TMP_Text>();
+        _contentText = transform.FindDeep("Content").GetComponentInChildren<TMPro.TMP_Text>();
+        _buttons = transform.FindDeep("Buttons");
         Hide();
     }
+
     public void Initialize(string name, string text, Action followUp)
     {
         _followUp = followUp;
         Initialize(name, text);
     }
+
     public void Initialize(string name, string text)
     {
-        transform.FindDeep("Name").GetComponentInChildren<TMPro.TMP_Text>().text = name;
-        transform.FindDeep("Buttons").gameObject.SetActive(false);
-        WriteOverTime(text, transform.FindDeep("Content").GetComponentInChildren<TMPro.TMP_Text>());
+        _streaming = false;
+        _nameText.text = name;
+        _buttons.gameObject.SetActive(false);
+        WriteOverTime(text, _contentText);
         Show();
     }
+
+    #region Streaming (LLM mode)
+
+    public void BeginStream(string name)
+    {
+        _streaming = true;
+        _followUp = null;
+        _choices = null;
+        _choicesText = null;
+        _nameText.text = name;
+        _contentText.text = "";
+        _buttons.gameObject.SetActive(false);
+        Show();
+    }
+
+    public void AppendStream(string token)
+    {
+        if (string.IsNullOrEmpty(token) || !_streaming)
+            return;
+        _contentText.text += token;
+    }
+
+    public void EndStream()
+    {
+        if (!_streaming)
+            return;
+        _streaming = false;
+        PresentChoices();
+    }
+
+    #endregion
 
     public void SetOptions(string[] choicesText, Action[] choices)
     {
         _choicesText = choicesText;
         _choices = choices;
+    }
+
+    public void SetFollowUp(Action followUp)
+    {
+        _followUp = followUp;
     }
 
     public void Show()
@@ -100,11 +148,13 @@ public class DialogDisplayer : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(null);
         if (_choices != null)
         {
-            _choices[index].Invoke();
+            if (index >= 0 && index < _choices.Length)
+                _choices[index].Invoke();
             _choices = null;
             return;
         }
-        _followUp.Invoke();
+        if (_followUp != null)
+            _followUp.Invoke();
     }
 
     public void Flip()
@@ -118,6 +168,46 @@ public class DialogDisplayer : MonoBehaviour
     public void StartDialogue(string dialogue = "Intro_Start")
     {
         _runner.StartDialogue(dialogue);
+    }
+
+    private void PresentChoices()
+    {
+        int count = _choices != null ? _choicesText.Length : 1;
+        if (count <= 0)
+            count = 1;
+        EnsureChoiceButtons(count);
+        for (int i = 0; i < _choiceButtons.Count; i++)
+        {
+            var button = _choiceButtons[i];
+            bool used = i < count;
+            button.SetActive(used);
+            if (!used)
+                continue;
+            button.GetComponentInChildren<TMPro.TMP_Text>().text = _choices != null ? _choicesText[i] : "Continue";
+            var uiButton = button.GetComponent<Button>();
+            if (uiButton != null)
+            {
+                uiButton.onClick.RemoveAllListeners();
+                int index = i;
+                uiButton.onClick.AddListener(() => Select(index));
+            }
+        }
+        _buttons.gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// The prefab ships with two buttons; extra choices are cloned from the second template.
+    /// </summary>
+    private void EnsureChoiceButtons(int count)
+    {
+        while (_buttons.childCount < count)
+        {
+            int templateIndex = Mathf.Clamp(1, 0, _buttons.childCount - 1);
+            Instantiate(_buttons.GetChild(templateIndex).gameObject, _buttons);
+        }
+        _choiceButtons.Clear();
+        for (int i = 0; i < count; i++)
+            _choiceButtons.Add(_buttons.GetChild(i).gameObject);
     }
 
     private async void WriteOverTime(string text, TMPro.TMP_Text target)
@@ -178,20 +268,7 @@ public class DialogDisplayer : MonoBehaviour
         }
         _delays = new int[0]; // reset delays
         await System.Threading.Tasks.Task.Delay(_choiceDelay);
-        var buttons = transform.FindDeep("Buttons");
-        if (_choices != null)
-        {
-            buttons.gameObject.SetActive(true);
-            buttons.GetChild(0).gameObject.SetActive(true);
-            buttons.GetChild(0).GetComponentInChildren<TMPro.TMP_Text>().text = _choicesText[0];
-            buttons.GetChild(1).GetComponentInChildren<TMPro.TMP_Text>().text = _choicesText[1];
-        }
-        else
-        {
-            buttons.GetChild(0).gameObject.SetActive(false);
-            buttons.gameObject.SetActive(true);
-            buttons.GetChild(1).GetComponentInChildren<TMPro.TMP_Text>().text = "Continue";
-        }
+        PresentChoices();
     }
 }
 

@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EventDataFile",
+  "type": "object",
+  "required": ["events"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "events": { "type": "array", "items": { "$ref": "#/definitions/event" } }
+  },
+  "definitions": {
+    "event": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "scope": { "enum": ["Personal", "Local", "Region", "World"] },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "baseSentiment": { "type": "number", "minimum": -1, "maximum": 1 },
+        "impact": { "type": "number", "minimum": 0, "maximum": 1 },
+        "decay": { "type": "number", "minimum": 0, "maximum": 1 },
+        "affectedNodeIds": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

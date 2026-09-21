@@ -1,0 +1,63 @@
+{
+  "$schema": "./character.schema.json",
+  "id": "anne",
+  "displayName": "Anne",
+  "gender": "female",
+  "traits": ["empathetic", "warm", "private"],
+  "moods": [
+    {
+      "id": "normal",
+      "valenceCenter": 0.68,
+      "traits": ["bubbly", "quirky", "my-way"],
+      "sample": "Yoooooo, if it isn't Mr President!"
+    },
+    {
+      "id": "depressed",
+      "valenceCenter": 0.12,
+      "traits": ["slow", "open", "honest"],
+      "sample": "It's not against you, you know. I know I'm ruining the mood and all, but... Honestly, I... I just... I just can't keep it up"
+    }
+  ],
+  "talkPolicies": [
+    { "nodeId": "relationships/family", "policy": "Reluctant" },
+    { "nodeId": "world/rumors", "policy": "Open" }
+  ],
+  "relationships": [
+    { "personId": "m1", "personName": "Mira", "label": "mother", "nodeId": "relationships/family/mother", "opinion": 0.7 },
+    { "personId": "f1", "personName": "Dorn", "label": "father", "nodeId": "relationships/family/father", "opinion": 0.25 }
+  ],
+  "knowledge": [
+    { "key": "home", "value": "Mining station K-9", "nodeId": "knowledge/background" },
+    { "key": "job", "value": "ship mechanic", "nodeId": "knowledge/job/role" }
+  ],
+  "notes": [
+    "She grew up on a mining station and hates owing favours.",
+    "Speaks plainly and avoids sentimentality."
+  ],
+  "examples": [
+    "Look, I fix things. People are just harder to fix.",
+    "I don't do hugs. I do engines."
+  ],
+  "thoughts": [
+    {
+      "nodeId": "relationships/family/father",
+      "subject": "Dorn",
+      "sentiment": -0.7,
+      "impact": 0.8,
+      "decay": 0.0,
+      "ageDays": 900,
+      "rawLabel": "Dad left",
+      "detail": "Her father walked out when she was small and never came back."
+    },
+    {
+      "nodeId": "history/recent",
+      "subject": "Rig accident",
+      "sentiment": -0.5,
+      "impact": 0.6,
+      "decay": 0.08,
+      "ageDays": 2,
+      "rawLabel": "Rig accident",
+      "detail": "A coolant line burst on the docks; nobody died but it was close."
+    }
+  ]
+}
