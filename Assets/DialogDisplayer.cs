@@ -89,6 +89,23 @@ public class DialogDisplayer : MonoBehaviour
         Show();
     }
 
+    /// <summary>
+    /// Brain-exploration navigation: the speaker label names whose head we're inside, the
+    /// content is a neutral path header, and the buttons are the next branches to dig into.
+    /// </summary>
+    public void ShowNavigation(string speaker, string header, string[] choicesText, Action[] choices)
+    {
+        _streaming = false;
+        _followUp = null;
+        _choicesText = choicesText;
+        _choices = choices;
+        _nameText.text = speaker;
+        _contentText.text = header ?? "";
+        _buttons.gameObject.SetActive(false);
+        PresentChoices();
+        Show();
+    }
+
     #region Streaming (LLM mode)
 
     public void BeginStream(string name)
@@ -148,9 +165,11 @@ public class DialogDisplayer : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(null);
         if (_choices != null)
         {
-            if (index >= 0 && index < _choices.Length)
-                _choices[index].Invoke();
+            Action action = (index >= 0 && index < _choices.Length) ? _choices[index] : null;
             _choices = null;
+            _choicesText = null;
+            if (action != null)
+                action.Invoke();
             return;
         }
         if (_followUp != null)
@@ -176,9 +195,9 @@ public class DialogDisplayer : MonoBehaviour
         if (count <= 0)
             count = 1;
         EnsureChoiceButtons(count);
-        for (int i = 0; i < _choiceButtons.Count; i++)
+        for (int i = 0; i < _buttons.childCount; i++)
         {
-            var button = _choiceButtons[i];
+            var button = _buttons.GetChild(i).gameObject;
             bool used = i < count;
             button.SetActive(used);
             if (!used)

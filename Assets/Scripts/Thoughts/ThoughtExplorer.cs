@@ -12,7 +12,9 @@ public class ThoughtExplorer : MonoBehaviour
     [SerializeField] private bool _autoStart = false;
 
     private ThoughtCharacter _character;
-    private string _currentPath = "";
+
+    /// <summary>Raised when the player backs out of the character's head entirely.</summary>
+    public event Action Exited;
 
     private DialogDisplayer Displayer
     {
@@ -42,48 +44,73 @@ public class ThoughtExplorer : MonoBehaviour
         if (_character == null || Displayer == null)
             return;
 
-        _currentPath = pathId;
         var options = ThoughtResolver.Options(_character, pathId);
-        var labels = new string[options.Count];
-        var actions = new Action[options.Count];
+
+        // No deeper categories to drill into: this is where the thought surfaces.
+        if (options.Count == 0)
+        {
+            Ask(pathId, ParentOf(pathId));
+            return;
+        }
+
+        bool atRoot = string.IsNullOrEmpty(pathId);
+        var labels = new string[options.Count + 1];
+        var actions = new Action[options.Count + 1];
         for (int i = 0; i < options.Count; i++)
         {
             var option = options[i];
             labels[i] = option.Label;
-            actions[i] = () =>
-            {
-                if (option.IsResolve)
-                    Ask(option.NodeId);
-                else
-                    ShowOptions(option.NodeId);
-            };
+            actions[i] = () => ShowOptions(option.NodeId);
         }
 
-        Displayer.SetOptions(labels, actions);
-        Displayer.Initialize(_character.DisplayName, Prompt(pathId));
+        labels[options.Count] = atRoot ? "Leave" : "Back";
+        if (atRoot)
+            actions[options.Count] = Exit;
+        else
+            actions[options.Count] = () => ShowOptions(ParentOf(pathId));
+
+        Displayer.ShowNavigation(_character.DisplayName, Header(pathId), labels, actions);
     }
 
-    private string Prompt(string pathId)
+    /// <summary>
+    /// Where we are inside the character's head, shown alongside the speaker label.
+    /// </summary>
+    private string Header(string pathId)
     {
         if (string.IsNullOrEmpty(pathId))
-            return "What do you want to ask about?";
-        return "What about " + _character.Taxonomy.NameOf(pathId) + "?";
+            return "";
+        return _character.Taxonomy.DisplayPath(pathId).Replace("/", " / ");
     }
 
-    private void Ask(string nodeId)
+    private string ParentOf(string pathId)
+    {
+        var node = _character.Taxonomy.Get(pathId);
+        return node == null ? "" : node.ParentId;
+    }
+
+    /// <summary>Steps out of the character's head entirely.</summary>
+    public void Exit()
+    {
+        if (Displayer != null)
+            Displayer.Hide();
+        if (Exited != null)
+            Exited();
+    }
+
+    private void Ask(string nodeId, string returnPath)
     {
         if (LLMDialogueManager.Instance != null)
         {
             LLMDialogueManager.Instance.Ask(_character, nodeId, _character.Taxonomy.NameOf(nodeId), (resolution, text) =>
             {
                 if (Displayer != null)
-                    Displayer.SetFollowUp(() => ShowOptions(_currentPath));
+                    Displayer.SetFollowUp(() => ShowOptions(returnPath));
             });
             return;
         }
 
         var result = ThoughtResolver.Resolve(_character, nodeId, new System.Random());
-        Displayer.SetFollowUp(() => ShowOptions(_currentPath));
+        Displayer.SetFollowUp(() => ShowOptions(returnPath));
         Displayer.Initialize(_character.DisplayName, result.RawText);
     }
 }

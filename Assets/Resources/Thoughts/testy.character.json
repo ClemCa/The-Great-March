@@ -1,0 +1,212 @@
+{
+  "$schema": "./character.schema.json",
+  "id": "testy",
+  "displayName": "Testy Test",
+  "gender": "neutral",
+  "traits": ["curious", "optimist", "gossip"],
+  "moods": [
+    {
+      "id": "normal",
+      "valenceCenter": 0.72,
+      "traits": ["cheerful", "chatty", "silly"],
+      "sample": "Oh hey! Perfect timing, I was literally just thinking about you."
+    },
+    {
+      "id": "low",
+      "valenceCenter": 0.15,
+      "traits": ["quiet", "blunt", "withdrawn"],
+      "sample": "Hm. Yeah. Sure. Whatever you say."
+    }
+  ],
+  "talkPolicies": [
+    { "nodeId": "world/rumors", "policy": "Open" },
+    { "nodeId": "relationships/family", "policy": "Reluctant" },
+    { "nodeId": "relationships/self", "policy": "Secretive" }
+  ],
+  "relationships": [
+    { "personId": "b1", "personName": "Bit", "label": "sibling", "nodeId": "relationships/family/siblings", "opinion": 0.8 },
+    { "personId": "n1", "personName": "Noodle", "label": "best friend", "nodeId": "relationships/friends/close", "opinion": 0.95 },
+    { "personId": "v1", "personName": "Coach Vera", "label": "rival", "nodeId": "relationships/rivals/competitors", "opinion": 0.3 }
+  ],
+  "knowledge": [
+    { "key": "home", "value": "Testy's cloud lab, mostly held together with tape", "nodeId": "knowledge/background" },
+    { "key": "job", "value": "professional guinea pig for the thought system", "nodeId": "knowledge/job/role" }
+  ],
+  "notes": [
+    "Testy exists purely to test the thought system; everything about them is deliberately exaggerated.",
+    "Speaks in short, upbeat bursts and answers questions with questions.",
+    "Treats every conversation as an experiment worth logging."
+  ],
+  "examples": [
+    "Wait, say that again but slower, I'm writing it down.",
+    "I have a good feeling about this. I always do.",
+    "Interesting. Very interesting. Also slightly alarming."
+  ],
+  "thoughts": [
+    {
+      "nodeId": "relationships/family/siblings",
+      "subject": "Bit",
+      "sentiment": 0.6,
+      "impact": 0.7,
+      "decay": 0.05,
+      "ageDays": 120,
+      "rawLabel": "Sibling Bit",
+      "detail": "Bit is the only family Testy actually talks to; borrowed money is involved.",
+      "tags": ["family"]
+    },
+    {
+      "nodeId": "relationships/friends/close",
+      "subject": "Noodle",
+      "sentiment": 0.9,
+      "impact": 0.8,
+      "decay": 0.02,
+      "ageDays": 30,
+      "rawLabel": "Noodle",
+      "detail": "Noodle once waited three hours in the rain with spare batteries for Testy's rig.",
+      "tags": ["friend", "warm"]
+    },
+    {
+      "nodeId": "relationships/rivals/competitors",
+      "subject": "Coach Vera",
+      "sentiment": -0.4,
+      "impact": 0.6,
+      "decay": 0.1,
+      "ageDays": 8,
+      "rawLabel": "Coach Vera",
+      "detail": "Vera keeps beating Testy's test scores and won't stop mentioning it.",
+      "tags": ["rival"]
+    },
+    {
+      "nodeId": "relationships/self/selfworth",
+      "subject": "Being the control group",
+      "sentiment": 0.25,
+      "impact": 0.5,
+      "decay": 0.03,
+      "ageDays": 60,
+      "rawLabel": "Control group",
+      "detail": "Testy suspects they were built to be the baseline everyone else is compared against.",
+      "tags": ["self"]
+    },
+    {
+      "nodeId": "knowledge/job/role",
+      "subject": "The test job",
+      "sentiment": 0.3,
+      "impact": 0.4,
+      "decay": 0.03,
+      "ageDays": 40,
+      "rawLabel": "Job",
+      "detail": "The pay is terrible but the questions are excellent.",
+      "tags": ["work"]
+    },
+    {
+      "nodeId": "knowledge/background",
+      "subject": "Cloud lab",
+      "sentiment": 0.5,
+      "impact": 0.45,
+      "decay": 0.01,
+      "ageDays": 300,
+      "rawLabel": "Cloud lab",
+      "detail": "Grew up in a floating test facility and never trusted solid ground since.",
+      "tags": ["home"]
+    },
+    {
+      "nodeId": "feelings/fears",
+      "subject": "Being replaced",
+      "sentiment": -0.6,
+      "impact": 0.75,
+      "decay": 0.06,
+      "ageDays": 15,
+      "rawLabel": "Fear of being replaced",
+      "detail": "Every new test version makes Testy a little more nervous.",
+      "tags": ["fear"]
+    },
+    {
+      "nodeId": "feelings/hopes",
+      "subject": "Passing the test",
+      "sentiment": 0.65,
+      "impact": 0.55,
+      "decay": 0.07,
+      "ageDays": 9,
+      "rawLabel": "Hoping to pass",
+      "detail": "Wants to be more than a test subject, even for a day.",
+      "tags": ["hope"]
+    },
+    {
+      "nodeId": "history/recent",
+      "subject": "Lab accident",
+      "sentiment": -0.5,
+      "impact": 0.6,
+      "decay": 0.15,
+      "ageDays": 3,
+      "rawLabel": "Lab accident",
+      "detail": "A pressure valve blew during a run; Testy walked away singed but grinning.",
+      "tags": ["history"]
+    },
+    {
+      "nodeId": "history/childhood",
+      "subject": "Early trials",
+      "sentiment": 0.1,
+      "impact": 0.5,
+      "decay": 0.02,
+      "ageDays": 800,
+      "rawLabel": "Early trials",
+      "detail": "Spent childhood being poked, prodded and scored. Turned out friendly anyway.",
+      "tags": ["history", "childhood"]
+    },
+    {
+      "nodeId": "opinions/values",
+      "subject": "Honesty",
+      "sentiment": 0.7,
+      "impact": 0.5,
+      "decay": 0.01,
+      "ageDays": 200,
+      "rawLabel": "Honesty",
+      "detail": "Testy will answer almost anything if you ask directly. Almost.",
+      "tags": ["value"]
+    },
+    {
+      "nodeId": "present/doing",
+      "subject": "Running tests",
+      "sentiment": 0.5,
+      "impact": 0.5,
+      "decay": 0.2,
+      "ageDays": 1,
+      "rawLabel": "Running tests",
+      "detail": "Currently mid-experiment and absolutely not supposed to be talking to you.",
+      "tags": ["present"]
+    },
+    {
+      "nodeId": "present/plans",
+      "subject": "Tomorrow's trial",
+      "sentiment": 0.4,
+      "impact": 0.45,
+      "decay": 0.1,
+      "ageDays": 2,
+      "rawLabel": "Tomorrow's trial",
+      "detail": "There is a big trial tomorrow and Testy has not prepared at all.",
+      "tags": ["present", "plans"]
+    },
+    {
+      "nodeId": "world/rumors",
+      "subject": "Missing supplies",
+      "sentiment": -0.2,
+      "impact": 0.4,
+      "decay": 0.1,
+      "ageDays": 5,
+      "rawLabel": "Missing supplies rumor",
+      "detail": "Crates keep disappearing from the loading bay and everyone blames everyone.",
+      "tags": ["world", "rumor"]
+    },
+    {
+      "nodeId": "world/places",
+      "subject": "Dock 7",
+      "sentiment": 0.35,
+      "impact": 0.35,
+      "decay": 0.04,
+      "ageDays": 14,
+      "rawLabel": "Dock 7",
+      "detail": "The best place to watch the sky fall and pretend it is on purpose.",
+      "tags": ["world"]
+    }
+  ]
+}

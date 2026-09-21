@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// One choice offered while drilling the thought tree. IsResolve marks the "talk about this
-/// node itself" option available on resumable nodes.
+/// One category offered while drilling the thought tree.
 /// </summary>
 public class DrillOption
 {
     public string NodeId = "";
     public string Label = "";
-    public bool IsResolve = false;
 }
 
 /// <summary>
@@ -45,9 +43,6 @@ public static class ThoughtResolver
             return options;
         }
 
-        if (character.Taxonomy.IsResolvable(pathId))
-            options.Add(new DrillOption { NodeId = pathId, Label = "Bring up " + character.Taxonomy.NameOf(pathId), IsResolve = true });
-
         foreach (var child in character.Taxonomy.ChildrenOf(pathId))
             options.Add(new DrillOption { NodeId = child, Label = character.Taxonomy.NameOf(child) });
 
@@ -66,9 +61,11 @@ public static class ThoughtResolver
                 alive.Add(pool[i]);
         result.Entries = alive;
 
-        var pick = character.Thoughts.WeightedPick(alive, now, rng);
+        var pick = ThoughtSelector.Pick(character, alive, nodeId, now, rng);
         if (pick != null)
         {
+            pick.TimesSurfaced++;
+            pick.LastSurfacedTick = now;
             result.Found = true;
             result.Entry = pick;
             result.RawText = RawRenderer.Render(pick);
@@ -81,6 +78,8 @@ public static class ThoughtResolver
             var made = SettingGenerator.Generate(character, nodeId, rng);
             if (made != null)
             {
+                made.TimesSurfaced++;
+                made.LastSurfacedTick = now;
                 result.Found = true;
                 result.Entry = made;
                 result.RawText = RawRenderer.Render(made);

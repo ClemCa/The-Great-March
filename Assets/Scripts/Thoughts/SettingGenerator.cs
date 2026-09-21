@@ -20,6 +20,9 @@ public static class SettingGenerator
     private static readonly string[] Actions = { "repairing the ship", "haggling at the market", "studying old charts", "visiting family", "looking for work" };
     private static readonly string[] Rumors = { "a whisper about the council", "talk of smuggling", "a story about a ghost fleet", "news of a distant war" };
     private static readonly string[] Topics = { "the new tariffs", "old music", "the frontier", "religion", "the old regime" };
+    private static readonly string[] Skills = { "welding", "navigation", "first aid", "haggling", "engine repair", "cooking", "reading old charts", "staying calm", "picking locks" };
+    private static readonly string[] Studies = { "the orbital academy", "a trade school", "night classes", "an apprenticeship", "the archive program", "self-teaching" };
+    private static readonly string[] Fields = { "history", "mathematics", "engineering", "medicine", "law", "astronomy", "old languages" };
 
     public static ThoughtEntry Generate(ThoughtCharacter character, string nodeId, System.Random rng)
     {
@@ -78,23 +81,45 @@ public static class SettingGenerator
     private static ThoughtEntry Knowledge(string nodeId, System.Random rng)
     {
         string key = LastSegment(nodeId);
-        if (key == "job" || key == "role")
+        switch (key)
         {
-            string job = Pick(Jobs, rng);
-            return new ThoughtEntry { Subject = job, RawLabel = job, Detail = "I work as a " + job + ".", Sentiment = Rand(rng, -0.2f, 0.5f), Impact = 0.5f, Decay = 0.01f };
+            case "job":
+            case "role":
+            {
+                string job = Pick(Jobs, rng);
+                return new ThoughtEntry { Subject = job, RawLabel = job, Detail = "I work as a " + job + ".", Sentiment = Rand(rng, -0.2f, 0.5f), Impact = 0.5f, Decay = 0.01f };
+            }
+            case "workplace":
+            {
+                string place = Pick(Places, rng);
+                return new ThoughtEntry { Subject = place, RawLabel = place, Detail = "I spend my days at " + place + ".", Sentiment = Rand(rng, -0.2f, 0.4f), Impact = 0.4f, Decay = 0.01f };
+            }
+            case "colleagues":
+            {
+                string name = Name("", rng);
+                return new ThoughtEntry { Subject = name, RawLabel = name, Detail = name + " is a colleague of mine.", Sentiment = Rand(rng, -0.3f, 0.6f), Impact = 0.4f, Decay = 0.02f };
+            }
+            case "skills":
+            {
+                string skill = Pick(Skills, rng);
+                return new ThoughtEntry { Subject = skill, RawLabel = skill, Detail = "I am good at " + skill + ".", Sentiment = Rand(rng, 0f, 0.6f), Impact = 0.4f, Decay = 0.02f };
+            }
+            case "education":
+            {
+                string study = Pick(Studies, rng);
+                return new ThoughtEntry { Subject = study, RawLabel = study, Detail = "I learned what I know through " + study + ".", Sentiment = Rand(rng, -0.2f, 0.5f), Impact = 0.4f, Decay = 0.01f };
+            }
+            case "background":
+            {
+                string home = Pick(Places, rng);
+                return new ThoughtEntry { Subject = home, RawLabel = home, Detail = "I came up around " + home + ".", Sentiment = Rand(rng, -0.3f, 0.5f), Impact = 0.45f, Decay = 0.01f };
+            }
+            default:
+            {
+                string field = Pick(Fields, rng);
+                return new ThoughtEntry { Subject = field, RawLabel = field, Detail = "I know a fair bit about " + field + ".", Sentiment = Rand(rng, -0.1f, 0.5f), Impact = 0.35f, Decay = 0.01f };
+            }
         }
-        if (key == "workplace")
-        {
-            string place = Pick(Places, rng);
-            return new ThoughtEntry { Subject = place, RawLabel = place, Detail = "I spend my days at " + place + ".", Sentiment = Rand(rng, -0.2f, 0.4f), Impact = 0.4f, Decay = 0.01f };
-        }
-        if (key == "colleagues")
-        {
-            string name = Name("", rng);
-            return new ThoughtEntry { Subject = name, RawLabel = name + " colleague", Detail = name + " works with me.", Sentiment = Rand(rng, -0.3f, 0.6f), Impact = 0.4f, Decay = 0.02f };
-        }
-        string general = Pick(Quirks, rng);
-        return new ThoughtEntry { Subject = Pick(Jobs, rng), RawLabel = general, Detail = "I know my way around " + general + " work.", Sentiment = Rand(rng, 0f, 0.5f), Impact = 0.35f, Decay = 0.01f };
     }
 
     private static ThoughtEntry History(string nodeId, System.Random rng)
@@ -133,8 +158,16 @@ public static class SettingGenerator
 
     private static ThoughtEntry Generic(string nodeId, System.Random rng)
     {
-        string quirk = Pick(Quirks, rng);
-        return new ThoughtEntry { Subject = LastSegment(nodeId), RawLabel = quirk, Detail = "It is " + quirk + ", I suppose.", Sentiment = Rand(rng, -0.3f, 0.4f), Impact = 0.3f, Decay = 0.05f };
+        float sentiment = Rand(rng, -0.3f, 0.4f);
+        string topic = Humanize(LastSegment(nodeId));
+        return new ThoughtEntry { Subject = topic, RawLabel = topic + " " + RawRenderer.SentimentWord(sentiment), Detail = "I have feelings about " + topic + ".", Sentiment = sentiment, Impact = 0.3f, Decay = 0.05f };
+    }
+
+    private static string Humanize(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+            return "";
+        return char.ToUpperInvariant(id[0]) + id.Substring(1);
     }
 
     private static string Name(string key, System.Random rng)

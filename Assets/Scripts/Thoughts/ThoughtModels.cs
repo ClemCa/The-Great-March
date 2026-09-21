@@ -49,6 +49,8 @@ public class ThoughtEntry
     public string Detail = "";     // longer note used to seed the LLM
     public bool Authored = false;  // written by hand
     public bool Procedural = false; // invented at runtime
+    public int TimesSurfaced = 0;   // how often the player has already drawn this out
+    public long LastSurfacedTick = 0L;
 
     public float Strength(long now)
     {
@@ -81,7 +83,9 @@ public class ThoughtEntry
             RawLabel = RawLabel,
             Detail = Detail,
             Authored = Authored,
-            Procedural = Procedural
+            Procedural = Procedural,
+            TimesSurfaced = TimesSurfaced,
+            LastSurfacedTick = LastSurfacedTick
         };
     }
 }
@@ -100,6 +104,7 @@ public class TraitInfo
     public float ImpactMultiplier = 1f;
     public float DecayMultiplier = 1f;
     public float SentimentMultiplier = 1f;
+    public float ValenceBias = 0f;                     // -1 drawn to bad memories .. +1 drawn to good
     public List<string> EagerNodes = new List<string>();   // talkative about these paths
     public List<string> AvoidNodes = new List<string>();   // reluctant or secretive about these paths
 }

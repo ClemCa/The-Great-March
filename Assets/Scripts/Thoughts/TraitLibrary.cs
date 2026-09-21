@@ -10,6 +10,7 @@ public class TraitProfile
     public float ImpactMultiplier = 1f;
     public float DecayMultiplier = 1f;
     public float SentimentMultiplier = 1f;
+    public float ValenceBias = 0f;
     public HashSet<string> Tags = new HashSet<string>();
     public List<string> EagerNodes = new List<string>();
     public List<string> AvoidNodes = new List<string>();
@@ -58,6 +59,7 @@ public class TraitLibrary
             profile.ImpactMultiplier *= t.ImpactMultiplier;
             profile.DecayMultiplier *= t.DecayMultiplier;
             profile.SentimentMultiplier *= t.SentimentMultiplier;
+            profile.ValenceBias += t.ValenceBias;
             for (int i = 0; i < t.Tags.Count; i++)
                 profile.Tags.Add(t.Tags[i]);
             profile.EagerNodes.AddRange(t.EagerNodes);
@@ -81,14 +83,16 @@ public class TraitLibrary
         {
             Id = "optimist",
             Display = "Optimist",
-            SentimentMultiplier = 1.25f
+            SentimentMultiplier = 1.25f,
+            ValenceBias = 0.5f
         });
         lib.Add(new TraitInfo
         {
             Id = "pessimist",
             Display = "Pessimist",
             SentimentMultiplier = 1.25f,
-            ImpactMultiplier = 1.1f
+            ImpactMultiplier = 1.1f,
+            ValenceBias = -0.5f
         });
         lib.Add(new TraitInfo
         {
