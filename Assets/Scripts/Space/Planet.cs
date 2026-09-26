@@ -722,6 +722,8 @@ public class Planet : MonoBehaviour
 
     private void RunFacilities()
     {
+        if (Registry.Instance == null)
+            return;
         for (int i = 0; i < _facilities.Count; i++)
             RunFacility(_facilities[i], _facilitiesProgression, i);
         for (int i = 0; i < _transformationFacilities.Count; i++)

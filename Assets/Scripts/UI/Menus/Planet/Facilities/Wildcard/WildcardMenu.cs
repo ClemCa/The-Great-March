@@ -77,7 +77,8 @@ public class WildcardMenu : MonoBehaviour, IPointerClickHandler
         transform.Find("Source0").GetComponent<Image>().enabled = false;
         transform.Find("Source1").GetComponent<Image>().enabled = false;
         transform.Find("Output").GetComponent<Image>().enabled = false;
-        transform.GetChild(0).GetComponent<Image>().sprite = Registry.Instance.GetWildcardSprite();
+        if (Registry.Instance != null && transform.childCount > 0)
+            transform.GetChild(0).GetComponent<Image>().sprite = Registry.Instance.GetWildcardSprite();
         transform.Find("Progression").GetComponent<RectTransform>().sizeDelta =
                     new Vector2(transform.Find("Progression").GetComponent<RectTransform>().sizeDelta.x,
                     GetComponent<RectTransform>().rect.height * 0);

@@ -25,6 +25,8 @@ public class TutorialQuests : MonoBehaviour
     {
         if (_lock || (_ignoreDialoguesEditor && Application.isEditor))
             return;
+        if (DialogDisplayer.Instance == null || DialogDisplayer.Instance.Runner == null || Questing.Instance == null)
+            return;
         switch (_steps)
         {
             case Steps.ProcedureExplanation:
