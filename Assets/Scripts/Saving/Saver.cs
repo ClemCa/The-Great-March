@@ -28,6 +28,7 @@ public class Saver : MonoBehaviour
         public string CargoSave;
         public bool LeaderInTransit;
         public int StoryStage;
+        public string StoryState;
         public Registry.Priorities GlobalPriorities;
         public string ThoughtState;
     }
@@ -124,8 +125,11 @@ public class Saver : MonoBehaviour
         CloudMoveScript.Instance.transform.position = JsonUtility.FromJson<SerializableVector3>(save.CloudPosition).Value;
         CloudMoveScript.Instance.enabled = true;
         StoryScript.StoryStage = save.StoryStage;
-        StoryScript.CheckStage();
         ThoughtPersistence.Restore(save.ThoughtState);
+        if (!string.IsNullOrEmpty(save.StoryState))
+            StoryPersistence.Restore(save.StoryState);
+        else
+            StoryScript.CheckStage();
         Planet.SetGlobalPriorities(0, save.GlobalPriorities.Food);
         Planet.SetGlobalPriorities(1, save.GlobalPriorities.Fuel);
         return true;
@@ -211,9 +215,9 @@ public class Saver : MonoBehaviour
         save = SetScoring(save);
         save = SetSystems(save);
         save.SelectedPlanet = Planet.Selected == null ? "" : Planet.Selected.Name;
-        save.StoryStage = StoryScript.StoryStage;
         save.GlobalPriorities = new Registry.Priorities(Planet.GetGlobalPriorities(0), Planet.GetGlobalPriorities(1));
         save.ThoughtState = ThoughtPersistence.Capture();
+        save.StoryState = StoryPersistence.Capture();
 
         SaveSave(save, slot);
     }

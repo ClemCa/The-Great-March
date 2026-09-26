@@ -1,0 +1,117 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 495531fa200bad84194a52591365ed2e, type: 3}
+  m_Name: MainStory
+  m_EditorClassIdentifier: Assembly-CSharp::StoryGraph
+  Title: Main Story
+  Description: Example evolutive story graph.
+  RootId: 88e1cc36add54d4d853a46ddcaf32e00
+  Nodes:
+  - Id: 88e1cc36add54d4d853a46ddcaf32e00
+    Name: Prologue
+    Type: 0
+    EditorPosition: {x: 127.779686, y: -56.95803}
+    Conditions: []
+    Weight: 1
+    HasDate: 0
+    Day: 1
+    MinuteOfDay: 0
+    YarnNodes: []
+    Appearances: []
+    Triggers: []
+  - Id: ce1be02c58c14ba0a41f6670bae91969
+    Name: Well Fed
+    Type: 0
+    EditorPosition: {x: 856.99927, y: -61.27651}
+    Conditions:
+    - Source: 0
+      Comparison: 4
+      Advanced: 0
+      ResourceIndex: 2
+      Amount: 50
+      Scope: 0
+      PlanetName: 
+      Variable: 
+      ValueKind: 0
+      NumberValue: 0
+      BoolValue: 0
+      StringValue: 
+      TimeUseDay: 1
+      TimeValue: 0
+    Weight: 1
+    HasDate: 0
+    Day: 1
+    MinuteOfDay: 0
+    YarnNodes: []
+    Appearances: []
+    Triggers: []
+  - Id: ea0ad3b1a1844fc2b7461bcb50cd2a3b
+    Name: Dirt Poor
+    Type: 0
+    EditorPosition: {x: -601.48254, y: -52.36694}
+    Conditions:
+    - Source: 0
+      Comparison: 0
+      Advanced: 0
+      ResourceIndex: 2
+      Amount: 50
+      Scope: 0
+      PlanetName: 
+      Variable: 
+      ValueKind: 0
+      NumberValue: 0
+      BoolValue: 0
+      StringValue: 
+      TimeUseDay: 1
+      TimeValue: 0
+    Weight: 1
+    HasDate: 0
+    Day: 1
+    MinuteOfDay: 0
+    YarnNodes: []
+    Appearances: []
+    Triggers: []
+  - Id: e733d1263b3549f4b84d73da1c7a92db
+    Name: Feast
+    Type: 1
+    EditorPosition: {x: 1495.5546, y: -64.64374}
+    Conditions: []
+    Weight: 1
+    HasDate: 0
+    Day: 1
+    MinuteOfDay: 0
+    YarnNodes:
+    - Intro_Start
+    Appearances: []
+    Triggers: []
+  - Id: c8a3c91783fe4ff89e87469327c00e86
+    Name: Scrounge
+    Type: 1
+    EditorPosition: {x: -1240.2863, y: -48.012234}
+    Conditions: []
+    Weight: 1
+    HasDate: 0
+    Day: 1
+    MinuteOfDay: 0
+    YarnNodes:
+    - Tutorial_Start
+    Appearances: []
+    Triggers: []
+  Edges:
+  - ParentId: 88e1cc36add54d4d853a46ddcaf32e00
+    ChildId: ce1be02c58c14ba0a41f6670bae91969
+  - ParentId: 88e1cc36add54d4d853a46ddcaf32e00
+    ChildId: ea0ad3b1a1844fc2b7461bcb50cd2a3b
+  - ParentId: ce1be02c58c14ba0a41f6670bae91969
+    ChildId: e733d1263b3549f4b84d73da1c7a92db
+  - ParentId: ea0ad3b1a1844fc2b7461bcb50cd2a3b
+    ChildId: c8a3c91783fe4ff89e87469327c00e86
