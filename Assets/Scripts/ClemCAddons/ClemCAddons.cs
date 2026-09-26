@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ClemCAddons.Utilities;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using System.Diagnostics;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
@@ -4232,23 +4233,23 @@ namespace ClemCAddons
             #endregion Casts
             #region Async
             public delegate void Call();
-            public static async Task DelayedCall(int delayms, Call call)
+            public static async UniTask DelayedCall(int delayms, Call call)
             {
-                await Task.Delay(delayms);
+                await UniTask.Delay(delayms);
                 call.Invoke();
             }
-            public static async Task MoveTo(Transform transform, Vector3 destination, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3 destination, float speed = 1f)
             {
                 Vector3 basePosition = transform.position;
                 float max = speed * 200; // 1000 (1s) / 5
                 for (int i = 0; i <= max; i++)
                 {
                     transform.position = Vector3.Lerp(basePosition, destination, i / max);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 return;
             }
-            public static async Task MoveTo(Transform transform, Vector3 destination, Quaternion destinationRotation, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3 destination, Quaternion destinationRotation, float speed = 1f)
             {
                 Quaternion baseRotation = transform.rotation;
                 Vector3 basePosition = transform.position;
@@ -4257,11 +4258,11 @@ namespace ClemCAddons
                 {
                     transform.position = Vector3.Lerp(basePosition, destination, i / max);
                     transform.rotation = Quaternion.Lerp(baseRotation, destinationRotation, i / max);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 return;
             }
-            public static async Task MoveTo(Transform transform, Vector3[] points, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3[] points, float speed = 1f)
             {
                 for (int i = 0; i < points.Length; i++)
                 {
@@ -4269,7 +4270,7 @@ namespace ClemCAddons
                 }
                 return;
             }
-            public static async Task MoveTo(Transform transform, Vector3[] points, Quaternion[] rotations, float speed = 1f)
+            public static async UniTask MoveTo(Transform transform, Vector3[] points, Quaternion[] rotations, float speed = 1f)
             {
                 for (int i = 0; i < points.Length; i++)
                 {
@@ -4351,9 +4352,9 @@ namespace ClemCAddons
         }
         public class Lerper
         {
-            private async static void InvokeNow<T>(Action<T> action, T value, bool standardInvoke)
+            private async static UniTaskVoid InvokeNow<T>(Action<T> action, T value, bool standardInvoke)
             {
-                await Task.Delay(1);
+                await UniTask.Delay(1);
                 if (!standardInvoke)
                 {
                     _ = action.BeginInvoke(value, action.EndInvoke, null);
@@ -4490,23 +4491,23 @@ namespace ClemCAddons
                 HandleLerp(*origin, destination, tolerance, speed, (float param) => { SetUnsafe(origin, param); }, ender);
             }
 
-            private async static void HandleLerp(float origin, float destination, float tolerance, float speed, Action<float> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(float origin, float destination, float tolerance, float speed, Action<float> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while ((origin - destination).Abs() > tolerance)
                 {
                     origin = Mathf.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleConstantLerp(float duration, float origin, float destination, Action<float> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, float origin, float destination, Action<float> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -4514,29 +4515,29 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Mathf.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleLerp(float origin, float destination, float tolerance, float speed, Action<float> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(float origin, float destination, float tolerance, float speed, Action<float> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while ((origin - destination).Abs() > tolerance)
                 {
                     origin = Mathf.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
             }
 
-            private async static void HandleConstantLerp(float duration, float origin, float destination, Action<float> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, float origin, float destination, Action<float> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -4544,7 +4545,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Mathf.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
@@ -4660,23 +4661,23 @@ namespace ClemCAddons
                 HandleLerp(*origin, destination, tolerance, speed, (Vector3 param) => { SetUnsafe(origin, param); }, ender);
             }
 
-            private async static void HandleLerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector3.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleConstantLerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -4684,29 +4685,29 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector3.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleLerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector3.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
             }
 
-            private async static void HandleConstantLerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -4714,7 +4715,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector3.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
@@ -4829,23 +4830,23 @@ namespace ClemCAddons
                 HandleLerp(*origin, destination, tolerance, speed, (Vector2 param) => { SetUnsafe(origin, param); }, ender);
             }
 
-            private async static void HandleLerp(Vector2 origin, Vector2 destination, float tolerance, float speed, Action<Vector2> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(Vector2 origin, Vector2 destination, float tolerance, float speed, Action<Vector2> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector2.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleConstantLerp(float duration, Vector2 origin, Vector2 destination, Action<Vector2> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, Vector2 origin, Vector2 destination, Action<Vector2> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -4853,29 +4854,29 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector2.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleLerp(Vector2 origin, Vector2 destination, float tolerance, float speed, Action<Vector2> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(Vector2 origin, Vector2 destination, float tolerance, float speed, Action<Vector2> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector2.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
             }
 
-            private async static void HandleConstantLerp(float duration, Vector2 origin, Vector2 destination, Action<Vector2> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, Vector2 origin, Vector2 destination, Action<Vector2> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -4883,7 +4884,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector2.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
@@ -4998,23 +4999,23 @@ namespace ClemCAddons
                 HandleLerp(*origin, destination, tolerance, speed, (Quaternion param) => { SetUnsafe(origin, param); }, ender);
             }
 
-            private async static void HandleLerp(Quaternion origin, Quaternion destination, float tolerance, float speed, Action<Quaternion> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(Quaternion origin, Quaternion destination, float tolerance, float speed, Action<Quaternion> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (Quaternion.Dot(origin, destination) > tolerance)
                 {
                     origin = Quaternion.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleConstantLerp(float duration, Quaternion origin, Quaternion destination, Action<Quaternion> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, Quaternion origin, Quaternion destination, Action<Quaternion> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -5022,29 +5023,29 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Quaternion.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleLerp(Quaternion origin, Quaternion destination, float tolerance, float speed, Action<Quaternion> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleLerp(Quaternion origin, Quaternion destination, float tolerance, float speed, Action<Quaternion> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (Quaternion.Dot(origin, destination) > tolerance)
                 {
                     origin = Quaternion.Lerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
             }
 
-            private async static void HandleConstantLerp(float duration, Quaternion origin, Quaternion destination, Action<Quaternion> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantLerp(float duration, Quaternion origin, Quaternion destination, Action<Quaternion> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -5052,7 +5053,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Quaternion.Lerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
@@ -5162,23 +5163,23 @@ namespace ClemCAddons
                 HandleSlerp(*origin, destination, tolerance, speed, (Vector3 param) => { SetUnsafe(origin, param); }, ender);
             }
 
-            private async static void HandleSlerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleSlerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector3.Slerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleConstantSlerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantSlerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -5186,29 +5187,29 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector3.Slerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
             }
 
-            private async static void HandleSlerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleSlerp(Vector3 origin, Vector3 destination, float tolerance, float speed, Action<Vector3> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
                 long prev = 0;
-                await Task.Delay(5);
+                await UniTask.Delay(5);
                 while (origin.Distance(destination) > tolerance)
                 {
                     origin = Vector3.Slerp(origin, destination, (r.ElapsedMilliseconds - prev) / 1000f * speed);
                     prev = r.ElapsedMilliseconds;
                     InvokeNow(setter, origin, standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
             }
 
-            private async static void HandleConstantSlerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender, bool standardInvoke = false)
+            private async static UniTaskVoid HandleConstantSlerp(float duration, Vector3 origin, Vector3 destination, Action<Vector3> setter, Action ender, bool standardInvoke = false)
             {
                 var r = new Stopwatch();
                 r.Start();
@@ -5216,7 +5217,7 @@ namespace ClemCAddons
                 while (r.ElapsedMilliseconds <= max)
                 {
                     InvokeNow(setter, Vector3.Slerp(origin, destination, r.ElapsedMilliseconds / max), standardInvoke);
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                 }
                 setter.Invoke(destination);
                 ender.Invoke();
@@ -5304,11 +5305,11 @@ namespace ClemCAddons
                 Action<GameObject> destroy = (g) => { UnityEngine.Object.Destroy(g); };
                 StartTimer(gameObject.GetEntityId().GetHashCode(), delay, destroy, gameObject, false);
             }
-            private async static void HandleClear(Stopwatch stopwatch, int delay)
+            private async static UniTaskVoid HandleClear(Stopwatch stopwatch, int delay)
             {
                 while (stopwatch.IsRunning)
                 {
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                     if (stopwatch.ElapsedMilliseconds > delay && stopwatch.IsRunning)
                     {
                         stopwatch.Stop();
@@ -5317,12 +5318,12 @@ namespace ClemCAddons
                     }
                 }
             }
-            private async static void HandleCallback(Stopwatch stopwatch, int delay, TimerCallback callback, bool loop)
+            private async static UniTaskVoid HandleCallback(Stopwatch stopwatch, int delay, TimerCallback callback, bool loop)
             {
                 int objectiveDelay = delay;
                 while (stopwatch.IsRunning)
                 {
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                     if (stopwatch.ElapsedMilliseconds < objectiveDelay)
                         continue;
                     if (stopwatch.IsRunning)
@@ -5338,12 +5339,12 @@ namespace ClemCAddons
                     }
                 }
             }
-            private async static void HandleCallback<T>(Stopwatch stopwatch, int delay, Action<T> callback, T value, bool loop)
+            private async static UniTaskVoid HandleCallback<T>(Stopwatch stopwatch, int delay, Action<T> callback, T value, bool loop)
             {
                 int objectiveDelay = delay;
                 while (stopwatch.IsRunning)
                 {
-                    await Task.Delay(5);
+                    await UniTask.Delay(5);
                     if (stopwatch.ElapsedMilliseconds < objectiveDelay)
                         continue;
                     if (stopwatch.IsRunning)

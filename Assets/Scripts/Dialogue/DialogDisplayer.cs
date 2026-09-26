@@ -7,6 +7,7 @@ using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Yarn.Unity;
+using Cysharp.Threading.Tasks;
 
 public class DialogDisplayer : MonoBehaviour
 {
@@ -292,7 +293,7 @@ public class DialogDisplayer : MonoBehaviour
             _choiceButtons.Add(_buttons.GetChild(i).gameObject);
     }
 
-    private async void WriteOverTime(string text, TMPro.TMP_Text target)
+    private async UniTaskVoid WriteOverTime(string text, TMPro.TMP_Text target)
     {
         string current = "";
         int _speedID = 0;
@@ -300,11 +301,11 @@ public class DialogDisplayer : MonoBehaviour
         target.text = current;
         if(_delays.Length > 0)
         {
-            await System.Threading.Tasks.Task.Delay(_delays[0]);
+            await UniTask.Delay(_delays[0]);
         }
         for (int i = 0; i < text.Length; i++)
         {
-            await System.Threading.Tasks.Task.Delay((_writingDelay / _speed).Round());
+            await UniTask.Delay((_writingDelay / _speed).Round());
             if(text.Length > i + 5) // 4+1
             {
                 var t = "";
@@ -319,7 +320,7 @@ public class DialogDisplayer : MonoBehaviour
                     target.text = current;
                     delayID++;
                     if (delayID < _delays.Length)
-                        await System.Threading.Tasks.Task.Delay(_delays[_speedID]);
+                        await UniTask.Delay(_delays[_speedID]);
                     continue;
                 }
                 if (t == "<sd>")
@@ -341,7 +342,7 @@ public class DialogDisplayer : MonoBehaviour
                     if (_speedID < _speeds.Length)
                         _speed = _speeds[_speedID];
                     if (delayID < _delays.Length)
-                        await System.Threading.Tasks.Task.Delay(_delays[_speedID]);
+                        await UniTask.Delay(_delays[_speedID]);
                     continue;
                 }
             }
@@ -349,7 +350,7 @@ public class DialogDisplayer : MonoBehaviour
             target.text = current;
         }
         _delays = new int[0]; // reset delays
-        await System.Threading.Tasks.Task.Delay(_choiceDelay);
+        await UniTask.Delay(_choiceDelay);
         PresentChoices();
     }
 }

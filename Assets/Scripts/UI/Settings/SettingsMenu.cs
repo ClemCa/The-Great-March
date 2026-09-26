@@ -36,6 +36,12 @@ public class SettingsMenu : MonoBehaviour
     private Slider _temperature, _verbatim, _summarized;
     private TextMeshProUGUI _temperatureV, _verbatimV, _summarizedV;
     private Toggle _thoughts;
+    private TextMeshProUGUI _webglNote;
+
+    public const string WebGlOllamaNote =
+        "WebGL limitation: browsers block direct requests to a local Ollama server. LLM mode with " +
+        "Ollama only works if it is started with CORS enabled (set OLLAMA_ORIGINS to this page's " +
+        "origin); otherwise use an OpenAI-compatible endpoint.";
 
     private Button _close;
 
@@ -92,6 +98,9 @@ public class SettingsMenu : MonoBehaviour
         _verbatim = Find<Slider>("Verbatim_Control"); _verbatimV = Find<TextMeshProUGUI>("Verbatim_Value");
         _summarized = Find<Slider>("Summarized_Control"); _summarizedV = Find<TextMeshProUGUI>("Summarized_Value");
         _thoughts = Find<Toggle>("Thoughts_Control");
+        _webglNote = Find<TextMeshProUGUI>("WebGL_Note");
+        if (_webglNote != null)
+            _webglNote.text = WebGlOllamaNote;
 
         _close = Find<Button>("Close");
         if (_close != null)
@@ -222,6 +231,7 @@ public class SettingsMenu : MonoBehaviour
 
         _updating = false;
         SelectSection(_section);
+        RefreshDialogueInteractable();
     }
 
     private void CycleResolution()
@@ -274,6 +284,7 @@ public class SettingsMenu : MonoBehaviour
     {
         LLMSettings.Provider = LLMSettings.Provider == LLMProviderKind.Ollama ? LLMProviderKind.OpenAICompatible : LLMProviderKind.Ollama;
         SetCycle(Find<TextMeshProUGUI>("Provider_Value"), LLMSettings.Provider.ToString());
+        RefreshDialogueInteractable();
     }
 
     private void RefreshDialogueInteractable()
@@ -284,6 +295,17 @@ public class SettingsMenu : MonoBehaviour
         if (_model != null) _model.interactable = online;
         if (_apiKey != null) _apiKey.interactable = online;
         if (_temperature != null) _temperature.interactable = online;
+        RefreshWebGlNote();
+    }
+
+    private void RefreshWebGlNote()
+    {
+        if (_webglNote == null)
+            return;
+
+        bool ollamaLimited = Application.platform == RuntimePlatform.WebGLPlayer
+            && LLMSettings.Provider == LLMProviderKind.Ollama;
+        _webglNote.gameObject.SetActive(ollamaLimited);
     }
 
     private string ResolutionLabel()

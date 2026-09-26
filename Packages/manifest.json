@@ -12,6 +12,7 @@
     "com.unity.test-framework": "1.9.0",
     "com.unity.timeline": "6.7.0",
     "com.unity.ugui": "2.7.0",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "dev.yarnspinner.unity": "https://github.com/YarnSpinnerTool/YarnSpinner-Unity.git#current",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",

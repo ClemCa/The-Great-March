@@ -5624,6 +5624,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldEventSystem
   _authored: []
+  _authoredCanonical: []
 --- !u!114 &1768245841
 MonoBehaviour:
   m_ObjectHideFlags: 0

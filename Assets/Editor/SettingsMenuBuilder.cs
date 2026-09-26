@@ -93,6 +93,7 @@ public static class SettingsMenuBuilder
         var dialogue = MakePanel(content.transform, "Panel_Dialogue");
         MakeCycleRow(dialogue.transform, "Mode", sprites, font);
         MakeCycleRow(dialogue.transform, "Provider", sprites, font);
+        MakeNote(dialogue.transform, "WebGL_Note", SettingsMenu.WebGlOllamaNote, font);
         MakeInputRow(dialogue.transform, "BaseUrl", sprites, font, false);
         MakeInputRow(dialogue.transform, "Model", sprites, font, false);
         MakeInputRow(dialogue.transform, "ApiKey", sprites, font, true);
@@ -184,6 +185,26 @@ public static class SettingsMenuBuilder
         var valueLe = value.gameObject.AddComponent<LayoutElement>();
         valueLe.preferredWidth = 260f;
         valueLe.minWidth = 260f;
+    }
+
+    private static void MakeNote(Transform parent, string name, string text, TMP_FontAsset font)
+    {
+        var go = NewUI(name, parent);
+        var tmp = go.AddComponent<TextMeshProUGUI>();
+        tmp.text = text;
+        tmp.fontSize = 20;
+        tmp.alignment = TextAlignmentOptions.TopLeft;
+        tmp.color = new Color(1f, 0.76f, 0.4f, 1f);
+        tmp.textWrappingMode = TextWrappingModes.Normal;
+        tmp.raycastTarget = false;
+        if (font != null)
+            tmp.font = font;
+
+        var le = go.AddComponent<LayoutElement>();
+        le.preferredHeight = 84f;
+        le.minHeight = 40f;
+
+        go.SetActive(false);
     }
 
     private static void MakeInputRow(Transform parent, string label, Sprites sprites, TMP_FontAsset font, bool password)
