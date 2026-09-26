@@ -1,8 +1,8 @@
 ﻿<Solution>
   <Project Path="Unity.AI.Sound.csproj" />
   <Project Path="Unity.AI.Toolkit.Asset.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.AI.Assistant.Runtime.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.AI.Assistant.UI.Editor.csproj" />
   <Project Path="Unity.AI.Toolkit.Utility.csproj" />
   <Project Path="Unity.AI.Generators.Redux.csproj" />
