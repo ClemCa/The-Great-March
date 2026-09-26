@@ -38,6 +38,20 @@ public class DialogDisplayer : MonoBehaviour
     public static DialogDisplayer Instance { get => _instance; }
     public DialogueRunner Runner { get => _runner; }
 
+    // Read-only surface used by the React HUD bridge to mirror the box in the new UI.
+    public bool IsVisible { get { return _visible; } }
+    public string DisplayName { get { return _nameText != null ? _nameText.text : string.Empty; } }
+    public string DisplayText { get { return _contentText != null ? _contentText.text : string.Empty; } }
+    public string[] ChoiceLabels
+    {
+        get
+        {
+            if (_choices != null && _choicesText != null && _choicesText.Length > 0)
+                return _choicesText;
+            return new[] { "Continue" };
+        }
+    }
+
 
     [YarnCommand("SetSpeed")]
     public void SetSpeed(float speed, float speed2 = -1, float speed3 = -1, float speed4 = -1)
@@ -301,11 +315,11 @@ public class DialogDisplayer : MonoBehaviour
         target.text = current;
         if(_delays.Length > 0)
         {
-            await UniTask.Delay(_delays[0]);
+            await UniTask.Delay(_delays[0], ignoreTimeScale: true);
         }
         for (int i = 0; i < text.Length; i++)
         {
-            await UniTask.Delay((_writingDelay / _speed).Round());
+            await UniTask.Delay((_writingDelay / _speed).Round(), ignoreTimeScale: true);
             if(text.Length > i + 5) // 4+1
             {
                 var t = "";
@@ -320,7 +334,7 @@ public class DialogDisplayer : MonoBehaviour
                     target.text = current;
                     delayID++;
                     if (delayID < _delays.Length)
-                        await UniTask.Delay(_delays[_speedID]);
+                        await UniTask.Delay(_delays[_speedID], ignoreTimeScale: true);
                     continue;
                 }
                 if (t == "<sd>")
@@ -342,7 +356,7 @@ public class DialogDisplayer : MonoBehaviour
                     if (_speedID < _speeds.Length)
                         _speed = _speeds[_speedID];
                     if (delayID < _delays.Length)
-                        await UniTask.Delay(_delays[_speedID]);
+                        await UniTask.Delay(_delays[_speedID], ignoreTimeScale: true);
                     continue;
                 }
             }
@@ -350,7 +364,7 @@ public class DialogDisplayer : MonoBehaviour
             target.text = current;
         }
         _delays = new int[0]; // reset delays
-        await UniTask.Delay(_choiceDelay);
+        await UniTask.Delay(_choiceDelay, ignoreTimeScale: true);
         PresentChoices();
     }
 }

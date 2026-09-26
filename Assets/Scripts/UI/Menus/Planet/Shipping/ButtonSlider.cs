@@ -18,7 +18,7 @@ public class ButtonSlider : MonoBehaviour
 
     void Awake()
     {
-        transform.Find("Prompt").GetChild(0).GetComponent<TMPro.TMP_Text>().text = Settings.ShowPrompt ? "Hide Help" : "Show Help";
+        transform.Find("Prompt").GetChild(0).GetComponent<TMPro.TMP_Text>().text = (Settings.Loaded && Settings.ShowPrompt) ? "Hide Help" : "Show Help";
     }
 
     // Update is called once per frame

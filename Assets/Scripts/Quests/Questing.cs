@@ -12,6 +12,8 @@ public class Questing : MonoBehaviour
 
     public bool IsRunningQuestline { get => _currentQuestline != null && _currentQuestline.current != null; }
 
+    public string CurrentObjective { get => IsRunningQuestline ? _currentQuestline.current.Objective : string.Empty; }
+
     public static Questing Instance { get => _instance;}
 
     void Awake()

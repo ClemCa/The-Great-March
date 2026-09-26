@@ -31,6 +31,8 @@ public class Pausing : MonoBehaviour
         _paused = true;
         _timeTarget = 0.01f;
 
+        if (_instance == null) return;
+
         _instance.GetComponent<AudioSource>().Play();
         _instance.GetComponent<AudioSource>().time = 0.12f;
         _instance.GetComponent<AudioSource>().volume = 0.5f;
@@ -42,6 +44,9 @@ public class Pausing : MonoBehaviour
         _paused = true;
         Time.timeScale = 0;
         _timeTarget = 0;
+
+        if (_instance == null) return;
+
         _instance.GetComponent<AudioSource>().Play();
         _instance.GetComponent<AudioSource>().time = 0.12f;
         _instance.GetComponent<AudioSource>().volume = 0.5f;
@@ -53,6 +58,8 @@ public class Pausing : MonoBehaviour
         _paused = false;
 
         _timeTarget = 1f;
+
+        if (_instance == null) return;
 
         _instance.GetComponent<AudioSource>().Play();
         _instance.GetComponent<AudioSource>().volume = 0.5f * 0.25f;

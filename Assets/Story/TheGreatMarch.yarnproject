@@ -1,5 +1,12 @@
-﻿title: Project
-tags:
----
-
-===
+﻿{
+    "projectFileVersion": 3,
+    "sourceFiles": [
+        "Intro.yarn",
+        "Tutorial.yarn"
+    ],
+    "excludeFiles": [
+        "**/*~/*",
+        "./Samples/Yarn Spinner*/*"
+    ],
+    "baseLanguage": "en"
+}
