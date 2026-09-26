@@ -17,8 +17,7 @@ public class Registry : MonoBehaviour
     [SerializeField] private GameObject[] _tundraPlanets;
     [SerializeField] private ResourceSprite[] _resourceSprites;
     [SerializeField] private AdvancedResourceSprite[] _advancedResourceSprites;
-    [SerializeField] private FacilityInfos[] _facilitiesInfo;
-    [SerializeField] private TransformationFacilitiesInfos[] _transformationFacilitiesInfos;
+    [SerializeField] private FacilityData[] _facilities;
     [SerializeField] private ResourceInfo[] _resourcesNames;
     [SerializeField] private AdvancedResourceInfo[] _advancedResourcesNames;
     [SerializeField] private ShipInfos[] _shipInfos;
@@ -81,31 +80,62 @@ public class Registry : MonoBehaviour
         public Sprite Sprite;
     }
 
-    [Serializable]
-    public class FacilityInfos
+    public enum FacilityEffectType
     {
-        public string Name;
-        public string Description;
-        public Facilities Facility;
-        public Resources AssociatedResource;
-        public Sprite Sprite;
-        public float Cooldown;
+        Consume,
+        Produce
     }
 
     [Serializable]
-    public class TransformationFacilitiesInfos
+    public class FacilityEffect
     {
+        public FacilityEffectType Type;
+        public bool Advanced;
+        public Resources Resource;
+        public AdvancedResources AdvancedResource;
+        public int Amount = 1;
+
+        public FacilityEffect() { }
+
+        public FacilityEffect(FacilityEffectType type, Resources resource, int amount = 1)
+        {
+            Type = type;
+            Resource = resource;
+            Amount = amount;
+        }
+
+        public FacilityEffect(FacilityEffectType type, AdvancedResources resource, int amount = 1)
+        {
+            Type = type;
+            Advanced = true;
+            AdvancedResource = resource;
+            Amount = amount;
+        }
+    }
+
+    [Serializable]
+    public class FacilityData
+    {
+        public string Id;
         public string Name;
         public string Description;
-        public bool Advanced;
-        public TransformationFacilities Facility;
-        public Resources[] InputResources;
-        public Resources OutputResource;
-        public AdvancedResources OutputResourceTransformation;
         public Sprite Sprite;
-        public float Cooldown;
-        public int Cost;
-        public int Production;
+        public float Cooldown = 30;
+        public bool Wildcard;
+        public Resources SlotResource;
+        public bool ExtendedTooltip;
+        public FacilityEffect[] Effects;
+
+        public FacilityEffect[] GetEffects(FacilityEffectType type)
+        {
+            if (Effects == null)
+                return new FacilityEffect[0];
+            var list = new List<FacilityEffect>();
+            foreach (var effect in Effects)
+                if (effect.Type == type)
+                    list.Add(effect);
+            return list.ToArray();
+        }
     }
 
     [Serializable]
@@ -172,29 +202,6 @@ public class Registry : MonoBehaviour
         PreparedFood
     }
 
-    public enum Facilities
-    {
-        HydrogenExtractor,
-        Mine,
-        OilExtractor,
-        GasExtractor,
-        WaterPump,
-        AnimalKidnappingCenter,
-        SuperGrowthGreenhouse
-    }
-
-    public enum TransformationFacilities
-    {
-        Type1Farm,
-        Type2Farm,
-        Type1Kitchen,
-        Type2Kitchen,
-        HellsKitchen,
-        Type1Raffinery,
-        Type2Raffinery,
-        Factory
-    }
-
     void Awake()
     {
         _instance = this;
@@ -246,14 +253,21 @@ public class Registry : MonoBehaviour
         return _advancedResourcesNames.First(t => t.Resource == resource).Description;
     }
 
-    public TransformationFacilitiesInfos GetFacilityInfo(TransformationFacilities facility)
+    public FacilityData GetFacilityInfo(string id)
     {
-        return _transformationFacilitiesInfos.First(t => t.Facility == facility);
+        if (string.IsNullOrEmpty(id))
+            return null;
+        return _facilities.FirstOrDefault(t => t.Id == id);
     }
 
-    public FacilityInfos GetFacilityInfo(Facilities facility)
+    public FacilityData[] GetAllFacilities()
     {
-        return _facilitiesInfo.First(t => t.Facility == facility);
+        return _facilities;
+    }
+
+    public FacilityData[] GetWildcardFacilities()
+    {
+        return _facilities.Where(t => t.Wildcard).ToArray();
     }
 
     public Sprite GetResourceSprite(Resources resource)
@@ -266,14 +280,10 @@ public class Registry : MonoBehaviour
         return Array.Find(_advancedResourceSprites, t => t.Resource == resource).Sprite;
     }
 
-    public Sprite GetFacilitySprite(Facilities facility)
+    public Sprite GetFacilitySprite(string id)
     {
-        return Array.Find(_facilitiesInfo, t => t.Facility == facility).Sprite;
-    }
-
-    public Sprite GetTransformationFacilitySprite(TransformationFacilities facility)
-    {
-        return Array.Find(_transformationFacilitiesInfos, t => t.Facility == facility).Sprite;
+        var info = GetFacilityInfo(id);
+        return info == null ? null : info.Sprite;
     }
 
     public Sprite GetShipSprite(ShipType ship)
@@ -290,14 +300,15 @@ public class Registry : MonoBehaviour
     {
         return _wildcardSprite;
     }
-    public Resources GetAssociatedResource(Facilities facility)
+    public Resources GetAssociatedResource(string id)
     {
-        return Array.Find(_facilitiesInfo, t => t.Facility == facility).AssociatedResource;
+        var info = GetFacilityInfo(id);
+        return info == null ? default : info.SlotResource;
     }
 
-    public Facilities[] GetAssociatedFacilities(Resources resource)
+    public FacilityData[] GetAssociatedFacilities(Resources resource)
     {
-        return _facilitiesInfo.Where(t => t.AssociatedResource == resource).Select(t => t.Facility).ToArray();
+        return _facilities.Where(t => !t.Wildcard && t.SlotResource == resource).ToArray();
     }
 
     public GameObject GetPlanet(PlanetType planetType, int id)

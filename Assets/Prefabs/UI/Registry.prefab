@@ -116,141 +116,277 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 9b9a657bb72dca045b1aa34e498490ad, type: 3}
   - Resource: 2
     Sprite: {fileID: 21300000, guid: 286b18650725f7241b10333d7b531b02, type: 3}
-  _facilitiesInfo:
-  - Name: Hydrogen Extractor
+  _facilities:
+  - Id: hydrogen_extractor
+    Name: Hydrogen Extractor
     Description: Extracts Hydrogen from the atmosphere
-    Facility: 0
-    AssociatedResource: 3
     Sprite: {fileID: 21300000, guid: 81ed0f26477535b4686c59c35a706149, type: 3}
     Cooldown: 30
-  - Name: Mine
+    Wildcard: 0
+    SlotResource: 3
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 1
+      Advanced: 0
+      Resource: 3
+      AdvancedResource: 0
+      Amount: 1
+  - Id: mine
+    Name: Mine
     Description: Mines Metal from deposits
-    Facility: 1
-    AssociatedResource: 0
     Sprite: {fileID: 21300000, guid: 990cd71e07864514580560d70651c4f6, type: 3}
     Cooldown: 30
-  - Name: Oil Extractor
+    Wildcard: 0
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 1
+      Advanced: 0
+      Resource: 0
+      AdvancedResource: 0
+      Amount: 1
+  - Id: oil_extractor
+    Name: Oil Extractor
     Description: Pumps oil out of the ground
-    Facility: 2
-    AssociatedResource: 4
     Sprite: {fileID: 21300000, guid: 31d282b2f78efef408d10d50819d7c25, type: 3}
     Cooldown: 30
-  - Name: Gas Extractor
+    Wildcard: 0
+    SlotResource: 4
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 1
+      Advanced: 0
+      Resource: 4
+      AdvancedResource: 0
+      Amount: 1
+  - Id: gas_extractor
+    Name: Gas Extractor
     Description: Pumps natural gas out of the ground
-    Facility: 3
-    AssociatedResource: 5
     Sprite: {fileID: 21300000, guid: c219914d766a51e4e8cca0adb68595c6, type: 3}
     Cooldown: 30
-  - Name: Water Pump
+    Wildcard: 0
+    SlotResource: 5
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 1
+      Advanced: 0
+      Resource: 5
+      AdvancedResource: 0
+      Amount: 1
+  - Id: water_pump
+    Name: Water Pump
     Description: There is water on this planet?
-    Facility: 4
-    AssociatedResource: 1
     Sprite: {fileID: 21300000, guid: 3ee2169e0ee2c1346bc2ff4caef49de4, type: 3}
     Cooldown: 30
-  - Name: Animal Kidnapping Center
+    Wildcard: 0
+    SlotResource: 1
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 1
+      Advanced: 0
+      Resource: 1
+      AdvancedResource: 0
+      Amount: 1
+  - Id: animal_kidnapping_center
+    Name: Animal Kidnapping Center
     Description: It isn't kidnapping if they aren't human
-    Facility: 5
-    AssociatedResource: 6
     Sprite: {fileID: 21300000, guid: fcd073b6d58333d4f9fdf5905600a6e6, type: 3}
     Cooldown: 30
-  - Name: Super Growth Greenhosue
+    Wildcard: 0
+    SlotResource: 6
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 1
+      Advanced: 0
+      Resource: 6
+      AdvancedResource: 0
+      Amount: 1
+  - Id: super_growth_greenhouse
+    Name: Super Growth Greenhosue
     Description: Local plants grow faster here
-    Facility: 6
-    AssociatedResource: 7
     Sprite: {fileID: 21300000, guid: 7313d821a26e0c548a775cfd718a201a, type: 3}
     Cooldown: 30
-  _transformationFacilitiesInfos:
-  - Name: Type 1 Farm
+    Wildcard: 0
+    SlotResource: 7
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 1
+      Advanced: 0
+      Resource: 7
+      AdvancedResource: 0
+      Amount: 1
+  - Id: type_1_farm
+    Name: Type 1 Farm
     Description: Did you know that if you put water in plants, they grow?
-    Advanced: 0
-    Facility: 0
-    InputResources: 0700000001000000
-    OutputResource: 7
-    OutputResourceTransformation: 0
     Sprite: {fileID: 21300000, guid: 679eb488e4e24154da96504ecd1bb8c9, type: 3}
     Cooldown: 30
-    Cost: 1
-    Production: 2
-  - Name: Type 2 Farm
-    Description: Feeding animals might seem useless, but turns out it's a good way
-      to multiply them
-    Advanced: 0
-    Facility: 1
-    InputResources: 0600000002000000
-    OutputResource: 6
-    OutputResourceTransformation: 0
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 7
+      AdvancedResource: 0
+      Amount: 1
+    - Type: 0
+      Advanced: 0
+      Resource: 1
+      AdvancedResource: 0
+      Amount: 1
+    - Type: 1
+      Advanced: 0
+      Resource: 7
+      AdvancedResource: 0
+      Amount: 2
+  - Id: type_2_farm
+    Name: Type 2 Farm
+    Description: Feeding animals might seem useless, but turns out it's a good way to multiply them
     Sprite: {fileID: 21300000, guid: 679eb488e4e24154da96504ecd1bb8c9, type: 3}
     Cooldown: 30
-    Cost: 1
-    Production: 2
-  - Name: Type 1 Kitchen
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 6
+      AdvancedResource: 0
+      Amount: 1
+    - Type: 0
+      Advanced: 0
+      Resource: 2
+      AdvancedResource: 0
+      Amount: 1
+    - Type: 1
+      Advanced: 0
+      Resource: 6
+      AdvancedResource: 0
+      Amount: 2
+  - Id: type_1_kitchen
+    Name: Type 1 Kitchen
     Description: Cooking plants might make for tastier stuff
-    Advanced: 0
-    Facility: 2
-    InputResources: 07000000
-    OutputResource: 2
-    OutputResourceTransformation: 0
     Sprite: {fileID: 21300000, guid: d2df941868934bb4792df2bd80872440, type: 3}
     Cooldown: 30
-    Cost: 1
-    Production: 2
-  - Name: Type 2 Kitchen
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 7
+      AdvancedResource: 0
+      Amount: 1
+    - Type: 1
+      Advanced: 0
+      Resource: 2
+      AdvancedResource: 0
+      Amount: 2
+  - Id: type_2_kitchen
+    Name: Type 2 Kitchen
     Description: Turns out cooking is a good way to make animal corpses edible
-    Advanced: 0
-    Facility: 3
-    InputResources: 06000000
-    OutputResource: 2
-    OutputResourceTransformation: 0
     Sprite: {fileID: 21300000, guid: d2df941868934bb4792df2bd80872440, type: 3}
     Cooldown: 30
-    Cost: 1
-    Production: 2
-  - Name: Hell's Kitchen
-    Description: Idiot sandwhich have never been easier to make since we learned
-      Animals weren't smart
-    Advanced: 1
-    Facility: 4
-    InputResources: 0700000006000000
-    OutputResource: 2
-    OutputResourceTransformation: 2
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 6
+      AdvancedResource: 0
+      Amount: 1
+    - Type: 1
+      Advanced: 0
+      Resource: 2
+      AdvancedResource: 0
+      Amount: 2
+  - Id: hells_kitchen
+    Name: Hell's Kitchen
+    Description: Idiot sandwhich have never been easier to make since we learned Animals weren't smart
     Sprite: {fileID: 21300000, guid: d2df941868934bb4792df2bd80872440, type: 3}
     Cooldown: 30
-    Cost: 5
-    Production: 1
-  - Name: Type 1 Raffinery
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 7
+      AdvancedResource: 0
+      Amount: 5
+    - Type: 0
+      Advanced: 0
+      Resource: 6
+      AdvancedResource: 0
+      Amount: 5
+    - Type: 1
+      Advanced: 1
+      Resource: 0
+      AdvancedResource: 2
+      Amount: 1
+  - Id: type_1_raffinery
+    Name: Type 1 Raffinery
     Description: Raffined oil is up to 10 times as efficient as Oil
-    Advanced: 1
-    Facility: 5
-    InputResources: 04000000
-    OutputResource: 0
-    OutputResourceTransformation: 0
     Sprite: {fileID: 21300000, guid: 7ea4e6fab3522d84ba32d42455558fbb, type: 3}
     Cooldown: 30
-    Cost: 5
-    Production: 1
-  - Name: Type 2 Raffinery
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 4
+      AdvancedResource: 0
+      Amount: 5
+    - Type: 1
+      Advanced: 1
+      Resource: 0
+      AdvancedResource: 0
+      Amount: 1
+  - Id: type_2_raffinery
+    Name: Type 2 Raffinery
     Description: Raffined gas is up to 10 times as efficient as Gas
-    Advanced: 1
-    Facility: 6
-    InputResources: 05000000
-    OutputResource: 0
-    OutputResourceTransformation: 0
     Sprite: {fileID: 21300000, guid: 7ea4e6fab3522d84ba32d42455558fbb, type: 3}
     Cooldown: 30
-    Cost: 10
-    Production: 2
-  - Name: Battery Factory
-    Description: Turning hydrogen into battery form has never been easier. For some
-      reason, the quantity of Hydrogen just happens to be multiplied by 10
-    Advanced: 1
-    Facility: 7
-    InputResources: 0000000003000000
-    OutputResource: 0
-    OutputResourceTransformation: 1
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 0
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 5
+      AdvancedResource: 0
+      Amount: 10
+    - Type: 1
+      Advanced: 1
+      Resource: 0
+      AdvancedResource: 0
+      Amount: 2
+  - Id: battery_factory
+    Name: Battery Factory
+    Description: Turning hydrogen into battery form has never been easier. For some reason, the quantity of Hydrogen just happens to be multiplied by 10
     Sprite: {fileID: 21300000, guid: abb60d25ddba84048b1d618ec1c7b29c, type: 3}
     Cooldown: 30
-    Cost: 3
-    Production: 1
+    Wildcard: 1
+    SlotResource: 0
+    ExtendedTooltip: 1
+    Effects:
+    - Type: 0
+      Advanced: 0
+      Resource: 0
+      AdvancedResource: 0
+      Amount: 3
+    - Type: 0
+      Advanced: 0
+      Resource: 3
+      AdvancedResource: 0
+      Amount: 3
+    - Type: 1
+      Advanced: 1
+      Resource: 0
+      AdvancedResource: 1
+      Amount: 1
   _resourcesNames:
   - Resource: 0
     Name: Metal

@@ -16,9 +16,9 @@ public class Planet : MonoBehaviour
     private Dictionary<Registry.AdvancedResources, int> _advancedResources = new Dictionary<Registry.AdvancedResources, int>();
     private int _people = 0;
     private Registry.Resources[] _availableResources;
-    private List<Registry.Facilities> _facilities = new List<Registry.Facilities>();
+    private List<string> _facilities = new List<string>();
     private List<float> _facilitiesProgression = new List<float>();
-    private List<Registry.TransformationFacilities> _transformationFacilities = new List<Registry.TransformationFacilities>();
+    private List<string> _transformationFacilities = new List<string>();
     private List<float> _transformationFacilitiesProgression = new List<float>();
     private string _name;
     private int _availableWildcards;
@@ -49,8 +49,8 @@ public class Planet : MonoBehaviour
     public Dictionary<Registry.Resources, int> Resources { get => _resources; set => _resources = value; }
     public Dictionary<Registry.AdvancedResources, int> AdvancedResources { get => _advancedResources; set => _advancedResources = value; }
 
-    public List<Registry.Facilities> Facilities { get => _facilities; set => _facilities = value; }
-    public List<Registry.TransformationFacilities> TransformationFacilities { get => _transformationFacilities; set => _transformationFacilities = value; }
+    public List<string> Facilities { get => _facilities; set => _facilities = value; }
+    public List<string> TransformationFacilities { get => _transformationFacilities; set => _transformationFacilities = value; }
 
     public static Planet Selected { get => selected;}
 
@@ -435,105 +435,95 @@ public class Planet : MonoBehaviour
         _people -= count;
     }
 
-    public void RegisterBuiltFacility(Registry.Facilities facility)
+    public void RegisterBuiltFacility(string facility)
     {
-        Scoring.facilitiesCount++;
-        _facilities.Add(facility);
-        _facilitiesProgression.Add(0);
+        var info = Registry.Instance.GetFacilityInfo(facility);
+        if (info != null && info.Wildcard)
+        {
+            _availableWildcards--;
+            Scoring.transformativeFacilitiesCount++;
+            _transformationFacilities.Add(facility);
+            _transformationFacilitiesProgression.Add(0);
+        }
+        else
+        {
+            Scoring.facilitiesCount++;
+            _facilities.Add(facility);
+            _facilitiesProgression.Add(0);
+        }
     }
 
-
-    public void RegisterBuiltFacility(Registry.TransformationFacilities facility)
+    public bool IsFacilityBuilt(string facility)
     {
-        _availableWildcards--;
-        Scoring.transformativeFacilitiesCount++;
-        _transformationFacilities.Add(facility);
-        _transformationFacilitiesProgression.Add(0);
+        return _facilities.Contains(facility) || _transformationFacilities.Contains(facility);
     }
 
-    public bool IsFacilityBuilt(Registry.Facilities facility)
+    public bool CanBuildFacility(string facility)
     {
-        return _facilities.FindIndex(t => t == facility) != -1;
+        var info = Registry.Instance.GetFacilityInfo(facility);
+        if (info == null)
+            return false;
+        if (info.Wildcard)
+            return _availableWildcards > 0;
+        return _availableResources.FindIndex(info.SlotResource) != -1;
     }
-
-    public bool CanBuildFacility(Registry.Facilities facility)
-    {
-        return _availableResources.FindIndex(Registry.Instance.GetAssociatedResource(facility)) != -1;
-    }
-
-
-    public bool CanBuildFacility(Registry.TransformationFacilities facility)
-    {
-        return _availableWildcards > 0;
-    }
-
 
     public bool HasFacility(Registry.Resources resource)
     {
-        var r = _availableResources.FindIndex(resource);
-        var t = Registry.Instance.GetAssociatedFacilities(resource);
-        foreach (var facility in t)
+        foreach (var facility in Registry.Instance.GetAssociatedFacilities(resource))
         {
-            var i = _facilities.FindIndex(t => t == facility);
-            if (i != -1)
+            if (_facilities.Contains(facility.Id))
                 return true;
         }
         return false;
     }
-    public bool HasFacility(Registry.TransformationFacilities facility)
+
+    public bool HasFacility(string facility)
     {
-        return _transformationFacilities.FindIndex(t => t == facility) != -1;
+        return _facilities.Contains(facility) || _transformationFacilities.Contains(facility);
     }
 
-    public Registry.Facilities GetFacility(Registry.Resources resource)
+    public string GetFacility(Registry.Resources resource)
     {
-        var r = _availableResources.FindIndex(resource);
-        var t = Registry.Instance.GetAssociatedFacilities(resource);
-        foreach (var facility in t)
+        foreach (var facility in Registry.Instance.GetAssociatedFacilities(resource))
         {
-            var i = _facilities.FindIndex(t => t == facility);
-            if (i != -1)
-                return _facilities[i];
+            if (_facilities.Contains(facility.Id))
+                return facility.Id;
         }
-        return _facilities[0];
+        return _facilities.Count > 0 ? _facilities[0] : null;
     }
 
     public float GetFactoryProgression(Registry.Resources resource)
     {
-        var r = _availableResources.FindIndex(resource);
-        if (r == -1)
+        if (_availableResources.FindIndex(resource) == -1)
             return 0;
-        var t = Registry.Instance.GetAssociatedFacilities(resource);
-        int index = -1;
-        foreach(var facility in t)
+        foreach (var facility in Registry.Instance.GetAssociatedFacilities(resource))
         {
-            var i = _facilities.FindIndex(t => t == facility);
+            var i = _facilities.FindIndex(t => t == facility.Id);
             if (i != -1)
-                index = i;
+            {
+                var info = Registry.Instance.GetFacilityInfo(_facilities[i]);
+                return info == null ? 0 : _facilitiesProgression[i] / info.Cooldown;
+            }
         }
-        if (index == -1)
-            return 0;
-        var info = Registry.Instance.GetFacilityInfo(_facilities[index]);
-        return _facilitiesProgression[index] / info.Cooldown;
+        return 0;
     }
 
-    public float GetFactoryProgression(Registry.Facilities facility)
+    public float GetFactoryProgression(string facility)
     {
-        var index = _facilities.FindIndex(t => t == facility);
-        if (index == -1)
-            return 0;
-        var info = Registry.Instance.GetFacilityInfo(_facilities[index]);
-        return _facilitiesProgression[index] / info.Cooldown;
-    }
-
-
-    public float GetFactoryProgression(Registry.TransformationFacilities facility)
-    {
-        var index = _transformationFacilities.FindIndex(t => t == facility);
-        if (index == -1)
-            return 0;
-        var info = Registry.Instance.GetFacilityInfo(_facilities[index]);
-        return _transformationFacilitiesProgression[index] / info.Cooldown;
+        int index = _facilities.FindIndex(t => t == facility);
+        if (index != -1)
+        {
+            var info = Registry.Instance.GetFacilityInfo(_facilities[index]);
+            return info == null ? 0 : _facilitiesProgression[index] / info.Cooldown;
+        }
+        index = _transformationFacilities.FindIndex(t => t == facility);
+        if (index != -1)
+        {
+            var info = Registry.Instance.GetFacilityInfo(_transformationFacilities[index]);
+            return info == null ? 0 : _transformationFacilitiesProgression[index] / info.Cooldown;
+        }
+        return 0;
     }
 
     public void SetAvailableResources(Registry.Resources[] availableResources)
@@ -607,8 +597,7 @@ public class Planet : MonoBehaviour
         else
             MoveSelectionMode();
         UpdateGraph();
-        RunBasicFacilities();
-        RunTransformationFacilities();
+        RunFacilities();
         ConsumeFood();
     }
 
@@ -731,43 +720,72 @@ public class Planet : MonoBehaviour
         }
     }
 
-    private void RunTransformationFacilities()
+    private void RunFacilities()
     {
+        for (int i = 0; i < _facilities.Count; i++)
+            RunFacility(_facilities[i], _facilitiesProgression, i);
         for (int i = 0; i < _transformationFacilities.Count; i++)
+            RunFacility(_transformationFacilities[i], _transformationFacilitiesProgression, i);
+    }
+
+    private void RunFacility(string facility, List<float> progressions, int index)
+    {
+        var info = Registry.Instance.GetFacilityInfo(facility);
+        if (info == null || !CanRunEffects(info))
+            return;
+        progressions[index] += Time.deltaTime * (_people / 5f);
+        if (progressions[index] > info.Cooldown)
         {
-            var info = Registry.Instance.GetFacilityInfo(_transformationFacilities[i]);
-            bool confirm = true;
-            foreach (var resource in info.InputResources)
-                if (GetResource(resource) < info.Cost)
-                    confirm = false;
-            if (!confirm)
-                continue;
-            _transformationFacilitiesProgression[i] += Time.deltaTime * (_people / 5f);
-            if (_transformationFacilitiesProgression[i] > info.Cooldown)
-            {
-                _transformationFacilitiesProgression[i] = 0;
-                foreach(var resource in info.InputResources)
-                    TakeResource(resource, info.Cost);
-                if (info.Advanced)
-                    AddResource(info.OutputResourceTransformation, info.Production);
-                else
-                    AddResource(info.OutputResource, info.Production);
-            }
+            progressions[index] = 0;
+            ApplyEffects(info);
         }
     }
 
-    private void RunBasicFacilities()
+    private bool CanRunEffects(Registry.FacilityData info)
     {
-        for(int i = 0; i < _facilities.Count; i++)
+        if (info.Effects == null)
+            return true;
+        foreach (var effect in info.Effects)
         {
-            var info = Registry.Instance.GetFacilityInfo(_facilities[i]);
-            _facilitiesProgression[i] += Time.deltaTime * (_people / 5f);
-            if(_facilitiesProgression[i] > info.Cooldown)
-            {
-                _facilitiesProgression[i] = 0;
-                AddResource(info.AssociatedResource);
-            }
+            if (effect.Type != Registry.FacilityEffectType.Consume)
+                continue;
+            if (GetResource(effect) < effect.Amount)
+                return false;
         }
+        return true;
+    }
+
+    private void ApplyEffects(Registry.FacilityData info)
+    {
+        if (info.Effects == null)
+            return;
+        foreach (var effect in info.Effects)
+            if (effect.Type == Registry.FacilityEffectType.Consume)
+                TakeResource(effect);
+        foreach (var effect in info.Effects)
+            if (effect.Type == Registry.FacilityEffectType.Produce)
+                AddResource(effect);
+    }
+
+    private int GetResource(Registry.FacilityEffect effect)
+    {
+        return effect.Advanced ? GetResource(effect.AdvancedResource) : GetResource(effect.Resource);
+    }
+
+    private void AddResource(Registry.FacilityEffect effect)
+    {
+        if (effect.Advanced)
+            AddResource(effect.AdvancedResource, effect.Amount);
+        else
+            AddResource(effect.Resource, effect.Amount);
+    }
+
+    private void TakeResource(Registry.FacilityEffect effect)
+    {
+        if (effect.Advanced)
+            TakeResource(effect.AdvancedResource, effect.Amount);
+        else
+            TakeResource(effect.Resource, effect.Amount);
     }
     private void MoveSelectionMode()
     {

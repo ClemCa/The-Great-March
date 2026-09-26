@@ -7,15 +7,15 @@ using UnityEngine.UI;
 
 public class WildcardMenu : MonoBehaviour, IPointerClickHandler
 {
-    private Registry.TransformationFacilities? _facility;
+    private string _facility;
     private int _id = 0;
 
-    public Registry.TransformationFacilities? Facility { get => _facility; }
+    public string Facility { get => _facility; }
 
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!_facility.HasValue && TransformationFacilityMenu.OrderedFacilities.Count <= _id)
+        if (string.IsNullOrEmpty(_facility) && TransformationFacilityMenu.OrderedFacilities.Count <= _id)
         {
             MenuAudioManager.Instance.PlayClick();
             SubMenu.GetInstance(SubMenu.SubMenuMode.TransformationFacilitySubMenu).Flip(transform.FindParentDeep("PlanetMenu").Find("Inventory Section"), GetEntityId().GetHashCode());
@@ -23,45 +23,53 @@ public class WildcardMenu : MonoBehaviour, IPointerClickHandler
     }
     void Start()
     {
-        if (Planet.Selected && _facility.HasValue)
-            GetComponentInChildren<Image>().sprite = Registry.Instance.GetTransformationFacilitySprite(_facility.Value);
+        if (Planet.Selected && !string.IsNullOrEmpty(_facility))
+            GetComponentInChildren<Image>().sprite = Registry.Instance.GetFacilitySprite(_facility);
         else
             Clear();
     }
 
     void Update()
     {
-        if (Planet.Selected != null && _facility.HasValue)
+        if (Planet.Selected != null && !string.IsNullOrEmpty(_facility))
         {
-            transform.GetChild(0).GetComponent<Image>().sprite = Registry.Instance.GetTransformationFacilitySprite(_facility.Value);
-            var info = Registry.Instance.GetFacilityInfo(_facility.Value);
+            transform.GetChild(0).GetComponent<Image>().sprite = Registry.Instance.GetFacilitySprite(_facility);
+            var info = Registry.Instance.GetFacilityInfo(_facility);
+            var inputs = info.GetEffects(Registry.FacilityEffectType.Consume);
+            var outputs = info.GetEffects(Registry.FacilityEffectType.Produce);
             transform.Find("Output").GetComponent<Image>().enabled = true;
-            if (info.InputResources.Length == 2)
+            if (inputs.Length >= 2)
             {
                 transform.Find("SourceSingle").GetComponent<Image>().enabled = false;
                 transform.Find("Source0").GetComponent<Image>().enabled = true;
                 transform.Find("Source1").GetComponent<Image>().enabled = true;
-                transform.Find("Source0").GetComponent<Image>().sprite = Registry.Instance.GetResourceSprite(info.InputResources[0]);
-                transform.Find("Source1").GetComponent<Image>().sprite = Registry.Instance.GetResourceSprite(info.InputResources[1]);
+                transform.Find("Source0").GetComponent<Image>().sprite = GetEffectSprite(inputs[0]);
+                transform.Find("Source1").GetComponent<Image>().sprite = GetEffectSprite(inputs[1]);
             }
             else
             {
-                transform.Find("SourceSingle").GetComponent<Image>().enabled = true;
+                transform.Find("SourceSingle").GetComponent<Image>().enabled = inputs.Length == 1;
                 transform.Find("Source0").GetComponent<Image>().enabled = false;
                 transform.Find("Source1").GetComponent<Image>().enabled = false;
-                transform.Find("SourceSingle").GetComponent<Image>().sprite = Registry.Instance.GetResourceSprite(info.InputResources[0]);
+                if (inputs.Length == 1)
+                    transform.Find("SourceSingle").GetComponent<Image>().sprite = GetEffectSprite(inputs[0]);
             }
-            if(info.Advanced)
-                transform.Find("Output").GetComponent<Image>().sprite = Registry.Instance.GetAdvancedResourceSprite(info.OutputResourceTransformation);
-            else
-                transform.Find("Output").GetComponent<Image>().sprite = Registry.Instance.GetResourceSprite(info.OutputResource);
+            if (outputs.Length > 0)
+                transform.Find("Output").GetComponent<Image>().sprite = GetEffectSprite(outputs[0]);
 
             transform.Find("Progression").GetComponent<RectTransform>().sizeDelta =
                         new Vector2(transform.Find("Progression").GetComponent<RectTransform>().sizeDelta.x,
-                        GetComponent<RectTransform>().rect.height * Planet.Selected.GetFactoryProgression(_facility.Value));
+                        GetComponent<RectTransform>().rect.height * Planet.Selected.GetFactoryProgression(_facility));
             return;
         }
         Clear();
+    }
+
+    private Sprite GetEffectSprite(Registry.FacilityEffect effect)
+    {
+        return effect.Advanced
+            ? Registry.Instance.GetAdvancedResourceSprite(effect.AdvancedResource)
+            : Registry.Instance.GetResourceSprite(effect.Resource);
     }
     private void Clear()
     {
@@ -74,7 +82,7 @@ public class WildcardMenu : MonoBehaviour, IPointerClickHandler
                     new Vector2(transform.Find("Progression").GetComponent<RectTransform>().sizeDelta.x,
                     GetComponent<RectTransform>().rect.height * 0);
     }
-    public void SetFacility(Registry.TransformationFacilities facility)
+    public void SetFacility(string facility)
     {
         _facility = facility;
     }

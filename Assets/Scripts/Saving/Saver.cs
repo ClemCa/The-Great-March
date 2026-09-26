@@ -82,9 +82,9 @@ public class Saver : MonoBehaviour
         public string _advancedResources;
         public int _people;
         public Registry.Resources[] _availableResources;
-        public List<Registry.Facilities> _facilities;
+        public List<string> _facilities;
         public List<float> _facilitiesProgression;
-        public List<Registry.TransformationFacilities> _transformationFacilities;
+        public List<string> _transformationFacilities;
         public List<float> _transformationFacilitiesProgression;
         public string _name;
         public int _availableWildcards;

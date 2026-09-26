@@ -47,7 +47,7 @@ public class PromptMenu : MonoBehaviour
             var info = Registry.Instance.GetFacilityInfo(_data.FacilityMenu.Facility);
             transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = info.Name;
             transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = info.Description;
-            transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces 1 " + Registry.Instance.GetResourceName(info.AssociatedResource) + " every " + info.Cooldown.ToString()+"s";
+            transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces " + DescribeEffects(info.GetEffects(Registry.FacilityEffectType.Produce)) + " every " + info.Cooldown.ToString()+"s";
             transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
             rect.anchorMin = rect.anchorMin.SetY(0.15);
             _rectTransform.sizeDelta = _baseSize;
@@ -55,8 +55,8 @@ public class PromptMenu : MonoBehaviour
         }
         if (_data.TransformationFacilityMenu != null)
         {
-            var info = Registry.Instance.GetFacilityInfo(_data.TransformationFacilityMenu.Facility.Value);
-            if(_data.Extended || _data.TransformationFacilityMenu.Facility.Value == Registry.TransformationFacilities.Factory)
+            var info = Registry.Instance.GetFacilityInfo(_data.TransformationFacilityMenu.Facility);
+            if(_data.Extended || info.ExtendedTooltip)
             {
                 _rectTransform.sizeDelta = _extendedSize;
             }
@@ -66,18 +66,8 @@ public class PromptMenu : MonoBehaviour
             }
             transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = info.Name;
             transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = info.Description;
-            string content = "";
-            for(int i = 0; i < info.InputResources.Length; i++)
-            {
-                if (i == 0)
-                    content += info.InputResources[0];
-                else if (i == info.InputResources.Length - 1)
-                    content += " and " + info.InputResources[i];
-                else
-                    content += ", " + info.InputResources[i];
-            }
-            transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "Consumes " + info.Cost + " " + content;
-            transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces " + info.Production + " " + (info.Advanced ? Registry.Instance.GetResourceName(info.OutputResourceTransformation).ToString() : Registry.Instance.GetResourceName(info.OutputResource).ToString()) + " every " + info.Cooldown.ToString() + "s";
+            transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "Consumes " + DescribeEffects(info.GetEffects(Registry.FacilityEffectType.Consume));
+            transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces " + DescribeEffects(info.GetEffects(Registry.FacilityEffectType.Produce)) + " every " + info.Cooldown.ToString() + "s";
             rect.anchorMin = rect.anchorMin.SetY(0.25);
             return;
         }
@@ -111,7 +101,7 @@ public class PromptMenu : MonoBehaviour
                 var info = Registry.Instance.GetFacilityInfo(Planet.Selected.GetFacility(_data.SlotMenu.ResourceType));
                 transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = info.Name;
                 transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = info.Description;
-                transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces 1 " + Registry.Instance.GetResourceName(info.AssociatedResource) + " every " + info.Cooldown.ToString() + "s";
+                transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces " + DescribeEffects(info.GetEffects(Registry.FacilityEffectType.Produce)) + " every " + info.Cooldown.ToString() + "s";
                 transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "";
                 rect.anchorMin = rect.anchorMin.SetY(0.15);
             }
@@ -127,23 +117,13 @@ public class PromptMenu : MonoBehaviour
         }
         if (_data.WildcardMenu != null)
         {
-            if (_data.WildcardMenu.Facility.HasValue)
+            if (!string.IsNullOrEmpty(_data.WildcardMenu.Facility))
             {
-                var info = Registry.Instance.GetFacilityInfo(_data.WildcardMenu.Facility.Value);
+                var info = Registry.Instance.GetFacilityInfo(_data.WildcardMenu.Facility);
                 transform.FindDeep("Title").GetComponentInChildren<TMPro.TMP_Text>().text = info.Name;
                 transform.FindDeep("Description").GetComponentInChildren<TMPro.TMP_Text>().text = info.Description;
-                string content = "";
-                for (int i = 0; i < info.InputResources.Length; i++)
-                {
-                    if (i == 0)
-                        content += info.InputResources[0];
-                    else if (i == info.InputResources.Length - 1)
-                        content += " and " + info.InputResources[i];
-                    else
-                        content += ", " + info.InputResources[i];
-                }
-                transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "Consumes " + info.Cost + " " + content;
-                transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces " + info.Production + " " + (info.Advanced ? Registry.Instance.GetResourceName(info.OutputResourceTransformation).ToString() : Registry.Instance.GetResourceName(info.OutputResource).ToString()) + " every " + info.Cooldown.ToString() + "s";
+                transform.FindDeep("Info1").GetComponentInChildren<TMPro.TMP_Text>().text = "Consumes " + DescribeEffects(info.GetEffects(Registry.FacilityEffectType.Consume));
+                transform.FindDeep("Info2").GetComponentInChildren<TMPro.TMP_Text>().text = "Produces " + DescribeEffects(info.GetEffects(Registry.FacilityEffectType.Produce)) + " every " + info.Cooldown.ToString() + "s";
                 rect.anchorMin = rect.anchorMin.SetY(0.25);
             }
             else
@@ -210,6 +190,27 @@ public class PromptMenu : MonoBehaviour
             rect.anchorMin = rect.anchorMin.SetY(0.15);
         else
             rect.anchorMin = rect.anchorMin.SetY(0.25);
+    }
+
+    private string DescribeEffects(Registry.FacilityEffect[] effects)
+    {
+        if (effects == null || effects.Length == 0)
+            return "nothing";
+        var parts = new string[effects.Length];
+        for (int i = 0; i < effects.Length; i++)
+            parts[i] = effects[i].Amount + " " + EffectResourceName(effects[i]);
+        if (parts.Length == 1)
+            return parts[0];
+        if (parts.Length == 2)
+            return parts[0] + " and " + parts[1];
+        return string.Join(", ", parts, 0, parts.Length - 1) + " and " + parts[parts.Length - 1];
+    }
+
+    private string EffectResourceName(Registry.FacilityEffect effect)
+    {
+        return effect.Advanced
+            ? Registry.Instance.GetResourceName(effect.AdvancedResource)
+            : Registry.Instance.GetResourceName(effect.Resource);
     }
 
     private void SetPosition(Vector2 position)

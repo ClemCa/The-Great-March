@@ -46,8 +46,7 @@ public class OrderHandler : MonoBehaviour
         public int Count2 = 0;
         public Registry.Resources Resource;
         public Registry.AdvancedResources AdvancedResource;
-        public Registry.Facilities Facility;
-        public Registry.TransformationFacilities TransformationFacility;
+        public string Facility;
         public int ShipID;
         public Registry.Ship Ship;
 
@@ -103,18 +102,12 @@ public class OrderHandler : MonoBehaviour
             Type = ActionType.AdvancedResources;
         }
 
-        public OrderExec(Planet planet, Registry.Facilities facility)
+        public OrderExec(Planet planet, string facility)
         {
             Planet = planet.Name;
-            Facility = facility;    
-            Type = ActionType.Facility;
-        }
-
-        public OrderExec(Planet planet, Registry.TransformationFacilities facility)
-        {
-            Planet = planet.Name;
-            TransformationFacility = facility;
-            Type = ActionType.TransformationFacility;
+            Facility = facility;
+            var info = Registry.Instance.GetFacilityInfo(facility);
+            Type = info != null && info.Wildcard ? ActionType.TransformationFacility : ActionType.Facility;
         }
 
         public OrderExec() { }
@@ -182,12 +175,12 @@ public class OrderHandler : MonoBehaviour
                     planet.AddResource(AdvancedResource, Count);
                     break;
                 case ActionType.Facility:
-                    FacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.Facilities>(planet, Facility));
+                    FacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, string>(planet, Facility));
                     planet.RegisterBuiltFacility(Facility);
                     break;
                 case ActionType.TransformationFacility:
-                    TransformationFacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.TransformationFacilities>(planet, TransformationFacility));
-                    planet.RegisterBuiltFacility(TransformationFacility);
+                    TransformationFacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, string>(planet, Facility));
+                    planet.RegisterBuiltFacility(Facility);
                     break;
                 default:
                     break;
@@ -202,10 +195,10 @@ public class OrderHandler : MonoBehaviour
             switch (Type)
             {
                 case ActionType.Facility:
-                    FacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.Facilities>(planet, Facility));
+                    FacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, string>(planet, Facility));
                     break;
                 case ActionType.TransformationFacility:
-                    TransformationFacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, Registry.TransformationFacilities>(planet, TransformationFacility));
+                    TransformationFacilityMenu.OrderedFacilities.Remove(new KeyValuePair<Planet, string>(planet, Facility));
                     break;
                 case ActionType.CargoLeader:
                     {

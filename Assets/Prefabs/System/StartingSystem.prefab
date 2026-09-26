@@ -167,8 +167,13 @@ MonoBehaviour:
   starterAdvancedResources:
   - Resource: 0
     Quantity: 5
-  starterFacilities: 040000000000000006000000
-  starterTransformationFacilities: 0000000001000000
+  starterFacilities:
+  - water_pump
+  - hydrogen_extractor
+  - super_growth_greenhouse
+  starterTransformationFacilities:
+  - type_1_farm
+  - type_2_farm
   starterSlots: 00000000010000000300000004000000050000000600000007000000
   starterShips:
   - Type: 1

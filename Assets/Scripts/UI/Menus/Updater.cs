@@ -78,13 +78,13 @@ public class Updater : MonoBehaviour
                 {
                     for (int i = transform.childCount - 1; i >= 0; i--)
                         Destroy(transform.GetChild(i).gameObject);
-                    var possibilities = (Registry.TransformationFacilities[])Enum.GetValues(typeof(Registry.TransformationFacilities));
+                    var possibilities = Registry.Instance.GetWildcardFacilities();
                     var r = _target.TransformationFacilities;
                     foreach (var possibility in possibilities)
                     {
-                        if (!r.Contains(possibility) && TransformationFacilityMenu.OrderedFacilities.FindIndex(t => t.Value == possibility) == -1)
+                        if (!r.Contains(possibility.Id) && TransformationFacilityMenu.OrderedFacilities.FindIndex(t => t.Value == possibility.Id) == -1)
                         {
-                            Instantiate(_prefab, transform).GetComponentInChildren<TransformationFacilityMenu>().SetFacility(possibility);
+                            Instantiate(_prefab, transform).GetComponentInChildren<TransformationFacilityMenu>().SetFacility(possibility.Id);
                         }
                     }
                 }
@@ -101,7 +101,7 @@ public class Updater : MonoBehaviour
         foreach (var facility in Registry.Instance.GetAssociatedFacilities(resource))
         {
             var t = Instantiate(_prefab, transform);
-            t.GetComponentInChildren<FacilityMenu>().SetFacility(facility);
+            t.GetComponentInChildren<FacilityMenu>().SetFacility(facility.Id);
         }
     }
 }

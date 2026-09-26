@@ -11,8 +11,8 @@ public class StarterPlanet : MonoBehaviour
     [SerializeField] private StarterResource[] starterResources = new StarterResource[] { };
     [SerializeField] private StarterAdvancedResource[] starterAdvancedResources = new StarterAdvancedResource[] { };
 
-    [SerializeField] private Registry.Facilities[] starterFacilities = new Registry.Facilities[] { };
-    [SerializeField] private Registry.TransformationFacilities[] starterTransformationFacilities = new Registry.TransformationFacilities[] { };
+    [SerializeField] private string[] starterFacilities = new string[] { };
+    [SerializeField] private string[] starterTransformationFacilities = new string[] { };
     [SerializeField] private Registry.Resources[] starterSlots = new Registry.Resources[] { };
     [SerializeField] private List<Registry.Ship> starterShips = new List<Registry.Ship>();
     [SerializeField] private int roll = 0;
