@@ -202,7 +202,7 @@ MonoBehaviour:
       AdvancedResource: 0
       Amount: 1
   - Id: super_growth_greenhouse
-    Name: Super Growth Greenhosue
+    Name: Super Growth Greenhouse
     Description: Local plants grow faster here
     Sprite: {fileID: 21300000, guid: 7313d821a26e0c548a775cfd718a201a, type: 3}
     Cooldown: 30
@@ -303,7 +303,7 @@ MonoBehaviour:
       Amount: 2
   - Id: hells_kitchen
     Name: Hell's Kitchen
-    Description: Idiot sandwhich have never been easier to make since we learned Animals weren't smart
+    Description: Idiot sandwiches have never been easier to make since we learned Animals aren't smart
     Sprite: {fileID: 21300000, guid: d2df941868934bb4792df2bd80872440, type: 3}
     Cooldown: 30
     Wildcard: 1
@@ -326,8 +326,8 @@ MonoBehaviour:
       AdvancedResource: 2
       Amount: 1
   - Id: type_1_raffinery
-    Name: Type 1 Raffinery
-    Description: Raffined oil is up to 10 times as efficient as Oil
+    Name: Type 1 Refinery
+    Description: Refined oil is up to 10 times as efficient as Oil
     Sprite: {fileID: 21300000, guid: 7ea4e6fab3522d84ba32d42455558fbb, type: 3}
     Cooldown: 30
     Wildcard: 1
@@ -345,8 +345,8 @@ MonoBehaviour:
       AdvancedResource: 0
       Amount: 1
   - Id: type_2_raffinery
-    Name: Type 2 Raffinery
-    Description: Raffined gas is up to 10 times as efficient as Gas
+    Name: Type 2 Refinery
+    Description: Refined gas is up to 10 times as efficient as Gas
     Sprite: {fileID: 21300000, guid: 7ea4e6fab3522d84ba32d42455558fbb, type: 3}
     Cooldown: 30
     Wildcard: 1
