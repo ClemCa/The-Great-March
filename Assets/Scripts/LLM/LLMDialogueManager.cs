@@ -40,6 +40,68 @@ public class LLMDialogueManager : MonoBehaviour
         Ask(character, nodeId, null, onFinished);
     }
 
+    /// <summary>
+    /// LLM-mode meeting line: surfaces the character's most fitting thought (if one is alive) and
+    /// greets the player. Deliberately inert outside LLM mode (Raw mode has no notion of meeting)
+    /// and a no-op for a provider that only reasons, so it never burns a silent turn.
+    /// </summary>
+    public void Meet(ThoughtCharacter character, Action<EmergingThought, string> onFinished = null)
+    {
+        if (LLMSettings.Mode != LLMMode.LLM || character == null)
+            return;
+        if (LLMThinking.IsUnreliable(LLMSettings.EffectiveModel()))
+            return;
+        StartCoroutine(MeetRoutine(character, onFinished));
+    }
+
+    private IEnumerator MeetRoutine(ThoughtCharacter character, Action<EmergingThought, string> onFinished)
+    {
+        var emerging = EmergingThoughtResolver.MostFitting(character, _rng);
+        character.RefreshMood(GameClock.Now);
+        character.History.UpdateSummaries(LLMSettings.VerbatimHistory, LLMSettings.SummarizedHistory, null);
+
+        var displayer = Displayer;
+        if (displayer != null)
+            displayer.BeginStream(character.DisplayName);
+
+        var request = ContextBuilder.BuildMeetingRequest(character, emerging, GameClock.Now);
+        var provider = LLMProviderFactory.Create(LLMSettings.Provider);
+
+        string streamed = "";
+        string error = null;
+
+        yield return provider.Stream(request,
+            token =>
+            {
+                streamed += token;
+                if (displayer != null)
+                    displayer.AppendStream(token);
+            },
+            () => { },
+            err => { error = err; });
+
+        if (string.IsNullOrEmpty(streamed))
+        {
+            // A raw fragment is not a greeting, so there is nothing sensible to show. Leave the
+            // thought un-surfaced; the next meeting can try again.
+            if (displayer != null)
+                displayer.EndStream();
+            if (onFinished != null)
+                onFinished(emerging, error);
+            yield break;
+        }
+
+        if (displayer != null)
+            displayer.EndStream();
+
+        if (emerging.HasThought)
+            emerging.MarkSurfaced(GameClock.Now);
+        character.History.Add("", streamed);
+
+        if (onFinished != null)
+            onFinished(emerging, streamed);
+    }
+
     private IEnumerator AskRoutine(ThoughtCharacter character, string nodeId, string playerQuestion, Action<ThoughtResolution, string> onFinished)
     {
         var resolution = ThoughtResolver.Resolve(character, nodeId, _rng);

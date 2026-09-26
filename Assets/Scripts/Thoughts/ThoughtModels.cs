@@ -17,7 +17,8 @@ public enum TalkPolicy
     Open,       // talks readily, invents a plausible setting if none exists
     Reluctant,  // changes subject / gives a short non-answer
     Secretive,  // actively refuses
-    Unknown     // genuinely does not know
+    Unknown,    // genuinely does not know
+    Enthusiastic // eager to share, invents a setting with relish
 }
 
 public enum EventScope
@@ -141,6 +142,7 @@ public class RelationshipInfo
     public string Label = "";   // "mother"
     public string NodeId = "";  // taxonomy node, e.g. relationships/family/mother
     public float Opinion = 0.5f;
+    public List<string> Notes = new List<string>();  // authored facts injected into the LLM context
 }
 
 [Serializable]

@@ -30,6 +30,9 @@ public class DialogDisplayer : MonoBehaviour
     private Action[] _choices;
     private Action _followUp;
     private bool _streaming;
+    private string _streamRaw = "";
+    private string[] _queuedLines;
+    private int _lineIndex;
 
     public static DialogDisplayer Instance { get => _instance; }
     public DialogueRunner Runner { get => _runner; }
@@ -83,6 +86,8 @@ public class DialogDisplayer : MonoBehaviour
     public void Initialize(string name, string text)
     {
         _streaming = false;
+        _queuedLines = null;
+        _streamRaw = "";
         _nameText.text = name;
         _buttons.gameObject.SetActive(false);
         WriteOverTime(text, _contentText);
@@ -96,6 +101,8 @@ public class DialogDisplayer : MonoBehaviour
     public void ShowNavigation(string speaker, string header, string[] choicesText, Action[] choices)
     {
         _streaming = false;
+        _queuedLines = null;
+        _streamRaw = "";
         _followUp = null;
         _choicesText = choicesText;
         _choices = choices;
@@ -114,6 +121,9 @@ public class DialogDisplayer : MonoBehaviour
         _followUp = null;
         _choices = null;
         _choicesText = null;
+        _queuedLines = null;
+        _lineIndex = 0;
+        _streamRaw = "";
         _nameText.text = name;
         _contentText.text = "";
         _buttons.gameObject.SetActive(false);
@@ -124,7 +134,10 @@ public class DialogDisplayer : MonoBehaviour
     {
         if (string.IsNullOrEmpty(token) || !_streaming)
             return;
-        _contentText.text += token;
+        _streamRaw += token;
+        // Only the first line is revealed while the rest of the reply is still arriving;
+        // any extra newline-separated lines are held back and spoken one at a time below.
+        _contentText.text = FirstLine(_streamRaw);
     }
 
     public void EndStream()
@@ -132,7 +145,47 @@ public class DialogDisplayer : MonoBehaviour
         if (!_streaming)
             return;
         _streaming = false;
+
+        string[] lines = SplitLines(_streamRaw);
+        if (lines.Length > 1)
+        {
+            _queuedLines = lines;
+            _lineIndex = 0;
+            _contentText.text = lines[0];
+            PresentChoices();
+            return;
+        }
+
+        if (lines.Length == 1)
+            _contentText.text = lines[0];
         PresentChoices();
+    }
+
+    /// <summary>
+    /// Splits a streamed reply into the separate lines a character speaks in one thought.
+    /// Blank lines are dropped so an author-friendly trailing newline is harmless.
+    /// </summary>
+    private static string[] SplitLines(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return new string[0];
+        var parts = text.Replace("\r\n", "\n").Split('\n');
+        var lines = new List<string>();
+        for (int i = 0; i < parts.Length; i++)
+        {
+            string line = parts[i].Trim();
+            if (!string.IsNullOrEmpty(line))
+                lines.Add(line);
+        }
+        return lines.ToArray();
+    }
+
+    private static string FirstLine(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return "";
+        int index = text.IndexOf('\n');
+        return index < 0 ? text : text.Substring(0, index).TrimEnd('\r');
     }
 
     #endregion
@@ -172,6 +225,16 @@ public class DialogDisplayer : MonoBehaviour
                 action.Invoke();
             return;
         }
+        // A thought can be spoken as several lines in a row; Continue reveals the next one
+        // until the character is done, then the follow-up (e.g. return to the thought tree) runs.
+        if (_queuedLines != null && _lineIndex < _queuedLines.Length - 1)
+        {
+            _lineIndex++;
+            _buttons.gameObject.SetActive(false);
+            WriteOverTime(_queuedLines[_lineIndex], _contentText);
+            return;
+        }
+        _queuedLines = null;
         if (_followUp != null)
             _followUp.Invoke();
     }

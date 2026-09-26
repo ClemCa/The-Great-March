@@ -38,7 +38,7 @@
       "additionalProperties": false,
       "properties": {
         "nodeId": { "type": "string", "description": "Taxonomy node id; applies to descendants." },
-        "policy": { "enum": ["Open", "Reluctant", "Secretive", "Unknown"] }
+        "policy": { "enum": ["Open", "Reluctant", "Secretive", "Unknown", "Enthusiastic"] }
       }
     },
     "relationship": {
@@ -50,7 +50,8 @@
         "personName": { "type": "string" },
         "label": { "type": "string", "examples": ["mother", "father", "friend"] },
         "nodeId": { "type": "string", "examples": ["relationships/family/mother"] },
-        "opinion": { "type": "number", "minimum": 0, "maximum": 1 }
+        "opinion": { "type": "number", "minimum": 0, "maximum": 1 },
+        "notes": { "type": "array", "items": { "type": "string" }, "description": "Authored facts injected into the LLM context." }
       }
     },
     "knowledge": {

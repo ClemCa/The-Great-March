@@ -73,7 +73,7 @@ public static class ThoughtResolver
             return result;
         }
 
-        if (result.Policy == TalkPolicy.Open && allowGenerate)
+        if ((result.Policy == TalkPolicy.Open || result.Policy == TalkPolicy.Enthusiastic) && allowGenerate)
         {
             var made = SettingGenerator.Generate(character, nodeId, rng);
             if (made != null)
@@ -95,6 +95,9 @@ public static class ThoughtResolver
                 break;
             case TalkPolicy.Secretive:
                 result.RawText = "That's not something I talk about.";
+                break;
+            case TalkPolicy.Enthusiastic:
+                result.RawText = "Oh, I'd love to tell you about that!";
                 break;
             default:
                 result.RawText = "I don't know.";

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,13 +17,31 @@ public static class ThoughtSelector
 
         var profile = character.Traits != null ? character.Traits.Aggregate(character.TraitIds) : null;
         var taxonomy = character.Taxonomy;
+        return Weighted(pool, entry => Score(entry, taxonomy, profile, nodeId, now), rng);
+    }
 
+    /// <summary>
+    /// Like <see cref="Pick"/> but with no query path: every thought is weighed against its own
+    /// topic, so a character's eager and avoided subjects colour what rises unprompted.
+    /// </summary>
+    public static ThoughtEntry PickEmerging(ThoughtCharacter character, IEnumerable<ThoughtEntry> pool, long now, System.Random rng)
+    {
+        if (character == null || pool == null)
+            return null;
+
+        var profile = character.Traits != null ? character.Traits.Aggregate(character.TraitIds) : null;
+        var taxonomy = character.Taxonomy;
+        return Weighted(pool, entry => Score(entry, taxonomy, profile, entry.NodeId, now), rng);
+    }
+
+    private static ThoughtEntry Weighted(IEnumerable<ThoughtEntry> pool, Func<ThoughtEntry, float> scoreOf, System.Random rng)
+    {
         var candidates = new List<ThoughtEntry>();
         var weights = new List<float>();
         float total = 0f;
         foreach (var entry in pool)
         {
-            float score = Score(entry, taxonomy, profile, nodeId, now);
+            float score = scoreOf(entry);
             if (score <= 0.0001f)
                 continue;
             candidates.Add(entry);

@@ -1,57 +1,5 @@
 {
   "$schema": "./event.schema.json",
   "events": [
-    {
-      "id": "war_declared",
-      "name": "A war was declared",
-      "scope": "World",
-      "importance": "Major",
-      "tags": ["war", "politics"],
-      "baseSentiment": -0.7,
-      "impact": 0.8,
-      "decay": 0.03,
-      "affectedNodeIds": ["opinions/politics", "world/events"]
-    },
-    {
-      "id": "plague",
-      "name": "A plague is spreading",
-      "scope": "Region",
-      "importance": "Major",
-      "tags": ["disease", "death"],
-      "baseSentiment": -0.9,
-      "impact": 0.85,
-      "decay": 0.02,
-      "affectedNodeIds": ["present/troubles", "world/events"]
-    },
-    {
-      "id": "harvest_festival",
-      "name": "The harvest festival",
-      "scope": "Local",
-      "tags": ["festival", "celebration"],
-      "baseSentiment": 0.6,
-      "impact": 0.4,
-      "decay": 0.15,
-      "affectedNodeIds": ["present/news", "world/events"]
-    },
-    {
-      "id": "personal_loss",
-      "name": "The death of someone close",
-      "scope": "Personal",
-      "tags": ["death", "grief"],
-      "baseSentiment": -0.9,
-      "impact": 0.9,
-      "decay": 0.05,
-      "affectedNodeIds": ["relationships/family"]
-    },
-    {
-      "id": "promotion",
-      "name": "A promotion at work",
-      "scope": "Personal",
-      "tags": ["work"],
-      "baseSentiment": 0.7,
-      "impact": 0.6,
-      "decay": 0.1,
-      "affectedNodeIds": ["knowledge/job"]
-    }
   ]
 }

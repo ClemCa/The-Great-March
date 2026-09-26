@@ -14,7 +14,8 @@ public static class ContextBuilder
     {
         var sb = new System.Text.StringBuilder();
         sb.Append("You are ").Append(character.DisplayName).Append(", a person living in a sci-fi world. ");
-        sb.Append("Speak only as they would out loud, in natural conversation, one to two sentences. ");
+        sb.Append("Speak only as they would out loud, in natural conversation, usually one to two sentences. ");
+        sb.Append("When a thought weighs on you or the answer comes in beats, you may break it into a few short sentences, each on its own line (plain sentences, not a list). ");
         sb.Append("Never narrate, never describe actions or expressions, no asterisks, no markdown, no lists, and never wrap the whole reply in quotation marks. ");
         sb.Append("Never mention being an AI, the context, JSON, or any field name. ");
 
@@ -60,7 +61,54 @@ public static class ContextBuilder
         return "Context:\n" + context + "\n\nThe player asks: " + question;
     }
 
+    /// <summary>
+    /// Request for a character meeting the player cold. The emerging thought (if any) is folded into
+    /// the snapshot, and the small-talk cue becomes an explicit meeting instruction so the model
+    /// greets even when nothing is on the character's mind.
+    /// </summary>
+    public static LLMRequest BuildMeetingRequest(ThoughtCharacter character, EmergingThought emerging, long now)
+    {
+        var request = new LLMRequest
+        {
+            BaseUrl = LLMSettings.EffectiveBaseUrl(),
+            ApiKey = LLMSettings.ApiKey,
+            Model = LLMSettings.EffectiveModel(),
+            Temperature = LLMSettings.Temperature,
+            SystemPrompt = BuildMeetingSystemPrompt(character),
+            Messages = new List<LLMMessage>()
+        };
+        request.Messages.Add(new LLMMessage("user", BuildMeetingUserMessage(character, emerging, now)));
+        return request;
+    }
+
+    private static string BuildMeetingSystemPrompt(ThoughtCharacter character)
+    {
+        return BuildSystemPrompt(character)
+            + " You have just met the player. Greet them in a short line that suits your mood;"
+            + " if something is on your mind, let it show rather than announcing it outright."
+            + " emergingThought, when present, is the one thing rising to the surface right now.";
+    }
+
+    public static string BuildMeetingUserMessage(ThoughtCharacter character, EmergingThought emerging, long now)
+    {
+        string context = BuildContextJson(character, "", "", now, emerging);
+        var sb = new System.Text.StringBuilder();
+        sb.Append("Context:\n").Append(context).Append("\n\n");
+        sb.Append("You have just met the player. Say a short line in greeting.");
+        if (emerging != null && emerging.HasThought)
+        {
+            sb.Append(" Something is on your mind (").Append(emerging.Topic).Append("): ")
+              .Append(emerging.Fragment).Append(". Bring it up if it fits the moment.");
+        }
+        return sb.ToString();
+    }
+
     public static string BuildContextJson(ThoughtCharacter character, string query, string reply, long now)
+    {
+        return BuildContextJson(character, query, reply, now, null);
+    }
+
+    public static string BuildContextJson(ThoughtCharacter character, string query, string reply, long now, EmergingThought emerging)
     {
         var root = new JObject();
 
@@ -75,6 +123,19 @@ public static class ContextBuilder
         root["knowledge"] = BuildKnowledge(character);
         root["relationships"] = BuildRelationships(character);
         root["thoughts"] = BuildThoughts(character, now);
+
+        if (emerging != null && emerging.HasThought)
+        {
+            var entry = emerging.Entry;
+            root["emergingThought"] = new JObject
+            {
+                ["topic"] = emerging.Topic,
+                ["feeling"] = entry != null ? RawRenderer.SentimentWord(entry.Sentiment) : "",
+                ["weight"] = entry != null ? WeightWord(entry.Strength(now)) : "",
+                ["raw"] = emerging.Fragment
+            };
+        }
+
         root["conversationHistory"] = BuildHistory(character);
 
         root["historySummary"] = new JObject
@@ -170,11 +231,14 @@ public static class ContextBuilder
             string key = string.IsNullOrEmpty(relationship.Label) ? relationship.PersonName : relationship.Label;
             if (string.IsNullOrEmpty(key))
                 continue;
-            relationships[key] = new JObject
+            var entry = new JObject
             {
                 ["name"] = relationship.PersonName,
                 ["opinion"] = relationship.Opinion
             };
+            if (relationship.Notes != null && relationship.Notes.Count > 0)
+                entry["notes"] = new JArray(relationship.Notes);
+            relationships[key] = entry;
         }
         return relationships;
     }

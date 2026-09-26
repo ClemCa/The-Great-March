@@ -693,21 +693,28 @@ public static class SettingGenerator
         string quirk = Pick(Quirks, rng);
 
         string detail;
-        switch (role)
+        if (authored != null && authored.Notes != null && authored.Notes.Count > 0)
         {
-            case "mother": detail = "My mother is named " + name + ", " + quirk + "."; break;
-            case "father": detail = "My father is named " + name + ", " + quirk + "."; break;
-            case "sibling": detail = name + " is my sibling, " + quirk + "."; break;
-            case "child": detail = name + " is my child, " + quirk + "."; break;
-            case "extended family": detail = name + " is family, " + quirk + "."; break;
-            case "close friend": detail = name + " is one of my closest friends, " + quirk + "."; break;
-            case "acquaintance": detail = name + " is someone I know, " + quirk + "."; break;
-            case "lost friend": detail = "I lost touch with " + name + " years ago."; break;
-            case "enemy": detail = name + " has it out for me."; break;
-            case "competitor": detail = name + " keeps beating me at everything."; break;
-            case "partner": detail = name + " is my partner, " + quirk + "."; break;
-            case "past partner": detail = name + " and I were together once."; break;
-            default: detail = name + " is " + role + " to me."; break;
+            detail = string.Join(" ", authored.Notes);
+        }
+        else
+        {
+            switch (role)
+            {
+                case "mother": detail = "My mother is named " + name + ", " + quirk + "."; break;
+                case "father": detail = "My father is named " + name + ", " + quirk + "."; break;
+                case "sibling": detail = name + " is my sibling, " + quirk + "."; break;
+                case "child": detail = name + " is my child, " + quirk + "."; break;
+                case "extended family": detail = name + " is family, " + quirk + "."; break;
+                case "close friend": detail = name + " is one of my closest friends, " + quirk + "."; break;
+                case "acquaintance": detail = name + " is someone I know, " + quirk + "."; break;
+                case "lost friend": detail = "I lost touch with " + name + " years ago."; break;
+                case "enemy": detail = name + " has it out for me."; break;
+                case "competitor": detail = name + " keeps beating me at everything."; break;
+                case "partner": detail = name + " is my partner, " + quirk + "."; break;
+                case "past partner": detail = name + " and I were together once."; break;
+                default: detail = name + " is " + role + " to me."; break;
+            }
         }
 
         return new ThoughtEntry
@@ -808,11 +815,21 @@ public static class SettingGenerator
 
     private static RelationshipInfo FindRelationship(ThoughtState s, string nodeId)
     {
-        if (s.Character == null || s.Character.Relationships == null)
+        if (s.Character == null || s.Character.Relationships == null || s.Character.Taxonomy == null)
             return null;
-        for (int i = 0; i < s.Character.Relationships.Count; i++)
-            if (s.Character.Relationships[i].NodeId == nodeId)
-                return s.Character.Relationships[i];
+
+        // Most specific authored relationship wins, so a rule on a branch (e.g. relationships/friends)
+        // also covers its descendant leaves.
+        var current = nodeId;
+        int guard = 0;
+        while (!string.IsNullOrEmpty(current) && guard++ < 64)
+        {
+            for (int i = 0; i < s.Character.Relationships.Count; i++)
+                if (s.Character.Relationships[i].NodeId == current)
+                    return s.Character.Relationships[i];
+            var node = s.Character.Taxonomy.Get(current);
+            current = node == null ? "" : node.ParentId;
+        }
         return null;
     }
 
