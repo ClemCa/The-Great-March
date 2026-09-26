@@ -14,9 +14,9 @@ export function App() {
     );
   }
 
-  // Only the hand-authored menu scenes get a dedicated screen; every other scene
-  // (Game, Tutorial, StoryTest, any future gameplay scene) is the in-game HUD.
+  // Only the main menu gets a dedicated screen. The lose screen and the tutorial now run
+  // inside the Game scene, so they are chosen from the session state rather than a scene name.
   if (state.scene === 'MainMenu') return <MainMenuScreen state={state} />;
-  if (state.scene === 'LoseMenu') return <LoseScreen state={state} />;
+  if (state.gameOver) return <LoseScreen state={state} />;
   return <GameScreen state={state} />;
 }

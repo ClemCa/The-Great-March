@@ -157,6 +157,8 @@ export interface SettingsSnapshot {
 export interface GameState {
   scene: string;
   isGameScene: boolean;
+  gameOver: boolean;
+  tutorial: boolean;
   paused: boolean;
   prompt: boolean;
   survivalTime: number;

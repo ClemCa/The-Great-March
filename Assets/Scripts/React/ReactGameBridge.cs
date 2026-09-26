@@ -53,12 +53,11 @@ namespace TheGreatMarch.React
         // they are only referenced from the (native) Globals record.
         private readonly List<Delegate> actionRoots = new List<Delegate>();
 
-        // Hand-authored menu scenes keep their own React screen. Everything else is treated as
-        // the in-game HUD, regardless of what the scene happens to be called.
+        // The main menu keeps its own React screen. Everything else is treated as the in-game
+        // HUD, regardless of what the scene happens to be called.
         private static readonly Dictionary<string, string[]> LegacyMenuRoots = new Dictionary<string, string[]>
         {
             { "MainMenu", new[] { "Menu", "Credits", "Developpers" } },
-            { "LoseMenu", new[] { "Menu", "Result" } },
         };
 
         // uGUI canvases that React now renders instead. Their Canvas component is disabled rather
@@ -318,6 +317,7 @@ namespace TheGreatMarch.React
         public void NewGame()
         {
             StoryScript.SlotLoader = -1;
+            GameSession.StartRun();
             _ = SceneManager.LoadSceneAsync("Game");
             PlayClick();
         }
@@ -325,13 +325,15 @@ namespace TheGreatMarch.React
         public void LoadGame(int slot)
         {
             StoryScript.SlotLoader = slot;
+            GameSession.StartRun();
             _ = SceneManager.LoadSceneAsync("Game");
             PlayClick();
         }
 
         public void Tutorial()
         {
-            _ = SceneManager.LoadSceneAsync("Tutorial");
+            GameSession.StartTutorial();
+            _ = SceneManager.LoadSceneAsync("Game");
             PlayClick();
         }
 
@@ -343,12 +345,14 @@ namespace TheGreatMarch.React
 
         public void Restart()
         {
+            GameSession.StartRun();
             PlayClick();
             _ = SceneManager.LoadSceneAsync("Game");
         }
 
         public void GoToMainMenu()
         {
+            GameSession.Clear();
             PlayClick();
             _ = SceneManager.LoadSceneAsync("MainMenu");
         }
@@ -760,6 +764,8 @@ namespace TheGreatMarch.React
             {
                 scene = sceneName,
                 isGameScene = !IsMenuScene(sceneName),
+                gameOver = GameSession.GameOver,
+                tutorial = GameSession.Tutorial,
                 paused = Pausing.Paused,
                 prompt = Settings.Loaded && Settings.ShowPrompt,
                 survivalTime = Scoring.survivalTime,
@@ -1426,6 +1432,8 @@ namespace TheGreatMarch.React
         {
             public string scene;
             public bool isGameScene;
+            public bool gameOver;
+            public bool tutorial;
             public bool paused;
             public bool prompt;
             public int survivalTime;

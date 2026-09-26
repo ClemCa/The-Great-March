@@ -2,7 +2,6 @@ using ClemCAddons;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class CloudMoveScript : MonoBehaviour
 {
@@ -42,11 +41,16 @@ public class CloudMoveScript : MonoBehaviour
             transform.position += Vector3.right * diff;
         }
 
+        // The tutorial never loses, and losing now freezes the Game scene in place instead of
+        // loading a separate LoseMenu scene: React swaps to the lose screen off the session flag.
+        if (GameSession.Tutorial || GameSession.GameOver)
+            return;
+
         if (Planet.LeaderPlanet != null && GetComponent<BoxCollider>().bounds.Contains(Planet.LeaderPlanet.transform.position))
         {
             Planet.Unselect();  
             Time.timeScale = 0;
-            _ = SceneManager.LoadSceneAsync("LoseMenu");
+            GameSession.EndRun();
         }
     }
 

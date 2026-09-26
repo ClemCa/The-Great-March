@@ -10,6 +10,7 @@ public class MainMenu : MonoBehaviour
     public void StartGame()
     {
         StoryScript.SlotLoader = -1;
+        GameSession.StartRun();
         _ = SceneManager.LoadSceneAsync("Game");
         MenuAudioManager.Instance.PlayClick();
     }
@@ -17,13 +18,15 @@ public class MainMenu : MonoBehaviour
     public void LoadSlot(int slot)
     {
         StoryScript.SlotLoader = slot;
+        GameSession.StartRun();
         _ = SceneManager.LoadSceneAsync("Game");
         MenuAudioManager.Instance.PlayClick();
     }
 
     public void Tutorial()
     {
-        _ = SceneManager.LoadSceneAsync("Tutorial");
+        GameSession.StartTutorial();
+        _ = SceneManager.LoadSceneAsync("Game");
         MenuAudioManager.Instance.PlayClick();
     }
 

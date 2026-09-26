@@ -73,6 +73,16 @@ public class Pausing : MonoBehaviour
         else Pause();
     }
 
+    /// <summary>Restores the neutral, unpaused state without playing any UI sound.</summary>
+    public static void Clear()
+    {
+        _paused = false;
+        _blocked = false;
+        _timeTarget = 1f;
+        Time.timeScale = 1f;
+        AudioListener.volume = 1f;
+    }
+
     void Awake()
     {
         _instance = this;

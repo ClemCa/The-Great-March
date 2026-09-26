@@ -45,24 +45,35 @@ public class Scoring : MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
+    /// <summary>Marks the timer so the next Game frame starts a fresh run.</summary>
+    public void ResetRun()
+    {
+        checkFirst = true;
+    }
+
     void Update()
     {
-        if(SceneManager.GetActiveScene().name == "Game")
-        {
-            if (checkFirst)
-            {
-                startTime = System.DateTime.Now;
-                naturalResourcesUnits = advancedResourcesUnits = facilitiesCount = transformativeFacilitiesCount = 0;
-                systems = 1;
-                checkFirst = false;
-            }
-            survivalTime = (int)Time.timeSinceLevelLoad / 60;
-            lastTime = System.DateTime.Now;
-            totalTime = (int)(lastTime.Subtract(startTime).TotalMinutes);
-        }
-        else
+        // The tutorial also runs inside the Game scene, but it must not count towards a run.
+        bool running = SceneManager.GetActiveScene().name == "Game" && !GameSession.Tutorial;
+        if (!running)
         {
             checkFirst = true;
+            return;
         }
+
+        // Freeze the stats while the lose screen is up.
+        if (GameSession.GameOver)
+            return;
+
+        if (checkFirst)
+        {
+            startTime = System.DateTime.Now;
+            naturalResourcesUnits = advancedResourcesUnits = facilitiesCount = transformativeFacilitiesCount = 0;
+            systems = 1;
+            checkFirst = false;
+        }
+        survivalTime = (int)Time.timeSinceLevelLoad / 60;
+        lastTime = System.DateTime.Now;
+        totalTime = (int)(lastTime.Subtract(startTime).TotalMinutes);
     }
 }

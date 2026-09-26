@@ -25,7 +25,7 @@ public class Questing : MonoBehaviour
     {
         if (_currentQuestline == null || _currentQuestline.current == null || _currentQuestline.current.Trigger)
             return;
-        _display.GetComponentInChildren<TMPro.TMP_Text>().text = _currentQuestline.current.Objective;
+        SetObjective(_currentQuestline.current.Objective);
         if (_currentQuestline.current.Checker.Invoke())
         {
             _currentQuestline.NextQuest(_display);
@@ -37,14 +37,29 @@ public class Questing : MonoBehaviour
         if (questLine == null || questLine.current == null)
             return false;
         _currentQuestline = questLine;
-        _display.GetComponentInChildren<TMPro.TMP_Text>().text = _currentQuestline.current.Objective;
-        ClemCAddons.Utilities.Lerper.ConstantLerp(_display.anchoredPosition, Vector2.zero, 2, (v) => _display.anchoredPosition = v);
+        SetObjective(_currentQuestline.current.Objective);
+        SlideDisplay(Vector2.zero, 2);
         return true;
     }
 
     public void HideUI()
     {
-        ClemCAddons.Utilities.Lerper.ConstantLerp(_display.anchoredPosition, new Vector2(0, 75), 1, (v) => _display.anchoredPosition = v);
+        SlideDisplay(new Vector2(0, 75), 1);
+    }
+
+    // The authored quest banner is optional: React renders the objective from CurrentObjective,
+    // so a tutorial spawned straight into the Game scene can run without a display transform.
+    private void SetObjective(string text)
+    {
+        if (_display == null) return;
+        var label = _display.GetComponentInChildren<TMPro.TMP_Text>();
+        if (label != null) label.text = text;
+    }
+
+    private void SlideDisplay(Vector2 target, float duration)
+    {
+        if (_display == null) return;
+        ClemCAddons.Utilities.Lerper.ConstantLerp(_display.anchoredPosition, target, duration, (v) => _display.anchoredPosition = v);
     }
 
     public class Quest
@@ -104,8 +119,12 @@ public class Questing : MonoBehaviour
             else
             {
                 current = null;
-                display.GetComponentInChildren<TMPro.TMP_Text>().text = "";
-                ClemCAddons.Utilities.Lerper.ConstantLerp(display.anchoredPosition, new Vector2(0, 75), 1, (v) => display.anchoredPosition = v);
+                if (display != null)
+                {
+                    var label = display.GetComponentInChildren<TMPro.TMP_Text>();
+                    if (label != null) label.text = "";
+                    ClemCAddons.Utilities.Lerper.ConstantLerp(display.anchoredPosition, new Vector2(0, 75), 1, (v) => display.anchoredPosition = v);
+                }
             }
         }
 
