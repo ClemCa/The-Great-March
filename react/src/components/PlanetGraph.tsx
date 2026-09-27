@@ -5,8 +5,8 @@ const HEIGHT = 110;
 
 const SERIES: { key: keyof GraphSnapshot; color: string; label: string }[] = [
   { key: 'people', color: '#ffffff', label: 'People' },
-  { key: 'resources', color: '#38d430', label: 'Resources' },
-  { key: 'facilities', color: '#4d79ff', label: 'Facilities' },
+  { key: 'resources', color: '#5989d9', label: 'Resources' },
+  { key: 'facilities', color: '#8a8a94', label: 'Facilities' },
 ];
 
 /**

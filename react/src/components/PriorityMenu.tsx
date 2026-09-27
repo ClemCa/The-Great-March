@@ -26,7 +26,9 @@ export function PriorityMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
 
   return (
     <view className="hud-submenu hud-submenu--priority">
+      <view className="hud-vignette" />
       <view className="hud-submenu__title">
+        <view className="hud-header__mark" />
         <text>{fuel ? 'Fuel Consumption' : 'Food Consumption'}</text>
       </view>
 

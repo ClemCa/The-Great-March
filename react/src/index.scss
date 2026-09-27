@@ -266,6 +266,37 @@
 /* ------------------------------------------------------------------ */
 /* Game HUD                                                            */
 /* ------------------------------------------------------------------ */
+/* The HUD adopts the same language as the menus: near-black translucent
+   surfaces, hairline frames with a blue leading edge, square corners, a
+   faint bottom vignette and console headings marked with a blue tick.
+   Blue is reserved for structure and selection; red only for progression. */
+
+/* Console heading mark, shared by the HUD panels (planet, queue, submenus). */
+.hud-header__mark {
+  width: 4px;
+  height: 24px;
+  flex-shrink: 0;
+  background-color: #5989d9;
+}
+
+/* Bottom vignette, layered behind a panel's content so it sinks into the scene. */
+.hud-vignette {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
+  pointer-events: none;
+}
+
+/* Section heading inside a panel: a blue tick and a muted, spaced label. */
+.hud-section__tick {
+  width: 3px;
+  height: 12px;
+  flex-shrink: 0;
+  background-color: #5989d9;
+}
 
 /* --- Pause cluster (top-right), original `PauseCanvas` --- */
 .pause-bar {
@@ -274,13 +305,13 @@
   right: 0;
   flex-direction: row;
   align-items: flex-start;
-  padding: 8px;
+  padding: 10px;
 }
 
 .pause-menu {
   flex-direction: column;
   align-items: flex-end;
-  margin-right: 6px;
+  margin-right: 8px;
 }
 
 .pause-row {
@@ -288,29 +319,38 @@
   align-items: center;
 }
 
+/* Outlined chips matching the menus' secondary rows. */
 .pause-button {
-  min-width: 50px;
-  height: 20px;
+  min-width: 54px;
+  height: 26px;
   margin-left: 4px;
-  padding: 0 6px;
+  padding: 0 10px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
-  font-size: 18px;
+  background-color: rgba(10, 12, 16, 0.86);
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 1;
   text-align: center;
   cursor: pointer;
 }
 
 .pause-button:hover {
-  background-color: #ededed;
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: #5989d9;
+}
+
+.pause-button:active {
+  background-color: rgba(255, 255, 255, 0.22);
 }
 
 .pause-extend {
-  min-width: 20px;
-  width: 20px;
+  min-width: 26px;
+  width: 26px;
+  padding: 0;
 }
 
 .pause-slots {
@@ -319,33 +359,42 @@
 }
 
 .pause-slot {
-  width: 50px;
-  height: 20px;
+  width: 54px;
+  height: 26px;
   margin-left: 4px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
-  font-size: 18px;
+  background-color: rgba(10, 12, 16, 0.86);
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 1;
   text-align: center;
   cursor: pointer;
 }
 
 .pause-slot:hover {
-  background-color: #ededed;
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: #5989d9;
 }
 
-.pause-slot--disabled {
-  background-color: rgba(255, 255, 255, 0.4);
-  color: rgba(50, 50, 50, 0.35);
+.pause-slot:active {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.pause-slot--disabled,
+.pause-slot--disabled:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.3);
   cursor: default;
 }
 
 .pause-icon {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
@@ -353,7 +402,7 @@
   border-radius: 0;
   background-color: rgba(0, 0, 0, 0);
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .pause-icon:hover {
@@ -371,14 +420,19 @@
   background-color: #ffffff;
 }
 
-/* --- Task queue (left), original `Queue` canvas --- */
+/* --- Task queue (left), original `Queue` canvas. Restyled as a left-hand
+   sidebar, with the blue frame edge facing the centre of the screen. --- */
 .task-queue {
   position: absolute;
   top: 240px;
   left: 0;
   width: 300px;
   height: 600px;
-  background-color: rgba(255, 255, 255, 0.392);
+  background-color: rgba(10, 12, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  border-right-color: rgba(89, 137, 217, 0.6);
+  overflow: hidden;
   transition-property: left;
   transition-duration: 0.18s;
   transition-timing-function: ease-out;
@@ -393,61 +447,67 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 56px;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  padding: 0 20px;
+  gap: 12px;
   color: #ffffff;
-  font-size: 35px;
+  font-size: 18px;
+  letter-spacing: 3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .task-queue__list {
   position: absolute;
-  top: 60px;
+  top: 56px;
   left: 0;
   right: 0;
   bottom: 0;
-  padding-top: 8px;
+  padding: 14px;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   overflow: scroll;
 }
 
 .queue-card {
-  width: 200px;
-  height: 115px;
+  width: 100%;
   margin-bottom: 10px;
+  padding: 12px 14px;
   flex-shrink: 0;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  background-color: rgba(161, 161, 161, 1);
+  gap: 2px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .queue-card__type {
   color: #ffffff;
-  font-size: 15px;
-  text-align: center;
+  font-size: 17px;
+  letter-spacing: 1;
+  text-align: left;
 }
 
 .queue-card__line {
-  color: #ffffff;
-  font-size: 15px;
-  text-align: center;
+  color: #bdbdbd;
+  font-size: 14px;
+  text-align: left;
 }
 
 .queue-card__track {
-  width: 200px;
-  height: 10px;
-  margin-top: 4px;
+  width: 100%;
+  height: 6px;
+  margin-top: 6px;
   flex-direction: row;
   align-items: flex-start;
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .queue-card__progress {
-  height: 10px;
-  background-color: #ffffff;
+  height: 6px;
+  background-color: #5989d9;
 }
 
 /* ------------------------------------------------------------------ */
@@ -459,7 +519,10 @@
   right: -400px;
   width: 400px;
   height: 1020px;
-  background-color: rgba(89, 89, 89, 0.92);
+  background-color: rgba(10, 12, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  border-left-color: rgba(89, 137, 217, 0.6);
   /* The facility/priority/shipping submenus are children of this panel but are anchored to its
      right edge (which coincides with the screen edge), so they sit just left of it. Clipping
      here hides them entirely. */
@@ -481,14 +544,16 @@
   height: 71px;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  background-color: #595959;
+  padding: 0 20px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .planet-panel__title-text {
   color: #ffffff;
-  font-size: 34px;
-  text-align: center;
+  font-size: 28px;
+  letter-spacing: 2;
+  text-align: left;
 }
 
 .planet-panel__baseinfo {
@@ -500,12 +565,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .planet-panel__baseinfo-text {
-  color: #ffffff;
-  font-size: 22px;
+  color: #bdbdbd;
+  font-size: 20px;
 }
 
 .planet-panel__graph {
@@ -520,7 +586,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  background-color: rgba(64, 64, 64, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .planet-panel__facilities {
@@ -538,15 +604,17 @@
   height: 122px;
 }
 
+/* Group heading: a blue tick and a muted, spaced label over a hairline rule. */
 .planet-panel__section-title {
   height: 34px;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  background-color: #595959;
-  color: #ffffff;
-  font-size: 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  padding: 0 20px;
+  gap: 8px;
+  color: #8a8a94;
+  font-size: 15px;
+  letter-spacing: 2;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .planet-panel__scroll {
@@ -555,19 +623,21 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 8px;
+  padding: 10px;
 }
 
 .planet-panel__action {
   height: 34px;
-  margin: 4px 20px 0 20px;
+  margin: 6px 20px 0 20px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
-  font-size: 18px;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 1;
   cursor: pointer;
 }
 
@@ -600,7 +670,7 @@
 }
 
 .planet-graph__legend-label {
-  color: #ffffff;
+  color: #bdbdbd;
   font-size: 14px;
 }
 
@@ -633,14 +703,16 @@
   align-items: center;
   justify-content: center;
   padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.04);
   overflow: hidden;
   cursor: pointer;
 }
 
 .facility-slot--empty {
-  background-color: rgba(0, 0, 0, 0.12);
+  border-color: rgba(255, 255, 255, 0.06);
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .facility-slot__icon {
@@ -653,7 +725,7 @@
   right: 2px;
   bottom: 0;
   width: 5px;
-  background-color: #ff0000;
+  background-color: #e05252;
 }
 
 /* --- Inventory grid --- */
@@ -670,6 +742,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0);
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .inventory-item__icon {
@@ -690,7 +766,11 @@
   right: 620px;
   width: 400px;
   height: 300px;
-  background-color: rgba(89, 89, 89, 0.96);
+  background-color: rgba(12, 14, 18, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  border-left-color: rgba(89, 137, 217, 0.6);
+  overflow: hidden;
 }
 
 .hud-submenu--priority {
@@ -709,10 +789,12 @@
   height: 40px;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  background-color: #595959;
+  padding: 0 16px;
+  gap: 10px;
   color: #ffffff;
-  font-size: 22px;
+  font-size: 17px;
+  letter-spacing: 2;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hud-submenu__list {
@@ -736,8 +818,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.04);
   cursor: pointer;
 }
 
@@ -759,10 +842,12 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
-  font-size: 20px;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 1;
   cursor: pointer;
 }
 
@@ -775,21 +860,25 @@
 }
 
 .priority-toggle {
-  min-width: 80px;
-  height: 26px;
+  min-width: 84px;
+  height: 28px;
   margin: 0 4px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
-  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 15px;
+  letter-spacing: 1;
   cursor: pointer;
 }
 
 .priority-toggle--on {
-  background-color: #bdbdbd;
+  border-color: #5989d9;
+  background-color: #5989d9;
+  color: #ffffff;
 }
 
 .priority-list {
@@ -798,12 +887,11 @@
 
 .priority-row {
   height: 60px;
-  margin-bottom: 6px;
   flex-shrink: 0;
   flex-direction: row;
   align-items: center;
   padding: 0 8px;
-  background-color: #a1a1a1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .priority-row__icon {
@@ -818,13 +906,13 @@
 }
 
 .priority-row__name {
-  color: #1a1a1a;
-  font-size: 20px;
+  color: #ffffff;
+  font-size: 18px;
 }
 
 .priority-row__value {
-  color: #1a1a1a;
-  font-size: 16px;
+  color: #8a8a94;
+  font-size: 15px;
 }
 
 .priority-row__controls {
@@ -833,16 +921,18 @@
 }
 
 .priority-row__btn {
-  min-width: 44px;
-  height: 26px;
+  min-width: 48px;
+  height: 28px;
   margin-left: 4px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
-  font-size: 15px;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 14px;
+  letter-spacing: 1;
   cursor: pointer;
 }
 
@@ -859,22 +949,25 @@
 }
 
 .shipping-note {
-  color: #ffffff;
-  font-size: 18px;
+  color: #bdbdbd;
+  font-size: 17px;
   text-align: center;
   margin-bottom: 12px;
 }
 
 .shipping-action {
   width: 220px;
-  height: 45px;
+  height: 44px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
-  font-size: 20px;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 18px;
+  letter-spacing: 1;
+  cursor: pointer;
 }
 
 .shipping-menu {
@@ -901,13 +994,15 @@
   flex-direction: row;
   align-items: center;
   padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0;
-  background-color: #a1a1a1;
+  background-color: rgba(255, 255, 255, 0.03);
   cursor: pointer;
 }
 
 .shipping-ship--selected {
-  background-color: #ffffff;
+  border-color: #5989d9;
+  background-color: rgba(89, 137, 217, 0.18);
 }
 
 .shipping-ship__icon {
@@ -918,13 +1013,13 @@
 
 .shipping-ship__label {
   flex: 1;
-  color: #1a1a1a;
-  font-size: 16px;
+  color: #ffffff;
+  font-size: 15px;
 }
 
 .shipping-ship__fuel {
-  color: #1a1a1a;
-  font-size: 14px;
+  color: #bdbdbd;
+  font-size: 13px;
 }
 
 .shipping-resources {
@@ -933,7 +1028,8 @@
 }
 
 .shipping-cell--selected {
-  background-color: #5989d9;
+  border-color: #5989d9;
+  background-color: rgba(89, 137, 217, 0.35);
 }
 
 .shipping-slider {
@@ -944,13 +1040,14 @@
 
 .shipping-slider__label {
   width: 70px;
-  color: #ffffff;
+  color: #bdbdbd;
   font-size: 16px;
 }
 
 .shipping-action--off {
-  background-color: rgba(255, 255, 255, 0.5);
-  color: rgba(50, 50, 50, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.3);
   cursor: default;
 }
 
@@ -966,7 +1063,10 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  background-color: rgba(89, 89, 89, 0.92);
+  padding: 0 20px;
+  background-color: rgba(10, 12, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom-color: rgba(89, 137, 217, 0.6);
   transition-property: top;
   transition-duration: 0.2s;
   transition-timing-function: ease-out;
@@ -978,7 +1078,8 @@
 
 .quest-objective__text {
   color: #ffffff;
-  font-size: 24px;
+  font-size: 22px;
+  letter-spacing: 1;
   text-align: center;
 }
 
@@ -988,25 +1089,30 @@
 .tooltip {
   position: absolute;
   width: 300px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   flex-direction: column;
-  background-color: rgba(38, 38, 38, 0.95);
+  gap: 2px;
+  background-color: rgba(10, 12, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-left-color: #5989d9;
+  border-left-width: 2px;
   pointer-events: none;
 }
 
 .tooltip__title {
   color: #ffffff;
-  font-size: 20px;
+  font-size: 19px;
+  letter-spacing: 1;
 }
 
 .tooltip__desc {
-  color: #dcdcdc;
-  font-size: 16px;
+  color: #bdbdbd;
+  font-size: 15px;
 }
 
 .tooltip__info {
-  color: #bdbdbd;
-  font-size: 14px;
+  color: #8a8a94;
+  font-size: 13px;
 }
 
 /* Click-outside catcher for the secondary sidebars. Sits above the main menu but below the
@@ -1541,7 +1647,8 @@
   left: 20px;
   right: 20px;
   bottom: 30px;
-  background-color: #595959;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dialog__inside {
@@ -1553,13 +1660,12 @@
   align-items: center;
   justify-content: center;
   padding: 0 8px;
-  background-color: #737373;
 }
 
 .dialog__text {
   width: 100%;
   color: #ffffff;
-  font-size: 22px;
+  font-size: 21px;
   text-align: center;
 }
 
@@ -1567,18 +1673,20 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 150px;
-  height: 30px;
+  width: 190px;
+  height: 40px;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  background-color: #464646;
+  gap: 10px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(89, 137, 217, 0.6);
 }
 
 .dialog__name-text {
   color: #ffffff;
-  font-size: 25px;
-  text-align: center;
+  font-size: 22px;
+  letter-spacing: 2;
+  text-align: left;
 }
 
 .dialog__choices {
@@ -1590,20 +1698,23 @@
   flex-direction: row;
 }
 
+/* The choice row doubles as the panel frame; only its top band and edges show around the
+   content well, so it carries the blue leading edge. */
 .dialog__choice {
   flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 8px 6px 8px;
+  padding: 0 8px 8px 8px;
+  border-top: 1px solid rgba(89, 137, 217, 0.6);
   border-radius: 0;
-  background-color: #ffffff;
+  background-color: rgba(10, 12, 16, 0.97);
   cursor: pointer;
 }
 
 .dialog__choice-text {
   width: 100%;
-  color: #323232;
+  color: #c4c4c4;
   font-size: 18px;
   text-align: center;
 }
@@ -1613,22 +1724,45 @@
 /* ReactUnity exposes :hover/:active. Pressed states stay monochrome   */
 /* so the interface keeps its stark, flat character.                   */
 /* ------------------------------------------------------------------ */
-.pause-button:hover,
-.pause-slot:hover,
+/* HUD rows: outlined, so interaction adds a translucent white wash and a blue contour. */
 .planet-panel__action:hover,
 .hud-submenu__return:hover,
 .priority-row__btn:hover,
-.dialog__choice:hover {
-  background-color: #ededed;
+.priority-toggle:hover,
+.shipping-action:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: #5989d9;
 }
 
-.pause-button:active,
-.pause-slot:active,
 .planet-panel__action:active,
 .hud-submenu__return:active,
 .priority-row__btn:active,
+.priority-toggle:active,
+.shipping-action:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Selection stays blue, and the disabled shipping action never lights up. */
+.priority-toggle--on:hover {
+  background-color: #6a97de;
+  border-color: #6a97de;
+}
+
+.priority-toggle--on:active {
+  background-color: #4f7bc6;
+}
+
+.shipping-action--off:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.dialog__choice:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
 .dialog__choice:active {
-  background-color: #d6d6d6;
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Main-menu panel rows: outlined, so interaction adds a translucent white wash. */
@@ -1695,31 +1829,35 @@
 }
 
 .facility-slot:hover {
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: #5989d9;
 }
 
 .facility-slot:active {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .facility-slot--empty:hover {
-  background-color: rgba(0, 0, 0, 0.25);
+  border-color: #5989d9;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .inventory-item:hover {
+  border-color: rgba(255, 255, 255, 0.16);
   background-color: rgba(255, 255, 255, 0.08);
 }
 
 .hud-submenu__cell:hover {
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: #5989d9;
 }
 
 .shipping-ship:hover {
-  background-color: #b5b5b5;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .shipping-ship--selected:hover {
-  background-color: #f2f2f2;
+  background-color: rgba(89, 137, 217, 0.28);
 }
 
 .settings-tab:hover {
@@ -1732,10 +1870,10 @@
 
 /* Empty-state copy, used when a panel has nothing to list. */
 .task-queue__empty {
-  width: 200px;
-  margin-top: 30px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 18px;
+  width: 100%;
+  margin-top: 24px;
+  color: #8a8a94;
+  font-size: 15px;
   text-align: center;
 }
 
@@ -1861,7 +1999,7 @@
   right: 0;
   bottom: 0;
   height: 1px;
-  background-color: rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
 .planet-graph__grid {
@@ -1869,5 +2007,5 @@
   left: 0;
   right: 0;
   height: 1px;
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.06);
 }

@@ -10,6 +10,7 @@ export function QuestObjective({ quest }: { quest: QuestSnapshot | undefined }) 
 
   return (
     <view className={cn('quest-objective', visible && 'quest-objective--open')}>
+      <view className="hud-vignette" />
       <text className="quest-objective__text">{visible ? quest!.text : ''}</text>
     </view>
   );

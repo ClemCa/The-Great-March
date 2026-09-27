@@ -11,7 +11,9 @@ export function TaskQueue({ state }: { state: GameState }) {
 
   return (
     <view className={cn('task-queue', !planet && 'task-queue--hidden')}>
+      <view className="hud-vignette" />
       <view className="task-queue__title">
+        <view className="hud-header__mark" />
         <text>Task Queue</text>
       </view>
       <view className="task-queue__list">
@@ -25,7 +27,7 @@ export function TaskQueue({ state }: { state: GameState }) {
             <view className="queue-card__track">
               <view
                 className="queue-card__progress"
-                style={{ width: `${Math.round(order.progress * 200)}px` }}
+                style={{ width: `${Math.round(order.progress * 100)}%` }}
               />
             </view>
           </view>

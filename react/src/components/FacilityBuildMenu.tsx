@@ -16,7 +16,9 @@ interface FacilityBuildMenuProps {
 export function FacilityBuildMenu({ title, options, onClose }: FacilityBuildMenuProps) {
   return (
     <view className="hud-submenu">
+      <view className="hud-vignette" />
       <view className="hud-submenu__title">
+        <view className="hud-header__mark" />
         <text>{title}</text>
       </view>
 

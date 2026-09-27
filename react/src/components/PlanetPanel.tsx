@@ -33,7 +33,10 @@ export function PlanetPanel({ state }: { state: GameState }) {
     <view className={cn('planet-panel', open && 'planet-panel--open')}>
       {planet && (
         <>
+          <view className="hud-vignette" />
+
           <view className="planet-panel__title">
+            <view className="hud-header__mark" />
             <text className="planet-panel__title-text">{planet.name}</text>
           </view>
 
@@ -48,6 +51,7 @@ export function PlanetPanel({ state }: { state: GameState }) {
 
           <view className="planet-panel__section planet-panel__facilities">
             <view className="planet-panel__section-title">
+              <view className="hud-section__tick" />
               <text>Facilities</text>
             </view>
             <scroll className="planet-panel__scroll">
@@ -107,6 +111,7 @@ export function PlanetPanel({ state }: { state: GameState }) {
 
           <view className="planet-panel__section planet-panel__inventory">
             <view className="planet-panel__section-title">
+              <view className="hud-section__tick" />
               <text>Inventory</text>
             </view>
             <scroll className="planet-panel__scroll">
@@ -128,6 +133,7 @@ export function PlanetPanel({ state }: { state: GameState }) {
 
           <view className="planet-panel__section planet-panel__shipping">
             <view className="planet-panel__section-title">
+              <view className="hud-section__tick" />
               <text>Shipping &amp; Consumption</text>
             </view>
             <button

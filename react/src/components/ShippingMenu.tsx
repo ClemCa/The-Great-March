@@ -17,7 +17,9 @@ export function ShippingMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
 
   return (
     <view className="hud-submenu hud-submenu--shipping">
+      <view className="hud-vignette" />
       <view className="hud-submenu__title">
+        <view className="hud-header__mark" />
         <text>{titleFor(mode, planet)}</text>
       </view>
 
