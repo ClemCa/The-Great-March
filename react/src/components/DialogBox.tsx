@@ -21,7 +21,6 @@ export function DialogBox({ dialog }: { dialog: DialogSnapshot | undefined }) {
       </view>
 
       <view className="dialog__name">
-        <view className="hud-header__mark" />
         <text className="dialog__name-text">{dialog?.name ?? ''}</text>
       </view>
 

@@ -3,6 +3,7 @@ import { iconFor } from '../assets/icons';
 import { actions } from '../bridge/actions';
 import type { GameState } from '../bridge/types';
 import { cn } from '../lib/cn';
+import { HudMark } from './HudMark';
 import { PlanetGraph } from './PlanetGraph';
 import { FacilityBuildMenu } from './FacilityBuildMenu';
 import { PriorityMenu } from './PriorityMenu';
@@ -36,7 +37,7 @@ export function PlanetPanel({ state }: { state: GameState }) {
           <view className="hud-vignette" />
 
           <view className="planet-panel__title">
-            <view className="hud-header__mark" />
+            <HudMark icon="stairs" />
             <text className="planet-panel__title-text">{planet.name}</text>
           </view>
 
@@ -51,7 +52,7 @@ export function PlanetPanel({ state }: { state: GameState }) {
 
           <view className="planet-panel__section planet-panel__facilities">
             <view className="planet-panel__section-title">
-              <view className="hud-section__tick" />
+              <HudMark icon="signal" className="hud-mark--sm" />
               <text>Facilities</text>
             </view>
             <scroll className="planet-panel__scroll">
@@ -111,7 +112,7 @@ export function PlanetPanel({ state }: { state: GameState }) {
 
           <view className="planet-panel__section planet-panel__inventory">
             <view className="planet-panel__section-title">
-              <view className="hud-section__tick" />
+              <HudMark icon="grid" className="hud-mark--sm" />
               <text>Inventory</text>
             </view>
             <scroll className="planet-panel__scroll">
@@ -133,7 +134,7 @@ export function PlanetPanel({ state }: { state: GameState }) {
 
           <view className="planet-panel__section planet-panel__shipping">
             <view className="planet-panel__section-title">
-              <view className="hud-section__tick" />
+              <HudMark icon="arrow-r" className="hud-mark--sm" />
               <text>Shipping &amp; Consumption</text>
             </view>
             <button

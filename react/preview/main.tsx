@@ -59,6 +59,14 @@ const ASPECTS: Array<[string, number | null]> = [
   ['9:16', 9 / 16],
 ];
 
+/** Opens the `HudMark` glyph gallery in place of the app (`?gallery=marks`). */
+function openGallery() {
+  const next = new URLSearchParams(params);
+  next.set('gallery', 'marks');
+  next.delete('clicks');
+  window.location.search = next.toString();
+}
+
 function buildToolbar(active: string) {
   const toolbar = document.getElementById('toolbar');
   if (!toolbar) return;
@@ -106,6 +114,11 @@ function buildToolbar(active: string) {
     toolbar.append(button);
   }
 
+  const galleryButton = document.createElement('button');
+  galleryButton.textContent = 'glyphs';
+  galleryButton.addEventListener('click', openGallery);
+  toolbar.append(galleryButton);
+
   const spacer = document.createElement('span');
   spacer.className = 'label';
   toolbar.append(spacer);
@@ -147,7 +160,11 @@ async function runClicks(tokens: string[]) {
   }
 }
 
-const clicks = params.get('clicks');
-void import('../src/index.tsx').then(() => {
-  if (clicks) void runClicks(clicks.split(',').map((token) => token.trim()).filter(Boolean));
-});
+if (params.get('gallery') === 'marks') {
+  void import('./MarkGallery').then((module) => module.mountMarkGallery());
+} else {
+  const clicks = params.get('clicks');
+  void import('../src/index.tsx').then(() => {
+    if (clicks) void runClicks(clicks.split(',').map((token) => token.trim()).filter(Boolean));
+  });
+}

@@ -18,6 +18,7 @@ export function PauseBar({ state }: { state: GameState }) {
 
   return (
     <>
+      {settingsOpen && <view className="sidebar-scrim" onClick={() => setSettingsOpen(false)} />}
       <view className="pause-bar">
         {state.paused && (
           <view className="pause-menu">
@@ -87,6 +88,7 @@ export function PauseBar({ state }: { state: GameState }) {
         </button>
       </view>
 
+      {settingsOpen && <view className="sidebar-scrim" onClick={() => setSettingsOpen(false)} />}
       {settingsOpen && <view className="sidebar-scrim" onClick={() => setSettingsOpen(false)} />}
       <SettingsPanel
         open={settingsOpen}

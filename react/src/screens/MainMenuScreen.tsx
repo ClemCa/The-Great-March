@@ -38,6 +38,8 @@ export function MainMenuScreen({ state }: { state: GameState }) {
         <text className="menu-title-line">March</text>
       </view>
 
+      {(panel !== null || settingsOpen) && <view className="sidebar-scrim" onClick={closeAll} />}
+
       <view className="sidebar-slot sidebar-slot--right">
         <view className="side-panel">
           <view className="side-panel__vignette" />
@@ -70,15 +72,20 @@ export function MainMenuScreen({ state }: { state: GameState }) {
         </view>
       </view>
 
-      {(panel !== null || settingsOpen) && <view className="sidebar-scrim" onClick={closeAll} />}
-
       <SubMenuPanel
         open={panel === 'credits'}
         entries={CREDITS}
         title="CREDITS"
+        icon="star"
         onClose={() => setPanel(null)}
       />
-      <SubMenuPanel open={panel === 'team'} entries={TEAM} title="TEAM" onClose={() => setPanel(null)} />
+      <SubMenuPanel
+        open={panel === 'team'}
+        entries={TEAM}
+        title="TEAM"
+        icon="people"
+        onClose={() => setPanel(null)}
+      />
 
       <SettingsPanel
         open={settingsOpen}

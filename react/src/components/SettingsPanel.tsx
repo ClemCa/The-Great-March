@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { actions } from '../bridge/actions';
 import { cn } from '../lib/cn';
+import { HudMark } from './HudMark';
 import type { SettingSelector, SettingsSnapshot } from '../bridge/types';
 
 const TABS = ['Audio', 'Display', 'Gameplay', 'Dialogue'];
@@ -380,11 +381,8 @@ export function SettingsPanel({
       <view className="settings-panel">
         <view className="settings-panel__vignette" />
         <view className="settings-header">
-          <view className="settings-header__mark" />
+          <HudMark icon="cog" />
           <text className="settings-header__title">SETTINGS</text>
-          <button className="sidebar-close" onClick={onClose}>
-            <text>X</text>
-          </button>
         </view>
 
         <view className="settings-tabs">
@@ -558,6 +556,9 @@ export function SettingsPanel({
             </>
           )}
         </view>
+        <button className="sidebar-close" onClick={onClose}>
+          <text>X</text>
+        </button>
       </view>
     </view>
   );

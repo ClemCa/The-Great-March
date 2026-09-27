@@ -2,6 +2,7 @@ import { actions } from '../bridge/actions';
 import { iconFor } from '../assets/icons';
 import type { FacilityOption } from '../bridge/types';
 import { cn } from '../lib/cn';
+import { HudMark } from './HudMark';
 
 interface FacilityBuildMenuProps {
   title: string;
@@ -18,7 +19,7 @@ export function FacilityBuildMenu({ title, options, onClose }: FacilityBuildMenu
     <view className="hud-submenu">
       <view className="hud-vignette" />
       <view className="hud-submenu__title">
-        <view className="hud-header__mark" />
+        <HudMark icon="plus" />
         <text>{title}</text>
       </view>
 

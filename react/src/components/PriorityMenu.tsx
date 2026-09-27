@@ -3,6 +3,7 @@ import { actions } from '../bridge/actions';
 import { iconFor } from '../assets/icons';
 import type { PlanetSnapshot } from '../bridge/types';
 import { cn } from '../lib/cn';
+import { HudMark } from './HudMark';
 
 /**
  * Consumption priorities submenu, mirroring `PriorityMenu`/`PriorityUpdater`: a food/fuel
@@ -28,8 +29,8 @@ export function PriorityMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
     <view className="hud-submenu hud-submenu--priority">
       <view className="hud-vignette" />
       <view className="hud-submenu__title">
-        <view className="hud-header__mark" />
-        <text>{fuel ? 'Fuel Consumption' : 'Food Consumption'}</text>
+        <HudMark icon={fuel ? 'flame' : 'consume'} />
+        <text>{fuel ? 'Fuel Consumption' : 'Consumption'}</text>
       </view>
 
       <view className="priority-switches">
@@ -37,7 +38,7 @@ export function PriorityMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
           className={cn('priority-toggle', !fuel && 'priority-toggle--on')}
           onClick={() => setFuel(false)}
         >
-          <text>Food</text>
+          <text>Consumption</text>
         </button>
         <button
           className={cn('priority-toggle', fuel && 'priority-toggle--on')}
@@ -63,7 +64,7 @@ export function PriorityMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
                 <view className="priority-row__text">
                   <text className="priority-row__name">{resource?.name ?? `#${id}`}</text>
                   <text className="priority-row__value">
-                    {`${fuel ? 'Fueling' : 'Feeding'} power: ${resource?.value ?? 0}`}
+                    {`${fuel ? 'Fueling' : 'Consumption'} power: ${resource?.value ?? 0}`}
                   </text>
                 </view>
                 <view className="priority-row__controls">

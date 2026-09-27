@@ -1,6 +1,7 @@
 import { actions } from '../bridge/actions';
 import { iconFor } from '../assets/icons';
 import { cn } from '../lib/cn';
+import { HudMark } from './HudMark';
 import type { PlanetSnapshot, ResourceEntry } from '../bridge/types';
 
 /**
@@ -19,7 +20,7 @@ export function ShippingMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
     <view className="hud-submenu hud-submenu--shipping">
       <view className="hud-vignette" />
       <view className="hud-submenu__title">
-        <view className="hud-header__mark" />
+        <HudMark icon={markFor(mode)} />
         <text>{titleFor(mode, planet)}</text>
       </view>
 
@@ -232,6 +233,21 @@ function CargoLoader({ planet }: { planet: PlanetSnapshot }) {
       </button>
     </view>
   );
+}
+
+function markFor(mode: string) {
+  switch (mode) {
+    case 'people':
+      return 'people';
+    case 'resources':
+      return 'block';
+    case 'cargo':
+      return 'split-v';
+    case 'president':
+      return 'star';
+    default:
+      return 'arrow-r';
+  }
 }
 
 function titleFor(mode: string, planet: PlanetSnapshot) {

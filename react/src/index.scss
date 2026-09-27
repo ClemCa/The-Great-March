@@ -183,7 +183,6 @@
   position: relative;
   width: 100%;
   flex-direction: column;
-  padding-top: 20px;
   background-color: rgba(10, 12, 16, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-top-color: rgba(89, 137, 217, 0.6);
@@ -203,21 +202,16 @@
   pointer-events: none;
 }
 
-/* Console heading shared with the settings panel: a blue mark and an uppercase label. */
+/* Console heading shared with the settings panel: a blue mark and an uppercase label. Right inset
+   reserves room for the absolutely-positioned dismiss button. */
 .submenu-header {
   height: 56px;
   flex-shrink: 0;
   flex-direction: row;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 60px 0 20px;
   gap: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.submenu-header__mark {
-  width: 4px;
-  height: 24px;
-  background-color: #5989d9;
 }
 
 .submenu-header__title {
@@ -271,11 +265,28 @@
    faint bottom vignette and console headings marked with a blue tick.
    Blue is reserved for structure and selection; red only for progression. */
 
-/* Console heading mark, shared by the HUD panels (planet, queue, submenus). */
-.hud-header__mark {
-  width: 4px;
-  height: 24px;
+/* Console heading glyph: a small pixel mark drawn from the lit cells of a 5x5 grid
+   (patterns live in HudMark.tsx). Titles use the default box, section sub-headings the
+   smaller variant, so rank is readable at a glance. */
+.hud-mark {
+  position: relative;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+}
+
+.hud-mark--sm {
+  width: 14px;
+  height: 14px;
+}
+
+.hud-mark--lg {
+  width: 40px;
+  height: 40px;
+}
+
+.hud-mark__cell {
+  position: absolute;
   background-color: #5989d9;
 }
 
@@ -288,14 +299,6 @@
   left: 0;
   background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
   pointer-events: none;
-}
-
-/* Section heading inside a panel: a blue tick and a muted, spaced label. */
-.hud-section__tick {
-  width: 3px;
-  height: 12px;
-  flex-shrink: 0;
-  background-color: #5989d9;
 }
 
 /* --- Pause cluster (top-right), original `PauseCanvas` --- */
@@ -596,12 +599,12 @@
 
 .planet-panel__inventory {
   top: 612px;
-  height: 286px;
+  height: 274px;
 }
 
 .planet-panel__shipping {
-  top: 898px;
-  height: 122px;
+  top: 886px;
+  height: 134px;
 }
 
 /* Group heading: a blue tick and a muted, spaced label over a hairline rule. */
@@ -1057,7 +1060,11 @@
 .quest-objective {
   position: absolute;
   top: -80px;
-  left: 610px;
+  /* True screen centring: `left` is a percentage of the (flexible) app width, and the
+     translate percentage resolves against this node's own width, so it stays centred at
+     any aspect ratio instead of the 1920-only `left: 610px` it used to assume. */
+  left: 50%;
+  translate: -50% 0;
   width: 700px;
   height: 60px;
   flex-direction: row;
@@ -1115,15 +1122,16 @@
   font-size: 13px;
 }
 
-/* Click-outside catcher for the secondary sidebars. Sits above the main menu but below the
-   sliding panels, so tapping the empty space around an open panel dismisses it. */
+/* Click-outside catcher for the secondary sidebars. Invisible: it must not dim the menu, and it
+   is ordered beneath the right sidebar so the menu stays visible and clickable while a panel is
+   open — tapping the empty space around a panel still dismisses it. */
 .sidebar-scrim {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: rgba(8, 9, 12, 0.72);
+  background-color: rgba(0, 0, 0, 0);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1174,15 +1182,9 @@
   flex-shrink: 0;
   flex-direction: row;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 60px 0 16px;
   gap: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.settings-header__mark {
-  width: 4px;
-  height: 28px;
-  background-color: #5989d9;
 }
 
 .settings-header__title {
@@ -1222,11 +1224,15 @@
   color: #ffffff;
 }
 
-/* Dismiss button shared by every secondary sidebar (submenus and settings). */
+/* Dismiss button shared by every secondary sidebar (submenus and settings). Anchored to the
+   panel's top-right corner rather than laid out in the header flow, so surrounding padding (e.g.
+   the submenu panel's top inset) can never shift it. */
 .sidebar-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   width: 40px;
   height: 40px;
-  margin-left: auto;
   flex-shrink: 0;
   flex-direction: row;
   align-items: center;
@@ -1628,7 +1634,10 @@
 /* ------------------------------------------------------------------ */
 .dialog {
   position: absolute;
-  left: 611px;
+  /* Like the objective banner: centred against the flexible app width, the translate resolving
+     against this box's own width, rather than the 1920-only `left: 611px` it used to assume. */
+  left: 50%;
+  translate: -50% 0;
   bottom: -208px;
   width: 698px;
   height: 208px;

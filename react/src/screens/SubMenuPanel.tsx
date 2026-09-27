@@ -1,11 +1,14 @@
 import { actions } from '../bridge/actions';
 import type { Credit } from '../menu/credits';
+import { HudMark } from '../components/HudMark';
 
 interface SubMenuPanelProps {
   open: boolean;
   entries: Credit[];
   /** Uppercase console heading, mirroring the settings panel. */
   title: string;
+  /** Console glyph shown before the heading. */
+  icon: string;
   onClose: () => void;
 }
 
@@ -13,7 +16,7 @@ interface SubMenuPanelProps {
  * The left-hand sliding panel used for the Credits and Team submenus. It stays mounted so the
  * `left` transition can animate it in and out, matching `SubMenu`'s lerp in the original.
  */
-export function SubMenuPanel({ open, entries, title, onClose }: SubMenuPanelProps) {
+export function SubMenuPanel({ open, entries, title, icon, onClose }: SubMenuPanelProps) {
   return (
     <view
       className="sidebar-slot sidebar-slot--left"
@@ -22,11 +25,8 @@ export function SubMenuPanel({ open, entries, title, onClose }: SubMenuPanelProp
       <view className="submenu-panel">
         <view className="submenu-panel__vignette" />
         <view className="submenu-header">
-          <view className="submenu-header__mark" />
+          <HudMark icon={icon} />
           <text className="submenu-header__title">{title}</text>
-          <button className="sidebar-close" onClick={onClose}>
-            <text>X</text>
-          </button>
         </view>
         <scroll className="submenu-list">
           {entries.map((entry) => (
@@ -36,6 +36,9 @@ export function SubMenuPanel({ open, entries, title, onClose }: SubMenuPanelProp
             </view>
           ))}
         </scroll>
+        <button className="sidebar-close" onClick={onClose}>
+          <text>X</text>
+        </button>
       </view>
     </view>
   );

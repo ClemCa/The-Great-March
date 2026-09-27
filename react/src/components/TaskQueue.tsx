@@ -1,5 +1,6 @@
 import type { GameState } from '../bridge/types';
 import { cn } from '../lib/cn';
+import { HudMark } from './HudMark';
 
 /**
  * Left-hand task queue. Mirrors the original `Queue` canvas: it slides in only
@@ -13,7 +14,7 @@ export function TaskQueue({ state }: { state: GameState }) {
     <view className={cn('task-queue', !planet && 'task-queue--hidden')}>
       <view className="hud-vignette" />
       <view className="task-queue__title">
-        <view className="hud-header__mark" />
+        <HudMark icon="list" />
         <text>Task Queue</text>
       </view>
       <view className="task-queue__list">
