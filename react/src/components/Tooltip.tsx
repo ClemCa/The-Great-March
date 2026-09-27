@@ -1,4 +1,5 @@
 import type { TooltipSnapshot } from '../bridge/types';
+import { HudMark } from './HudMark';
 
 /**
  * Cursor-following help tooltip. Mirrors the original `PromptMenu`: Unity resolves the hovered
@@ -13,7 +14,12 @@ export function Tooltip({ tooltip }: { tooltip: TooltipSnapshot | undefined }) {
 
   return (
     <view className="tooltip" style={{ left, top }}>
-      {tooltip.title ? <text className="tooltip__title">{tooltip.title}</text> : null}
+      {tooltip.title ? (
+        <view className="tooltip__head">
+          <HudMark icon="reticle" className="hud-mark--sm" />
+          <text className="tooltip__title">{tooltip.title}</text>
+        </view>
+      ) : null}
       {tooltip.description ? <text className="tooltip__desc">{tooltip.description}</text> : null}
       {tooltip.info1 ? <text className="tooltip__info">{tooltip.info1}</text> : null}
       {tooltip.info2 ? <text className="tooltip__info">{tooltip.info2}</text> : null}

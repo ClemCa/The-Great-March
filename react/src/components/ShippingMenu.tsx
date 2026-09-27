@@ -1,288 +1,322 @@
+import { useEffect, useRef, useState } from 'react';
 import { actions } from '../bridge/actions';
 import { iconFor } from '../assets/icons';
 import { cn } from '../lib/cn';
 import { HudMark } from './HudMark';
-import type { PlanetSnapshot, ResourceEntry } from '../bridge/types';
+import type { PlanetSnapshot, ShipEntry } from '../bridge/types';
+
+type Stage = 'ships' | 'load';
+
+const CATEGORIES = [
+  { key: 'Cargo', label: 'Cargo', mark: 'block' },
+  { key: 'People', label: 'People', mark: 'people' },
+  { key: 'Presidential', label: 'Presidential', mark: 'star' },
+] as const;
+
+function categoryOf(type: string): (typeof CATEGORIES)[number]['key'] {
+  if (type === 'Cargo') return 'Cargo';
+  if (type === 'Presidential') return 'Presidential';
+  return 'People';
+}
+
+function markForType(type: string) {
+  if (type === 'Presidential') return 'star';
+  if (type === 'Cargo') return 'block';
+  return 'people';
+}
+
+function titleForType(type: string) {
+  if (type === 'Presidential') return 'Presidential Ship';
+  if (type === 'Cargo') return 'Load Cargo';
+  return 'Send People';
+}
 
 /**
- * Full React port of the `ShippingMenu` / `ShippingSubMenu` / `ShipChoice` / `CargoChoice` flow.
- * The step machine lives in `ReactGameBridge` (shipping mode + selections); this component is a
- * thin renderer that dispatches the same actions the original uGUI handlers did.
+ * Ship-first shipping menu. The player picks a ship (grouped by what it carries), refuels it
+ * inline or on the next screen, then loads cargo and sends — a single flow instead of the old
+ * Player/People/Resources/Ships wizard. Refuelling is always its own action, and a quick-refuel
+ * button is repeated on the load screen so fuel never blocks a send silently.
  */
 export function ShippingMenu({ planet, onClose }: { planet: PlanetSnapshot; onClose: () => void }) {
+  const [stage, setStage] = useState<Stage>('ships');
   const shipping = planet.shipping;
+  const selected = shipping?.ships.find((ship) => ship.index === shipping.selectedShip);
+
+  useEffect(() => {
+    setStage('ships');
+  }, [planet.name]);
+
+  useEffect(() => {
+    if (stage === 'load' && !selected) setStage('ships');
+  }, [stage, selected]);
+
+  useEffect(() => {
+    if (!shipping) return;
+    if (shipping.peopleAmount > shipping.maxPeople) actions.shippingSetPeopleAmount(shipping.maxPeople);
+    else if (shipping.resourceAmount > shipping.maxResource) actions.shippingSetResourceAmount(shipping.maxResource);
+  }, [shipping?.peopleAmount, shipping?.maxPeople, shipping?.resourceAmount, shipping?.maxResource]);
+
   if (!shipping) return null;
 
-  const mode = shipping.mode || 'ships';
-  const returnToMenu = () => actions.shippingSetMode('menu');
+  const groups = CATEGORIES.map((category) => ({
+    ...category,
+    ships: shipping.ships.filter((ship) => categoryOf(ship.type) === category.key),
+  })).filter((group) => group.ships.length > 0);
+
+  const openShip = (ship: ShipEntry) => {
+    actions.shippingSelectShip(ship.index);
+    setStage('load');
+  };
 
   return (
     <view className="hud-submenu hud-submenu--shipping">
       <view className="hud-vignette" />
       <view className="hud-submenu__title">
-        <HudMark icon={markFor(mode)} />
-        <text>{titleFor(mode, planet)}</text>
+        <HudMark icon={stage === 'load' ? markForType(shipping.shipType || selected?.type || '') : 'arrow-r'} />
+        <text>{stage === 'load' ? titleForType(shipping.shipType || selected?.type || '') : `Shipping (${shipping.ships.length})`}</text>
       </view>
 
       <view className="shipping-body">
-        {mode === 'menu' && (
-          <view className="shipping-menu">
-            <button
-              className={cn('shipping-action', (!shipping.hasPlayer || shipping.leaderInTransit) && 'shipping-action--off')}
-              onClick={
-                shipping.hasPlayer && !shipping.leaderInTransit ? () => actions.shippingPlayerMove() : undefined
-              }
-            >
-              <text>Player</text>
-            </button>
-            <button className="shipping-action" onClick={() => actions.shippingSetMode('people')}>
-              <text>People</text>
-            </button>
-            <button className="shipping-action" onClick={() => actions.shippingSetMode('resources')}>
-              <text>Resources</text>
-            </button>
-            <button className="shipping-action" onClick={() => actions.shippingSetMode('ships')}>
-              <text>Ships</text>
-            </button>
-          </view>
-        )}
-
-        {mode === 'ships' && <ShipList planet={planet} />}
-
-        {mode === 'people' && (
-          <view className="shipping-column">
-            <text className="shipping-note">{`${shipping.peopleAmount} of ${Math.min(planet.people, 5)} people`}</text>
-            <view className="shipping-slider">
-              <button className="settings-btn" onClick={() => actions.shippingSetPeopleAmount(Math.max(0, shipping.peopleAmount - 1))}>
-                <text>-</text>
-              </button>
-              <text className="settings-value">{shipping.peopleAmount}</text>
-              <button className="settings-btn" onClick={() => actions.shippingSetPeopleAmount(Math.min(Math.min(planet.people, 5), shipping.peopleAmount + 1))}>
-                <text>+</text>
-              </button>
-            </view>
-            <button
-              className={cn('shipping-action', shipping.peopleAmount <= 0 && 'shipping-action--off')}
-              onClick={shipping.peopleAmount > 0 ? () => actions.shippingLaunchPeople() : undefined}
-            >
-              <text>Send</text>
-            </button>
-          </view>
-        )}
-
-        {mode === 'resources' && <ResourcePicker planet={planet} />}
-
-        {mode === 'cargo' && <CargoLoader planet={planet} />}
-
-        {mode === 'president' && (
-          <view className="shipping-column">
-            <text className="shipping-note">Move the president with this ship.</text>
-            <button className="shipping-action" onClick={() => actions.shippingLaunch()}>
-              <text>Launch</text>
-            </button>
-          </view>
+        {stage === 'ships' ? (
+          <scroll className="ship-groups">
+            {groups.length === 0 && <text className="shipping-note">No ships on this planet.</text>}
+            {groups.map((group) => (
+              <view key={group.key} className="ship-group">
+                <view className="ship-group__title">
+                  <HudMark icon={group.mark} className="hud-mark--sm" />
+                  <text>{group.label}</text>
+                  <text className="ship-group__count">{group.ships.length}</text>
+                </view>
+                {group.ships.map((ship) => (
+                  <ShipRow key={ship.index} ship={ship} onOpen={openShip} />
+                ))}
+              </view>
+            ))}
+          </scroll>
+        ) : (
+          selected && <LoadStage planet={planet} ship={selected} onBack={() => setStage('ships')} />
         )}
       </view>
 
-      <button
-        className="hud-submenu__return"
-        onClick={mode === 'ships' || mode === 'menu' ? onClose : returnToMenu}
-      >
-        <text>Return</text>
+      <button className="hud-submenu__close" onClick={onClose}>
+        <text>X</text>
       </button>
     </view>
   );
 }
 
-function ShipList({ planet }: { planet: PlanetSnapshot }) {
-  const shipping = planet.shipping!;
+function ShipRow({ ship, onOpen }: { ship: ShipEntry; onOpen: (ship: ShipEntry) => void }) {
+  const pct = ship.requiredFuel > 0 ? Math.min(100, Math.round((ship.fuel / ship.requiredFuel) * 100)) : 100;
+  const refuel = () => {
+    actions.shippingSelectShip(ship.index);
+    actions.shippingRefuel();
+  };
+
   return (
-    <view className="shipping-column">
-      {shipping.ships.length === 0 && <text className="shipping-note">No ship here.</text>}
-      <scroll className="shipping-ships">
-        {shipping.ships.map((ship) => (
+    <view className="ship-row">
+      <view className="ship-row__top">
+        <image className="ship-row__icon" src={iconFor(ship.icon)} />
+        <view className="ship-row__info">
+          <ShipName ship={ship} className="ship-row__name" />
+          <text className="ship-row__type">{ship.type}</text>
+        </view>
+        <view className="ship-row__fuel">
+          <text className={cn('ship-row__fuel-text', ship.canLaunch ? 'ship-row__fuel-text--ok' : 'ship-row__fuel-text--low')}>
+            {`Fuel ${ship.fuel}/${ship.requiredFuel}`}
+          </text>
+          <view className="ship-row__fuel-bar">
+            <view
+              className={cn('ship-row__fuel-fill', ship.canLaunch ? 'ship-row__fuel-fill--ok' : 'ship-row__fuel-fill--low')}
+              style={{ width: `${pct}%` }}
+            />
+          </view>
+        </view>
+      </view>
+
+      <view className="ship-row__actions">
+        {!ship.canLaunch && (
           <button
-            key={ship.index}
-            className={cn('shipping-ship', shipping.selectedShip === ship.index && 'shipping-ship--selected')}
-            onMouseEnter={() => actions.promptTarget('ship', String(ship.index))}
-            onMouseLeave={actions.clearPrompt}
-            onClick={() => actions.shippingSelectShip(ship.index)}
+            className={cn('ship-btn ship-btn--fuel', !ship.canRefuel && 'ship-btn--off')}
+            onClick={ship.canRefuel ? refuel : undefined}
           >
-            <image className="shipping-ship__icon" src={iconFor(ship.icon)} />
-            <text className="shipping-ship__label">{`Ship ${ship.index + 1}: ${ship.type}`}</text>
-            <text className="shipping-ship__fuel">{`Fuel ${ship.fuel}/${ship.requiredFuel}`}</text>
+            <text>{`Refuel ${ship.refuelAmount}`}</text>
           </button>
-        ))}
-      </scroll>
-
-      {shipping.selectedShip >= 0 && (
-        <button
-          className={cn('shipping-action', !canAct(planet) && 'shipping-action--off')}
-          onClick={canAct(planet) ? () => actions.shippingRefuel() : undefined}
-        >
-          <text>{actionLabel(planet)}</text>
+        )}
+        <button className="ship-btn ship-btn--primary" onClick={() => onOpen(ship)}>
+          <text>{ship.type === 'Presidential' ? 'Send' : 'Load'}</text>
         </button>
+      </view>
+    </view>
+  );
+}
+
+/**
+ * The ship's name: plain text until clicked, then an inline text field. The name lives on the
+ * Unity ship (`ShippingRenameShip` -> `Registry.Ship.Name`) so it survives saves and transit.
+ */
+function ShipName({ ship, className }: { ship: ShipEntry; className?: string }) {
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef<any>(null);
+  const fallback = `Ship ${ship.index + 1}`;
+
+  useEffect(() => {
+    if (!editing) return;
+    const field: any = inputRef.current;
+    if (!field) return;
+    if (typeof field.focus === 'function') {
+      field.focus();
+      field.select?.();
+      return;
+    }
+    const inner = field.InputField;
+    inner?.ActivateInputField?.();
+    if (inner) {
+      inner.selectionAnchorPosition = 0;
+      inner.selectionFocusPosition = (inner.text ?? '').length;
+    }
+  }, [editing]);
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        className={cn(className, 'ship-name--edit')}
+        value={ship.name || fallback}
+        characterLimit={24}
+        onEndEdit={(text: string) => {
+          actions.shippingRenameShip(ship.index, text);
+          setEditing(false);
+        }}
+      />
+    );
+  }
+
+  return (
+    <text className={cn(className, 'ship-name')} onClick={() => setEditing(true)}>
+      {ship.name || fallback}
+    </text>
+  );
+}
+
+function LoadStage({ planet, ship, onBack }: { planet: PlanetSnapshot; ship: ShipEntry; onBack: () => void }) {
+  const shipping = planet.shipping!;
+  const type = shipping.shipType || ship.type;
+  const live = shipping.ships.find((entry) => entry.index === shipping.selectedShip) ?? ship;
+  const presidential = type === 'Presidential';
+  const cargo = type === 'Cargo' || type === 'Passenger';
+  const resources = planet.resources.filter((resource) => resource.amount > 0);
+  const canSend = live.canLaunch && (presidential ? shipping.hasPlayer : shipping.peopleAmount > 0);
+
+  const send = () => {
+    if (presidential) actions.shippingLaunchPresident();
+    else actions.shippingLaunch();
+    onBack();
+  };
+
+  return (
+    <view className="ship-load">
+      <view className="ship-load__head">
+        <image className="ship-load__icon" src={iconFor(live.icon)} />
+        <view className="ship-load__titles">
+          <ShipName ship={live} className="ship-load__title" />
+          <text className="ship-load__type">{type}</text>
+          <text className={cn('ship-load__fuel', live.canLaunch ? 'ship-load__fuel--ok' : 'ship-load__fuel--low')}>
+            {`Fuel ${live.fuel}/${live.requiredFuel}`}
+          </text>
+        </view>
+        {!live.canLaunch && (
+          <button
+            className={cn('ship-btn ship-btn--fuel', !live.canRefuel && 'ship-btn--off')}
+            onClick={live.canRefuel ? actions.shippingRefuel : undefined}
+          >
+            <text>{`Refuel ${live.refuelAmount}`}</text>
+          </button>
+        )}
+      </view>
+
+      {presidential && <text className="shipping-note">Move the president with this ship.</text>}
+
+      {cargo && (
+        <view className="ship-section">
+          <text className="ship-section__label">Resources</text>
+          <scroll className="ship-load__resources">
+            <view className="hud-submenu__grid">
+              {resources.map((resource) => (
+                <button
+                  key={`${resource.id}-${resource.advanced}`}
+                  className={cn(
+                    'ship-cell',
+                    shipping.resourceId === resource.id &&
+                      shipping.resourceAdvanced === resource.advanced &&
+                      'ship-cell--selected',
+                  )}
+                  onMouseEnter={() => actions.promptTarget(resource.advanced ? 'advancedresource' : 'resource', resource.id)}
+                  onMouseLeave={actions.clearPrompt}
+                  onClick={() => actions.shippingSelectResource(resource.id, resource.advanced)}
+                >
+                  <image className="ship-cell__icon" src={iconFor(resource.icon)} />
+                </button>
+              ))}
+            </view>
+          </scroll>
+          <Stepper
+            label="Amount"
+            value={shipping.resourceAmount}
+            max={shipping.maxResource}
+            onChange={actions.shippingSetResourceAmount}
+          />
+        </view>
       )}
+
+      {!presidential && (
+        <Stepper
+          label="People"
+          value={shipping.peopleAmount}
+          max={shipping.maxPeople}
+          onChange={actions.shippingSetPeopleAmount}
+        />
+      )}
+
+      <view className="ship-load__footer">
+        <button className="ship-btn" onClick={onBack}>
+          <text>Back</text>
+        </button>
+        <button className={cn('ship-btn ship-btn--primary', !canSend && 'ship-btn--off')} onClick={canSend ? send : undefined}>
+          <text>{presidential ? 'Send President' : 'Send'}</text>
+        </button>
+      </view>
     </view>
   );
 }
 
-function ResourcePicker({ planet }: { planet: PlanetSnapshot }) {
-  const shipping = planet.shipping!;
-  const selected = findResource(planet, shipping.resourceId, shipping.resourceAdvanced);
-  const max = Math.min(selected?.amount ?? 0, 10);
-
+function Stepper({
+  label,
+  value,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  onChange: (value: number) => void;
+}) {
   return (
-    <view className="shipping-column">
-      <scroll className="shipping-resources">
-        <view className="hud-submenu__grid">
-          {planet.resources
-            .filter((resource) => resource.amount > 0)
-            .map((resource) => (
-              <button
-                key={resource.id}
-                className={cn(
-                  'hud-submenu__cell',
-                  shipping.resourceId === resource.id && shipping.resourceAdvanced === resource.advanced && 'shipping-cell--selected',
-                )}
-                onMouseEnter={() => actions.promptTarget(resource.advanced ? 'advancedresource' : 'resource', resource.id)}
-                onMouseLeave={actions.clearPrompt}
-                onClick={() => actions.shippingSelectResource(resource.id, resource.advanced)}
-              >
-                <image className="hud-submenu__icon" src={iconFor(resource.icon)} />
-              </button>
-            ))}
-        </view>
-      </scroll>
-
-      <view className="shipping-slider">
-        <button className="settings-btn" onClick={() => actions.shippingSetResourceAmount(Math.max(0, shipping.resourceAmount - 1))}>
-          <text>-</text>
-        </button>
-        <text className="settings-value">{shipping.resourceAmount}</text>
-        <button className="settings-btn" onClick={() => actions.shippingSetResourceAmount(Math.min(max, shipping.resourceAmount + 1))}>
-          <text>+</text>
-        </button>
-      </view>
-
+    <view className="ship-stepper">
+      <text className="ship-stepper__label">{label}</text>
       <button
-        className={cn('shipping-action', shipping.resourceAmount <= 0 && 'shipping-action--off')}
-        onClick={shipping.resourceAmount > 0 ? () => actions.shippingLaunchResource() : undefined}
+        className={cn('ship-stepper__btn', value <= 0 && 'ship-stepper__btn--off')}
+        onClick={value > 0 ? () => onChange(value - 1) : undefined}
       >
-        <text>Send</text>
+        <text>-</text>
       </button>
+      <text className="ship-stepper__value">{value}</text>
+      <button
+        className={cn('ship-stepper__btn', value >= max && 'ship-stepper__btn--off')}
+        onClick={value < max ? () => onChange(value + 1) : undefined}
+      >
+        <text>+</text>
+      </button>
+      <text className="ship-stepper__max">{`/ ${max}`}</text>
     </view>
   );
-}
-
-function CargoLoader({ planet }: { planet: PlanetSnapshot }) {
-  const shipping = planet.shipping!;
-  const selected = findResource(planet, shipping.resourceId, shipping.resourceAdvanced);
-  const max = Math.min(selected?.amount ?? 0, 10);
-
-  return (
-    <view className="shipping-column">
-      <scroll className="shipping-resources">
-        <view className="hud-submenu__grid">
-          {planet.resources
-            .filter((resource) => resource.amount > 0)
-            .map((resource) => (
-              <button
-                key={resource.id}
-                className={cn(
-                  'hud-submenu__cell',
-                  shipping.resourceId === resource.id && shipping.resourceAdvanced === resource.advanced && 'shipping-cell--selected',
-                )}
-                onMouseEnter={() => actions.promptTarget(resource.advanced ? 'advancedresource' : 'resource', resource.id)}
-                onMouseLeave={actions.clearPrompt}
-                onClick={() => actions.shippingSelectResource(resource.id, resource.advanced)}
-              >
-                <image className="hud-submenu__icon" src={iconFor(resource.icon)} />
-              </button>
-            ))}
-        </view>
-      </scroll>
-
-      <view className="shipping-slider">
-        <text className="shipping-slider__label">Cargo</text>
-        <button className="settings-btn" onClick={() => actions.shippingSetResourceAmount(Math.max(0, shipping.resourceAmount - 1))}>
-          <text>-</text>
-        </button>
-        <text className="settings-value">{`${shipping.resourceAmount}/${max}`}</text>
-        <button className="settings-btn" onClick={() => actions.shippingSetResourceAmount(Math.min(max, shipping.resourceAmount + 1))}>
-          <text>+</text>
-        </button>
-      </view>
-
-      <view className="shipping-slider">
-        <text className="shipping-slider__label">People</text>
-        <button className="settings-btn" onClick={() => actions.shippingSetPeopleAmount(Math.max(0, shipping.peopleAmount - 1))}>
-          <text>-</text>
-        </button>
-        <text className="settings-value">{`${shipping.peopleAmount}/${shipping.maxPeople}`}</text>
-        <button className="settings-btn" onClick={() => actions.shippingSetPeopleAmount(Math.min(shipping.maxPeople, shipping.peopleAmount + 1))}>
-          <text>+</text>
-        </button>
-      </view>
-
-      <button
-        className={cn('shipping-action', shipping.peopleAmount <= 0 && 'shipping-action--off')}
-        onClick={shipping.peopleAmount > 0 ? () => actions.shippingLaunch() : undefined}
-      >
-        <text>Launch</text>
-      </button>
-    </view>
-  );
-}
-
-function markFor(mode: string) {
-  switch (mode) {
-    case 'people':
-      return 'people';
-    case 'resources':
-      return 'block';
-    case 'cargo':
-      return 'split-v';
-    case 'president':
-      return 'star';
-    default:
-      return 'arrow-r';
-  }
-}
-
-function titleFor(mode: string, planet: PlanetSnapshot) {
-  switch (mode) {
-    case 'people':
-      return 'Send People';
-    case 'resources':
-      return 'Send Resources';
-    case 'cargo':
-      return 'Load Cargo';
-    case 'president':
-      return 'Presidential Ship';
-    default:
-      return `Ships (${planet.ships})`;
-  }
-}
-
-function findResource(planet: PlanetSnapshot, id: string, advanced: boolean): ResourceEntry | undefined {
-  return planet.resources.find((resource) => resource.id === id && resource.advanced === advanced);
-}
-
-function selectedShip(planet: PlanetSnapshot) {
-  const shipping = planet.shipping!;
-  return shipping.ships.find((ship) => ship.index === shipping.selectedShip);
-}
-
-function canAct(planet: PlanetSnapshot) {
-  const ship = selectedShip(planet);
-  return !!ship && (ship.canLaunch || ship.canRefuel);
-}
-
-function actionLabel(planet: PlanetSnapshot) {
-  const ship = selectedShip(planet);
-  if (!ship) return 'Select a ship';
-  if (ship.canLaunch) return ship.type === 'Presidential' ? 'Launch' : 'Load';
-  if (ship.canRefuel) return `Refuel (${ship.refuelAmount})`;
-  return 'Missing fuel';
 }

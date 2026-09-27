@@ -3,6 +3,7 @@ import type {
   GraphSnapshot,
   PlanetSnapshot,
   SettingsSnapshot,
+  ShippingSnapshot,
 } from '../src/bridge/types';
 
 /* ------------------------------------------------------------------ */
@@ -150,9 +151,9 @@ function planet(name: string, seed = 0): PlanetSnapshot {
       maxPeople: 5,
       availableFuel: 34,
       ships: [
-        { index: 0, type: 'Cargo', icon: 'Factory', fuel: 10, requiredFuel: 8, canLaunch: true, canRefuel: false, refuelAmount: 0 },
-        { index: 1, type: 'Passenger', icon: 'Farm', fuel: 3, requiredFuel: 6, canLaunch: false, canRefuel: true, refuelAmount: 3 },
-        { index: 2, type: 'Presidential', icon: 'Kitchen', fuel: 12, requiredFuel: 12, canLaunch: true, canRefuel: false, refuelAmount: 0 },
+        { index: 0, type: 'Cargo', name: 'Hauler', icon: 'Factory', fuel: 10, requiredFuel: 8, canLaunch: true, canRefuel: false, refuelAmount: 0 },
+        { index: 1, type: 'Passenger', name: '', icon: 'Farm', fuel: 3, requiredFuel: 6, canLaunch: false, canRefuel: true, refuelAmount: 3 },
+        { index: 2, type: 'Presidential', name: 'Air Force One', icon: 'Kitchen', fuel: 12, requiredFuel: 12, canLaunch: true, canRefuel: false, refuelAmount: 0 },
       ],
     },
   };
@@ -291,6 +292,52 @@ function shipOf(state: GameState) {
   return state.selectedPlanet?.shipping;
 }
 
+function selectedShipEntry(shipping: ShippingSnapshot) {
+  return shipping.ships.find((ship) => ship.index === shipping.selectedShip);
+}
+
+/**
+ * Re-derives the shipping snapshot the way `ReactGameBridge.BuildShipping` does, so the preview's
+ * ship-first flow (fuel, capacity, resource stock) behaves like the game while clicking around.
+ */
+function syncShipping(state: GameState) {
+  const shipping = shipOf(state);
+  const planet = state.selectedPlanet;
+  if (!shipping || !planet) return;
+
+  const ship = selectedShipEntry(shipping);
+  const stock = shipping.resourceId
+    ? (planet.resources.find((r) => r.id === shipping.resourceId && r.advanced === shipping.resourceAdvanced)?.amount ?? 0)
+    : 0;
+
+  shipping.people = planet.people;
+  shipping.availableFuel = planet.fuel;
+  for (const entry of shipping.ships) {
+    entry.canLaunch = entry.fuel >= entry.requiredFuel;
+    entry.refuelAmount = Math.max(0, entry.requiredFuel - entry.fuel);
+    entry.canRefuel = !entry.canLaunch && entry.refuelAmount < planet.fuel;
+  }
+
+  if (!ship) {
+    shipping.shipType = '';
+    shipping.maxResource = 0;
+    shipping.maxPeople = 0;
+    return;
+  }
+
+  shipping.shipType = ship.type;
+  if (ship.type === 'Cargo') {
+    shipping.maxResource = stock <= 0 ? 0 : Math.min(stock, Math.max(0, 11 - shipping.peopleAmount));
+    shipping.maxPeople = Math.min(planet.people, Math.max(0, 11 - shipping.resourceAmount), 5);
+  } else if (ship.type === 'Passenger') {
+    shipping.maxResource = stock <= 0 ? 0 : Math.min(stock, Math.max(0, 15 - shipping.peopleAmount), 5);
+    shipping.maxPeople = Math.min(planet.people, Math.max(0, 15 - shipping.resourceAmount));
+  } else {
+    shipping.maxResource = 0;
+    shipping.maxPeople = Math.min(planet.people, 5);
+  }
+}
+
 const noopAction = () => undefined;
 
 export const globals: Record<string, unknown> = {
@@ -416,20 +463,40 @@ export const globals: Record<string, unknown> = {
       if (shipping.mode === 'menu' || shipping.mode === 'ships') {
         shipping.selectedShip = -1;
         shipping.resourceId = '';
+        shipping.resourceAdvanced = false;
         shipping.resourceAmount = 0;
         shipping.peopleAmount = 0;
+        syncShipping(state);
       }
     }),
   shippingSelectShip: (index: number) =>
     update((state) => {
       const shipping = shipOf(state);
-      if (shipping) shipping.selectedShip = index;
+      if (!shipping) return;
+      shipping.selectedShip = index;
+      shipping.resourceId = '';
+      shipping.resourceAdvanced = false;
+      shipping.resourceAmount = 0;
+      shipping.peopleAmount = 0;
+      syncShipping(state);
     }),
   shippingRefuel: () =>
     update((state) => {
       const shipping = shipOf(state);
-      const ship = shipping?.ships.find((s) => s.index === shipping.selectedShip);
-      if (shipping && ship) shipping.mode = ship.type === 'Presidential' ? 'president' : 'cargo';
+      const planet = state.selectedPlanet;
+      const ship = shipping ? selectedShipEntry(shipping) : undefined;
+      if (!shipping || !planet || !ship) return;
+      const missing = Math.max(0, ship.requiredFuel - ship.fuel);
+      if (missing <= 0) return;
+      planet.fuel = Math.max(0, planet.fuel - missing);
+      ship.fuel += missing;
+      syncShipping(state);
+    }),
+  shippingRenameShip: (index: number, name: string) =>
+    update((state) => {
+      const shipping = shipOf(state);
+      const ship = shipping?.ships.find((entry) => entry.index === index);
+      if (ship) ship.name = name.trim().slice(0, 24);
     }),
   shippingSelectResource: (id: string, advanced: boolean) =>
     update((state) => {
@@ -438,18 +505,32 @@ export const globals: Record<string, unknown> = {
       shipping.resourceId = id;
       shipping.resourceAdvanced = advanced;
       shipping.resourceAmount = id ? 1 : 0;
+      syncShipping(state);
     }),
   shippingSetResourceAmount: (value: number) =>
     update((state) => {
       const shipping = shipOf(state);
-      if (shipping) shipping.resourceAmount = value;
+      if (shipping) shipping.resourceAmount = Math.max(0, Math.min(value, shipping.maxResource));
+      syncShipping(state);
     }),
   shippingSetPeopleAmount: (value: number) =>
     update((state) => {
       const shipping = shipOf(state);
-      if (shipping) shipping.peopleAmount = value;
+      if (shipping) shipping.peopleAmount = Math.max(0, Math.min(value, shipping.maxPeople));
+      syncShipping(state);
     }),
   shippingLaunch: () => log('shippingLaunch'),
+  shippingLaunchPresident: () => {
+    log('shippingLaunchPresident');
+    update((state) => {
+      const shipping = shipOf(state);
+      if (!shipping) return;
+      shipping.ships = shipping.ships.filter((ship) => ship.index !== shipping.selectedShip);
+      shipping.selectedShip = -1;
+      shipping.mode = 'ships';
+      syncShipping(state);
+    });
+  },
   shippingPlayerMove: () => log('shippingPlayerMove'),
   shippingLaunchPeople: () => log('shippingLaunchPeople'),
   shippingLaunchResource: () => log('shippingLaunchResource'),

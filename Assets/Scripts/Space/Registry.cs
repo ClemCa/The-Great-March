@@ -153,6 +153,7 @@ public class Registry : MonoBehaviour
     {
         public ShipType Type;
         public int Fuel;
+        public string Name;
     }
 
     public enum ShipType

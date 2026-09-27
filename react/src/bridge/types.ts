@@ -68,6 +68,7 @@ export interface ShippingSnapshot {
 export interface ShipEntry {
   index: number;
   type: string;
+  name?: string;
   icon: string;
   fuel: number;
   requiredFuel: number;

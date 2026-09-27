@@ -741,10 +741,70 @@
   height: 110px;
 }
 
-.planet-graph__bar {
+/* The original painted polylines onto a bitmap; this is the tessellated SVG replacement. */
+.planet-graph__svg {
   position: absolute;
-  bottom: 0;
-  min-width: 2px;
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 110px;
+}
+
+/* Hover crosshair: a hairline at the sample plus a dot per series, and a value tooltip. */
+.planet-graph__hover-line {
+  position: absolute;
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.planet-graph__hover-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.planet-graph__tooltip {
+  position: absolute;
+  flex-direction: column;
+  padding: 4px 6px;
+  background-color: rgba(8, 10, 14, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.planet-graph__tooltip-row {
+  height: 15px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.planet-graph__tooltip-swatch {
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+}
+
+.planet-graph__tooltip-label {
+  flex: 1;
+  color: #bdbdbd;
+  font-size: 12px;
+}
+
+.planet-graph__tooltip-value {
+  color: #ffffff;
+  font-size: 12px;
+}
+
+/* Invisible per-sample columns that drive the hover state; the sprite is never re-tessellated. */
+.planet-graph__hit {
+  position: absolute;
+  top: 0;
+  height: 110px;
+  padding: 0;
+  border-width: 0;
+  border-radius: 0;
+  background-color: transparent;
+  cursor: default;
 }
 
 /* --- Facility slots (original: 75x75 cells, vertical red progression bar) --- */
@@ -838,10 +898,10 @@
 }
 
 .hud-submenu--shipping {
-  top: 380px;
+  top: 360px;
   right: 520px;
-  width: 300px;
-  height: 410px;
+  width: 380px;
+  height: 510px;
 }
 
 .hud-submenu__title {
@@ -862,6 +922,13 @@
   left: 10px;
   right: 10px;
   bottom: 50px;
+}
+
+/* The priority menu has a 40px switch bar between the title and the list, so the list starts
+   below it instead of on top of the first reorderable row. */
+.hud-submenu--priority .hud-submenu__list {
+  top: 80px;
+  bottom: 10px;
 }
 
 .hud-submenu__grid {
@@ -915,13 +982,20 @@
   height: 40px;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 0 14px;
+}
+
+/* Two distinct clusters: the People/Fuel list switch, and the Local/Global variant switch. */
+.priority-switches__group {
+  flex-direction: row;
+  align-items: center;
 }
 
 .priority-toggle {
-  min-width: 84px;
+  min-width: 68px;
   height: 28px;
-  margin: 0 4px;
+  margin: 0 3px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
@@ -929,7 +1003,7 @@
   border-radius: 0;
   background-color: rgba(255, 255, 255, 0.04);
   color: #ffffff;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 1;
   cursor: pointer;
 }
@@ -951,6 +1025,23 @@
   align-items: center;
   padding: 0 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 2px solid transparent;
+}
+
+.priority-row--dragging {
+  border-left-color: #5989d9;
+  background-color: rgba(89, 137, 217, 0.12);
+}
+
+.priority-row__grip {
+  width: 22px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  background-color: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
 }
 
 .priority-row__icon {
@@ -960,7 +1051,7 @@
 }
 
 .priority-row__text {
-  width: 200px;
+  width: 176px;
   flex-direction: column;
 }
 
@@ -995,119 +1086,323 @@
   cursor: pointer;
 }
 
-/* --- Shipping shell --- */
+/* --- Shipping (ship-first flow) --- */
 .shipping-body {
   position: absolute;
   top: 40px;
   left: 10px;
   right: 10px;
-  bottom: 50px;
+  bottom: 10px;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
 }
 
 .shipping-note {
   color: #bdbdbd;
-  font-size: 17px;
+  font-size: 16px;
   text-align: center;
-  margin-bottom: 12px;
+  margin: 4px 0 10px 0;
 }
 
-.shipping-action {
-  width: 220px;
-  height: 44px;
+/* Ship list: one scroll of grouped sections. */
+.ship-groups {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.ship-group {
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.ship-group__title {
+  height: 26px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  color: #8a8a94;
+  font-size: 14px;
+  letter-spacing: 2;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ship-group__count {
+  margin-left: auto;
+  color: #6f6f78;
+  font-size: 13px;
+}
+
+.ship-row {
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.ship-row__top {
+  flex-direction: row;
+  align-items: center;
+}
+
+.ship-row__icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.ship-row__info {
+  flex: 1;
+  flex-direction: column;
+}
+
+.ship-row__name {
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.ship-row__type {
+  color: #8a8a94;
+  font-size: 13px;
+  letter-spacing: 1;
+}
+
+/* Click-to-rename: reads as plain text until hovered/clicked, then becomes an inline field. */
+.ship-name {
+  cursor: pointer;
+}
+
+.ship-name:hover {
+  color: #9ec1f0;
+}
+
+.ship-name--edit {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(89, 137, 217, 0.7);
+}
+
+.ship-row__fuel {
+  width: 96px;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.ship-row__fuel-text {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.ship-row__fuel-text--ok {
+  color: #bdbdbd;
+}
+
+.ship-row__fuel-text--low {
+  color: #d06a5a;
+}
+
+.ship-row__fuel-bar {
+  width: 84px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ship-row__fuel-fill {
+  height: 4px;
+}
+
+.ship-row__fuel-fill--ok {
+  background-color: #5989d9;
+}
+
+.ship-row__fuel-fill--low {
+  background-color: #d06a5a;
+}
+
+.ship-row__actions {
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* Buttons shared by the ship list and the load screen. */
+.ship-btn {
+  min-width: 56px;
+  height: 30px;
+  margin-left: 6px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  padding: 0 12px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
   background-color: rgba(255, 255, 255, 0.04);
   color: #ffffff;
-  font-size: 18px;
+  font-size: 14px;
   letter-spacing: 1;
   cursor: pointer;
 }
 
-.shipping-menu {
-  flex-direction: column;
-  align-items: center;
+.ship-btn--primary {
+  border-color: rgba(89, 137, 217, 0.7);
+  background-color: rgba(89, 137, 217, 0.2);
 }
 
-.shipping-column {
-  flex-direction: column;
-  align-items: center;
-}
-
-.shipping-ships {
-  width: 280px;
-  max-height: 180px;
-  flex-direction: column;
-}
-
-.shipping-ship {
-  width: 280px;
-  height: 52px;
-  margin-bottom: 6px;
-  flex-shrink: 0;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0;
-  background-color: rgba(255, 255, 255, 0.03);
-  cursor: pointer;
-}
-
-.shipping-ship--selected {
-  border-color: #5989d9;
-  background-color: rgba(89, 137, 217, 0.18);
-}
-
-.shipping-ship__icon {
-  width: 40px;
-  height: 40px;
-  margin-right: 8px;
-}
-
-.shipping-ship__label {
-  flex: 1;
-  color: #ffffff;
-  font-size: 15px;
-}
-
-.shipping-ship__fuel {
-  color: #bdbdbd;
-  font-size: 13px;
-}
-
-.shipping-resources {
-  width: 280px;
-  max-height: 170px;
-}
-
-.shipping-cell--selected {
-  border-color: #5989d9;
-  background-color: rgba(89, 137, 217, 0.35);
-}
-
-.shipping-slider {
-  flex-direction: row;
-  align-items: center;
-  margin: 6px 0;
-}
-
-.shipping-slider__label {
-  width: 70px;
-  color: #bdbdbd;
-  font-size: 16px;
-}
-
-.shipping-action--off {
+.ship-btn--off {
   border-color: rgba(255, 255, 255, 0.08);
   background-color: rgba(255, 255, 255, 0.02);
   color: rgba(255, 255, 255, 0.3);
   cursor: default;
+}
+
+/* Load screen: ship summary, quick refuel, cargo controls, footer. */
+.ship-load {
+  flex: 1;
+  flex-direction: column;
+}
+
+.ship-load__head {
+  flex-direction: row;
+  align-items: center;
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ship-load__icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.ship-load__titles {
+  flex: 1;
+  flex-direction: column;
+}
+
+.ship-load__title {
+  color: #ffffff;
+  font-size: 17px;
+  letter-spacing: 1;
+}
+
+.ship-load__type {
+  color: #8a8a94;
+  font-size: 13px;
+  letter-spacing: 1;
+}
+
+.ship-load__fuel {
+  font-size: 14px;
+}
+
+.ship-load__fuel--ok {
+  color: #bdbdbd;
+}
+
+.ship-load__fuel--low {
+  color: #d06a5a;
+}
+
+.ship-section {
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.ship-section__label {
+  color: #8a8a94;
+  font-size: 13px;
+  letter-spacing: 2;
+  margin-bottom: 6px;
+}
+
+.ship-load__resources {
+  height: 128px;
+}
+
+.ship-cell {
+  width: 56px;
+  height: 56px;
+  margin: 4px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.ship-cell--selected {
+  border-color: #5989d9;
+  background-color: rgba(89, 137, 217, 0.3);
+}
+
+.ship-cell__icon {
+  width: 50px;
+  height: 50px;
+}
+
+.ship-stepper {
+  height: 34px;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.ship-stepper__label {
+  flex: 1;
+  color: #bdbdbd;
+  font-size: 15px;
+}
+
+.ship-stepper__btn {
+  width: 28px;
+  height: 28px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ship-stepper__btn--off {
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: default;
+}
+
+.ship-stepper__value {
+  width: 40px;
+  color: #ffffff;
+  font-size: 16px;
+  text-align: center;
+}
+
+.ship-stepper__max {
+  width: 44px;
+  color: #8a8a94;
+  font-size: 13px;
+}
+
+.ship-load__footer {
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 10px;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1147,25 +1442,37 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Cursor tooltip, original `PromptMenu`                               */
-/* ------------------------------------------------------------------ */
+/* Cursor tooltip, original `PromptMenu`. Adopts the HUD submenu frame (blue leading corner over
+   a near-black surface) and a console glyph + spaced heading, so help reads as part of the same
+   interface rather than an OS bubble. */
 .tooltip {
   position: absolute;
   width: 300px;
-  padding: 8px 12px;
+  padding: 8px 12px 10px;
   flex-direction: column;
-  gap: 2px;
-  background-color: rgba(10, 12, 16, 0.96);
+  gap: 3px;
+  background-color: rgba(10, 12, 16, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
   border-left-color: #5989d9;
   border-left-width: 2px;
   pointer-events: none;
 }
 
+/* Heading row: console glyph, spaced title, hairline rule beneath. */
+.tooltip__head {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .tooltip__title {
   color: #ffffff;
-  font-size: 19px;
-  letter-spacing: 1;
+  font-size: 17px;
+  letter-spacing: 2;
 }
 
 .tooltip__desc {
@@ -1176,6 +1483,7 @@
 .tooltip__info {
   color: #8a8a94;
   font-size: 13px;
+  letter-spacing: 1;
 }
 
 /* Click-outside catcher for the secondary sidebars. Invisible: it must not dim the menu, and it
@@ -1283,10 +1591,9 @@
 /* Dismiss button shared by every secondary sidebar (submenus and settings). Anchored to the
    panel's top-right corner rather than laid out in the header flow, so surrounding padding (e.g.
    the submenu panel's top inset) can never shift it. */
-.sidebar-close {
+.sidebar-close,
+.hud-submenu__close {
   position: absolute;
-  top: 10px;
-  right: 10px;
   width: 40px;
   height: 40px;
   flex-shrink: 0;
@@ -1300,6 +1607,18 @@
   font-size: 18px;
   text-align: center;
   cursor: pointer;
+}
+
+.sidebar-close {
+  top: 10px;
+  right: 10px;
+}
+
+/* HUD submenus have a compact 40px title bar, so the dismiss button fills its trailing corner
+   instead of sitting inset like the taller sidebar headers. */
+.hud-submenu__close {
+  top: 0;
+  right: 0;
 }
 
 .settings-body {
@@ -1794,7 +2113,9 @@
 .hud-submenu__return:hover,
 .priority-row__btn:hover,
 .priority-toggle:hover,
-.shipping-action:hover {
+.ship-btn:hover,
+.ship-stepper__btn:hover,
+.ship-cell:hover {
   background-color: rgba(255, 255, 255, 0.12);
   border-color: #5989d9;
 }
@@ -1803,11 +2124,12 @@
 .hud-submenu__return:active,
 .priority-row__btn:active,
 .priority-toggle:active,
-.shipping-action:active {
+.ship-btn:active,
+.ship-stepper__btn:active {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Selection stays blue, and the disabled shipping action never lights up. */
+/* Selection stays blue, and disabled controls never light up. */
 .priority-toggle--on:hover {
   background-color: #6a97de;
   border-color: #6a97de;
@@ -1817,7 +2139,8 @@
   background-color: #4f7bc6;
 }
 
-.shipping-action--off:hover {
+.ship-btn--off:hover,
+.ship-stepper__btn--off:hover {
   border-color: rgba(255, 255, 255, 0.08);
   background-color: rgba(255, 255, 255, 0.02);
 }
@@ -1917,19 +2240,12 @@
   border-color: #5989d9;
 }
 
-.shipping-ship:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.shipping-ship--selected:hover {
-  background-color: rgba(89, 137, 217, 0.28);
-}
-
 .settings-tab:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
-.sidebar-close:hover {
+.sidebar-close:hover,
+.hud-submenu__close:hover {
   background-color: rgba(255, 255, 255, 0.12);
 }
 
@@ -2057,20 +2373,4 @@
   flex-direction: column;
 }
 
-/* --- Population graph baseline --- */
-.planet-graph__baseline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.25);
-}
 
-.planet-graph__grid {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.06);
-}

@@ -293,11 +293,13 @@ namespace TheGreatMarch.React
 
             Set(globals, "shippingSetMode", (Action<string>)ShippingSetMode);
             Set(globals, "shippingSelectShip", (Action<int>)ShippingSelectShip);
+            Set(globals, "shippingRenameShip", (Action<int, string>)ShippingRenameShip);
             Set(globals, "shippingRefuel", (Action)ShippingRefuel);
             Set(globals, "shippingSelectResource", (Action<string, bool>)ShippingSelectResource);
             Set(globals, "shippingSetResourceAmount", (Action<int>)ShippingSetResourceAmount);
             Set(globals, "shippingSetPeopleAmount", (Action<int>)ShippingSetPeopleAmount);
             Set(globals, "shippingLaunch", (Action)ShippingLaunch);
+            Set(globals, "shippingLaunchPresident", (Action)ShippingLaunchPresident);
             Set(globals, "shippingPlayerMove", (Action)ShippingPlayerMove);
             Set(globals, "shippingLaunchPeople", (Action)ShippingLaunchPeople);
             Set(globals, "shippingLaunchResource", (Action)ShippingLaunchResource);
@@ -581,6 +583,19 @@ namespace TheGreatMarch.React
             PlayClick();
         }
 
+        /// <summary>
+        /// Names a ship. The name lives on the ship itself (`Registry.Ship.Name`) so it survives
+        /// being reserved in transit and is written to the save.
+        /// </summary>
+        public void ShippingRenameShip(int index, string name)
+        {
+            if (Planet.Selected == null || index < 0 || index >= Planet.Selected.Ships.Count) return;
+            var trimmed = string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
+            if (trimmed.Length > 24) trimmed = trimmed.Substring(0, 24);
+            Planet.Selected.Ships[index].Name = trimmed;
+            PlayClick();
+        }
+
         public void ShippingRefuel()
         {
             if (Planet.Selected == null || shippingShip < 0 || shippingShip >= Planet.Selected.Ships.Count) return;
@@ -641,6 +656,25 @@ namespace TheGreatMarch.React
             else
                 planet.EngageMoveSelectionMode(people, id);
 
+            shippingMode = "ships";
+            ResetShippingTransient();
+            PlayClick();
+        }
+
+        /// <summary>
+        /// Sends the selected presidential ship to carry the leader, mirroring `PresidentCargo.Launch`.
+        /// Unlike a cargo launch the president travels alone, so this uses the single-argument
+        /// move-selection overload (count -1) rather than the resource/people one.
+        /// </summary>
+        public void ShippingLaunchPresident()
+        {
+            var planet = Planet.Selected;
+            if (planet == null || shippingShip < 0 || shippingShip >= planet.Ships.Count) return;
+            var id = planet.ShipIDs;
+            planet.ShipIDs++;
+            planet.ReservedShips.Add(new KeyValuePair<int, Registry.Ship>(id, planet.Ships[shippingShip]));
+            planet.Ships.RemoveAt(shippingShip);
+            planet.EngageMoveSelectionMode(id);
             shippingMode = "ships";
             ResetShippingTransient();
             PlayClick();
@@ -1021,6 +1055,7 @@ namespace TheGreatMarch.React
                     {
                         index = i,
                         type = ship.Type.ToString(),
+                        name = ship.Name ?? string.Empty,
                         icon = SpriteName(registry != null ? registry.GetShipSprite(ship.Type) : null),
                         fuel = ship.Fuel,
                         requiredFuel = required,
@@ -1503,6 +1538,7 @@ namespace TheGreatMarch.React
         {
             public int index;
             public string type;
+            public string name;
             public string icon;
             public int fuel;
             public int requiredFuel;

@@ -108,6 +108,8 @@ export const HUD_GLYPHS: Record<string, readonly string[]> = {
     '.......',
   ],
   star: ['..#..', '.###.', '#####', '.#.#.', '#...#'],
+  // 5x5: a two-column, three-row grip — the conventional "drag me" texture.
+  grip: ['.#.#.', '.....', '.#.#.', '.....', '.#.#.'],
 };
 
 export const HUD_MARK_NAMES = Object.keys(HUD_GLYPHS);
