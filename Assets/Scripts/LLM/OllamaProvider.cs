@@ -35,10 +35,14 @@ public class OllamaProvider : ILLMProvider
         {
             ["model"] = model,
             ["stream"] = true,
-            ["think"] = !noThink,
             ["messages"] = messages,
             ["options"] = options
         };
+        // Only disable thinking explicitly for models that honour the switch. Sending think=true
+        // (or think at all) to a non-thinking model such as llama3.2 makes Ollama reject the call.
+        // Omitting the field lets Ollama use each model's own default.
+        if (noThink)
+            body["think"] = false;
 
         var handler = new LLMStreamHandler();
         var www = new UnityWebRequest(url, "POST");
