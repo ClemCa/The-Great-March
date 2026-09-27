@@ -9,21 +9,18 @@ interface ButtonProps {
   onClick?: () => void;
 }
 
+// All full-screen actions use the same stark white rectangle as the main menu; `ghost` only
+// drops the fill, it never introduces a second accent colour.
 const VARIANTS: Record<NonNullable<ButtonProps['variant']>, string> = {
-  primary: 'bg-amber-500 text-slate-900',
-  default: 'bg-slate-700 text-slate-100',
-  ghost: 'bg-transparent text-slate-300',
+  primary: '',
+  default: '',
+  ghost: 'button--ghost',
 };
 
 export function Button({ children, variant = 'default', disabled, className, onClick }: ButtonProps) {
   return (
     <button
-      className={cn(
-        'items-center justify-center rounded-lg px-5 py-3',
-        VARIANTS[variant],
-        disabled && 'opacity-40',
-        className,
-      )}
+      className={cn('button', VARIANTS[variant], disabled && 'button--disabled', className)}
       onClick={disabled ? undefined : onClick}
     >
       {children}

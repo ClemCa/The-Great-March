@@ -1,0 +1,143 @@
+/* Browser preview only. Not shipped to Unity. */
+
+@font-face {
+  font-family: ChakraPetch;
+  /* A weight range so every requested weight maps onto the single medium face, rather than
+     letting the browser synthesise from a 400 face. */
+  font-weight: 100 900;
+  src: url('../../Assets/Resources/Font/ChakraPetch-Medium.ttf') format('truetype');
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #10131a;
+  overflow: hidden;
+}
+
+/* --- ReactUnity primitives, restored to Yoga's defaults ------------------ */
+/* ReactUnity lays everything out with Yoga: flex column, no shrinking, borders  */
+/* included in the box. The browser disagrees on all three, so the host elements  */
+/* produced by jsx-runtime.ts are normalised back.                                */
+[data-rui],
+button {
+  /* Yoga positions `absolute` children against their direct parent; CSS uses the nearest
+     positioned ancestor. Making every host element a containing block closes the gap. */
+  position: relative;
+  margin: 0;
+}
+
+[data-rui='view'],
+[data-rui='text'],
+[data-rui='scroll'] {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+[data-rui='text'] {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+[data-rui='scroll'] {
+  overflow: auto;
+}
+
+[data-rui='image'] {
+  display: block;
+  object-fit: contain;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  text-align: inherit;
+  display: flex;
+  cursor: pointer;
+}
+
+input {
+  font: inherit;
+  border: 0;
+}
+
+/* --- Preview stage: mirrors the Unity canvas, reference height 1080 ------- */
+/* Width, position and scale are set by `fitStage()` so the logical width can flex with the
+   aspect ratio (matching Unity's ScaleWithScreenSize + match-height CanvasScaler). */
+#stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1080px;
+  transform-origin: top left;
+  overflow: hidden;
+}
+
+#app-root {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- Development toolbar ------------------------------------------------- */
+#toolbar {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: calc(100vw - 16px);
+  padding: 6px 8px;
+  border: 1px solid #2f3646;
+  border-radius: 6px;
+  background: rgba(16, 19, 26, 0.92);
+  font: 12px/1.2 ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+  color: #cbd5e1;
+}
+
+body.clean #toolbar {
+  display: none;
+}
+
+#toolbar .label {
+  align-self: center;
+  margin: 0 6px 0 2px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#toolbar button {
+  padding: 4px 8px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+#toolbar button:hover {
+  background: #334155;
+}
+
+#toolbar button.active {
+  border-color: #93c5fd;
+  background: #1d4ed8;
+  color: #ffffff;
+}

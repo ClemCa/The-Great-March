@@ -152,6 +152,14 @@ export interface SettingsSnapshot {
   verbatim: number;
   summarized: number;
   thoughts: boolean;
+  /** Option lists for the cycling selectors, so the UI can show faded neighbours. */
+  selectors?: SettingSelector[];
+}
+
+export interface SettingSelector {
+  key: string;
+  options: string[];
+  index: number;
 }
 
 export interface GameState {

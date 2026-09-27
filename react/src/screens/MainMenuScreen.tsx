@@ -15,8 +15,20 @@ export function MainMenuScreen({ state }: { state: GameState }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const slots = state.slots ?? [];
 
-  const togglePanel = (next: Exclude<OpenPanel, null>) =>
+  const closeAll = () => {
+    setPanel(null);
+    setSettingsOpen(false);
+  };
+
+  const togglePanel = (next: Exclude<OpenPanel, null>) => {
+    setSettingsOpen(false);
     setPanel((current) => (current === next ? null : next));
+  };
+
+  const openSettings = () => {
+    setPanel(null);
+    setSettingsOpen(true);
+  };
 
   return (
     <view className="app-root">
@@ -26,36 +38,53 @@ export function MainMenuScreen({ state }: { state: GameState }) {
         <text className="menu-title-line">March</text>
       </view>
 
-      <SubMenuPanel open={panel === 'credits'} entries={CREDITS} />
-      <SubMenuPanel open={panel === 'team'} entries={TEAM} />
+      <view className="sidebar-slot sidebar-slot--right">
+        <view className="side-panel">
+          <view className="side-panel__vignette" />
 
-      {loadOpen && (
-        <view className="load-slots">
-          {slots.map((slot) => (
-            <button
-              key={slot.index}
-              className={cn('load-slot', !slot.used && 'menu-button--disabled')}
-              onClick={slot.used ? () => actions.loadGame(slot.index) : undefined}
-            >
-              <text>{`Slot ${slot.index}`}</text>
-            </button>
-          ))}
-        </view>
-      )}
+          {loadOpen && (
+            <view className="load-slots">
+              {slots.map((slot) => (
+                <button
+                  key={slot.index}
+                  className={cn('load-slot', !slot.used && 'load-slot--disabled')}
+                  onClick={slot.used ? () => actions.loadGame(slot.index) : undefined}
+                >
+                  <text>{`Slot ${slot.index}`}</text>
+                </button>
+              ))}
+            </view>
+          )}
 
-      <view className="side-panel">
-        <view className="side-column">
-          <MenuButton label="Start Game" onClick={actions.newGame} />
-          <MenuButton label="Load Save" onClick={() => setLoadOpen((open) => !open)} />
-          <MenuButton label="Tutorial" onClick={actions.tutorial} />
-          <MenuButton label="Team" onClick={() => togglePanel('team')} />
-          <MenuButton label="Credits" onClick={() => togglePanel('credits')} />
-          <MenuButton label="Settings" onClick={() => setSettingsOpen(true)} />
-          <MenuButton label="Exit" onClick={actions.exit} />
+          <view className="side-panel__body">
+            <view className="side-column">
+              <MenuButton label="Start Game" primary onClick={actions.newGame} />
+              <MenuButton label="Load Save" onClick={() => setLoadOpen((open) => !open)} />
+              <MenuButton label="Tutorial" onClick={actions.tutorial} />
+              <MenuButton label="Team" ghost onClick={() => togglePanel('team')} />
+              <MenuButton label="Credits" ghost onClick={() => togglePanel('credits')} />
+              <MenuButton label="Settings" ghost onClick={openSettings} />
+              <MenuButton label="Exit" ghost onClick={actions.exit} />
+            </view>
+          </view>
         </view>
       </view>
 
-      {settingsOpen && <SettingsPanel settings={state.settings} onClose={() => setSettingsOpen(false)} />}
+      {(panel !== null || settingsOpen) && <view className="sidebar-scrim" onClick={closeAll} />}
+
+      <SubMenuPanel
+        open={panel === 'credits'}
+        entries={CREDITS}
+        title="CREDITS"
+        onClose={() => setPanel(null)}
+      />
+      <SubMenuPanel open={panel === 'team'} entries={TEAM} title="TEAM" onClose={() => setPanel(null)} />
+
+      <SettingsPanel
+        open={settingsOpen}
+        settings={state.settings}
+        onClose={() => setSettingsOpen(false)}
+      />
     </view>
   );
 }

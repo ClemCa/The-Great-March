@@ -289,6 +289,7 @@ namespace TheGreatMarch.React
             Set(globals, "setSettingBool", (Action<string, bool>)SetSettingBool);
             Set(globals, "setLlmSetting", (Action<string, string>)SetLlmSetting);
             Set(globals, "cycleSetting", (Action<string>)CycleSetting);
+            Set(globals, "selectSetting", (Action<string, int>)SelectSetting);
 
             Set(globals, "shippingSetMode", (Action<string>)ShippingSetMode);
             Set(globals, "shippingSelectShip", (Action<int>)ShippingSelectShip);
@@ -486,6 +487,57 @@ namespace TheGreatMarch.React
                     LLMSettings.Provider = LLMSettings.Provider == LLMProviderKind.Ollama ? LLMProviderKind.OpenAICompatible : LLMProviderKind.Ollama;
                     LLMSettings.Save();
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Jumps a cyclable setting straight to an option, using the same ordering the React
+        /// selector carousel renders (see <see cref="BuildSelectors"/>). For resolution, option 0
+        /// is the native/current display and maps back to the stored -1 sentinel.
+        /// </summary>
+        public void SelectSetting(string key, int index)
+        {
+            if (!Settings.Loaded) return;
+            switch (key)
+            {
+                case "resolution":
+                {
+                    var resolutions = Screen.resolutions;
+                    int count = resolutions != null ? resolutions.Length : 0;
+                    int next = index - 1;
+                    Settings.ResolutionIndex = (next < 0 || next >= count) ? -1 : next;
+                    break;
+                }
+                case "quality":
+                {
+                    int count = QualitySettings.names != null ? QualitySettings.names.Length : 0;
+                    if (index >= 0 && index < count) Settings.QualityLevel = index;
+                    break;
+                }
+                case "antialiasing":
+                {
+                    var values = (AntialiasingMode[])Enum.GetValues(typeof(AntialiasingMode));
+                    if (index >= 0 && index < values.Length) Settings.AntialiasingMode = values[index];
+                    break;
+                }
+                case "antialiasingQuality":
+                {
+                    var values = (AntialiasingQuality[])Enum.GetValues(typeof(AntialiasingQuality));
+                    if (index >= 0 && index < values.Length) Settings.AntialiasingQuality = values[index];
+                    break;
+                }
+                case "mode":
+                {
+                    var values = (LLMMode[])Enum.GetValues(typeof(LLMMode));
+                    if (index >= 0 && index < values.Length) { LLMSettings.Mode = values[index]; LLMSettings.Save(); }
+                    break;
+                }
+                case "provider":
+                {
+                    var values = (LLMProviderKind[])Enum.GetValues(typeof(LLMProviderKind));
+                    if (index >= 0 && index < values.Length) { LLMSettings.Provider = values[index]; LLMSettings.Save(); }
+                    break;
+                }
             }
         }
 
@@ -827,11 +879,11 @@ namespace TheGreatMarch.React
             s.fullscreen = Settings.Fullscreen;
             s.resolution = ResolutionLabel();
             s.quality = QualityLabel();
-            s.antialiasing = Settings.AntialiasingMode.ToString();
-            s.antialiasingQuality = Settings.AntialiasingQuality.ToString();
+            s.antialiasing = ReadableName(Settings.AntialiasingMode.ToString());
+            s.antialiasingQuality = ReadableName(Settings.AntialiasingQuality.ToString());
 
-            s.mode = LLMSettings.Mode.ToString();
-            s.provider = LLMSettings.Provider.ToString();
+            s.mode = ReadableName(LLMSettings.Mode.ToString());
+            s.provider = ReadableName(LLMSettings.Provider.ToString());
             s.baseUrl = LLMSettings.BaseUrl;
             s.model = LLMSettings.Model;
             s.apiKey = LLMSettings.ApiKey;
@@ -839,7 +891,85 @@ namespace TheGreatMarch.React
             s.verbatim = LLMSettings.VerbatimHistory;
             s.summarized = LLMSettings.SummarizedHistory;
             s.thoughts = LLMSettings.IncludeThoughtsJson;
+            s.selectors = BuildSelectors();
             return s;
+        }
+
+        /// <summary>
+        /// The option lists behind the cycling selectors, so the React carousel can show the
+        /// faded neighbours on either side of the current choice. The order must match
+        /// <see cref="SelectSetting"/>.
+        /// </summary>
+        private static SettingSelector[] BuildSelectors()
+        {
+            var list = new List<SettingSelector>();
+
+            // Resolution: option 0 is the native/current display; stored index is -1 for native.
+            var resolutions = Screen.resolutions;
+            var resolutionOptions = new List<string> { "Native" };
+            if (resolutions != null)
+            {
+                foreach (var r in resolutions)
+                {
+                    resolutionOptions.Add(r.width + "x" + r.height + " @" + Mathf.RoundToInt((float)r.refreshRateRatio.value) + "Hz");
+                }
+            }
+            int resolutionIndex = Settings.ResolutionIndex;
+            int nativeIndex = (resolutionIndex < 0 || resolutions == null || resolutionIndex >= resolutions.Length) ? 0 : resolutionIndex + 1;
+            list.Add(MakeSelector("resolution", resolutionOptions.ToArray(), nativeIndex));
+
+            var qualityNames = QualitySettings.names ?? new string[0];
+            int qualityIndex = Settings.QualityLevel;
+            if (qualityIndex < 0 || qualityIndex >= qualityNames.Length) qualityIndex = Mathf.Max(0, qualityNames.Length - 1);
+            list.Add(MakeSelector("quality", qualityNames, qualityIndex));
+
+            var aaModes = (AntialiasingMode[])Enum.GetValues(typeof(AntialiasingMode));
+            list.Add(MakeSelector("antialiasing", ReadableNames(Enum.GetNames(typeof(AntialiasingMode))), Array.IndexOf(aaModes, Settings.AntialiasingMode)));
+
+            var aaQualities = (AntialiasingQuality[])Enum.GetValues(typeof(AntialiasingQuality));
+            list.Add(MakeSelector("antialiasingQuality", ReadableNames(Enum.GetNames(typeof(AntialiasingQuality))), Array.IndexOf(aaQualities, Settings.AntialiasingQuality)));
+
+            var modes = (LLMMode[])Enum.GetValues(typeof(LLMMode));
+            list.Add(MakeSelector("mode", ReadableNames(Enum.GetNames(typeof(LLMMode))), Array.IndexOf(modes, LLMSettings.Mode)));
+
+            var providers = (LLMProviderKind[])Enum.GetValues(typeof(LLMProviderKind));
+            list.Add(MakeSelector("provider", ReadableNames(Enum.GetNames(typeof(LLMProviderKind))), Array.IndexOf(providers, LLMSettings.Provider)));
+
+            return list.ToArray();
+        }
+
+        /// <summary>
+        /// Maps raw enum member names to the short labels the UI shows (e.g. the URP antialiasing
+        /// mode names are unreadable). Anything not listed is shown as-is.
+        /// </summary>
+        private static string ReadableName(string name)
+        {
+            switch (name)
+            {
+                case "FastApproximate": return "FXAA";
+                case "SubpixelMorphologicalAntiAliasing": return "SMAA";
+                case "OpenAICompatible": return "OpenAI Compatible";
+                default: return name;
+            }
+        }
+
+        private static string[] ReadableNames(string[] names)
+        {
+            if (names == null) return new string[0];
+            var result = new string[names.Length];
+            for (int i = 0; i < names.Length; i++)
+                result[i] = ReadableName(names[i]);
+            return result;
+        }
+
+        private static SettingSelector MakeSelector(string key, string[] options, int index)
+        {
+            return new SettingSelector
+            {
+                key = key,
+                options = options ?? new string[0],
+                index = index < 0 ? 0 : index,
+            };
         }
 
         private static string ResolutionLabel()
@@ -1357,6 +1487,15 @@ namespace TheGreatMarch.React
             public int verbatim;
             public int summarized;
             public bool thoughts;
+            public SettingSelector[] selectors;
+        }
+
+        [Serializable]
+        public class SettingSelector
+        {
+            public string key;
+            public string[] options;
+            public int index;
         }
 
         [Serializable]

@@ -33,6 +33,7 @@ export function PlanetGraph({ graph }: { graph: GraphSnapshot }) {
       </view>
 
       <view className="planet-graph__plot">
+        <view className="planet-graph__grid" style={{ top: HEIGHT / 2 }} />
         {values.map((series, seriesIndex) =>
           series.points.map((point, index) => (
             <view
@@ -47,6 +48,7 @@ export function PlanetGraph({ graph }: { graph: GraphSnapshot }) {
             />
           )),
         )}
+        <view className="planet-graph__baseline" />
       </view>
     </view>
   );

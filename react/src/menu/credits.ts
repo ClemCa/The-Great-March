@@ -39,6 +39,8 @@ export const CREDITS: Credit[] = [
     description: 'Low Poly Crown',
     url: 'https://softpolystudios.itch.io/low-poly-crown-free',
   },
+  { name: 'Gokhan Kurt', description: 'ReactUnity', url: 'https://reactunity.github.io/' },
+  { name: 'Cysharp', description: 'UniTask', url: 'https://github.com/Cysharp/UniTask' },
 ];
 
 export const TEAM: Credit[] = [

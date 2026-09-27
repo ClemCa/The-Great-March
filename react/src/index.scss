@@ -36,134 +36,231 @@
   text-align: center;
 }
 
+/* One blank TMP line: 142.5px * (93.6 line height / 72 point size) = 185.25px. */
 .title-gap {
-  height: 150px;
+  height: 185px;
 }
 
-/* --- Right-hand menu panel (original: 300x880, white @ 39% alpha) --- */
-.side-panel {
+/* --- Sidebar slots. Each panel hugs its content and floats vertically centred: a short panel
+   (Team) becomes a small card, a tall one (Credits) a tall card, and the main panel a card
+   around its buttons — never a half-empty slab. The slot is click-through so the empty space
+   above and below a panel does not swallow input. --- */
+.sidebar-slot {
   position: absolute;
-  top: 100px;
+  top: 0;
+  bottom: 0;
+  width: 300px;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.sidebar-slot--right {
   right: 0;
-  bottom: 100px;
-  width: 300px;
-  background-color: rgba(255, 255, 255, 0.392);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
-.side-column {
-  flex-direction: column;
-  align-items: center;
-}
-
-/* --- Buttons (original: 200x60 white, black centred 25px label, 10px gaps) --- */
-.menu-button {
-  width: 200px;
-  height: 60px;
-  margin: 5px 0;
-  flex-shrink: 0;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border-radius: 0;
-  background-color: #ffffff;
-  color: #000000;
-  font-size: 25px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.menu-button:hover {
-  background-color: #f5f5f5;
-}
-
-.menu-button--disabled {
-  background-color: rgba(255, 255, 255, 0.5);
-  color: rgba(0, 0, 0, 0.35);
-  cursor: default;
-}
-
-/* --- Load-save slots (original: horizontal row left of the Load button) --- */
-.load-slots {
-  position: absolute;
-  top: 0;
-  right: 300px;
-  bottom: 0;
-  flex-direction: row;
-  align-items: center;
-}
-
-.load-slot {
-  width: 90px;
-  height: 60px;
-  margin: 0 5px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border-radius: 0;
-  background-color: #ffffff;
-  color: #000000;
-  font-size: 18px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.load-slot:hover {
-  background-color: #f5f5f5;
-}
-
-/* --- Left sliding submenus (credits / team), original: 300 wide, white @ 39% --- */
-.submenu-panel {
-  position: absolute;
-  top: 0;
+.sidebar-slot--left {
   left: -300px;
-  bottom: 0;
-  width: 300px;
-  background-color: rgba(255, 255, 255, 0.392);
-  overflow: hidden;
   transition-property: left;
   transition-duration: 0.18s;
   transition-timing-function: ease-out;
 }
 
-.submenu-list {
+/* --- Right-hand menu panel. The original is a 300x880 white sheet; it is restyled into the
+   same dark, flat, layered language as the lose screen. The frame warms from blue (top-left)
+   to neutral, and a bottom vignette sinks it into the scene. Only the primary action stays
+   filled white. --- */
+.side-panel {
+  position: relative;
   width: 100%;
-  height: 100%;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background-color: rgba(10, 12, 16, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  border-left-color: rgba(89, 137, 217, 0.6);
+  pointer-events: auto;
+}
+
+/* Darkens the bottom edge so the panel sinks into the scene instead of ending abruptly. */
+.side-panel__vignette {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
   pointer-events: none;
 }
 
-.credit-item {
-  width: 300px;
-  height: 125px;
-  flex-shrink: 0;
-  margin-bottom: 10px;
+.side-panel__body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 88px 50px;
+}
+
+.side-column {
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  /* Original GridLayoutGroup: 200x60 cells with 10px spacing. */
+  gap: 10px;
+}
+
+/* --- Buttons (original: 200x60). Outlined rows with a single filled primary --- */
+.menu-button {
+  width: 200px;
+  height: 60px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 22px;
+  letter-spacing: 1;
+  text-align: center;
+  cursor: pointer;
+}
+
+.menu-button--primary {
+  border-color: #ffffff;
   background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+/* Mirrors `.button--ghost` so the lower menu entries match the lose screen's secondary action. */
+.menu-button--ghost {
+  border-color: rgba(255, 255, 255, 0.45);
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.menu-button--disabled {
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.35);
+  cursor: default;
+}
+
+/* --- Load-save slots (original `SlotsLoad`: 121x40 cells, 5px gaps, 5px to the left of the
+   panel and vertically centred on the Load Save button) --- */
+.load-slots {
+  position: absolute;
+  right: 305px;
+  top: 168px;
+  height: 40px;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+/* The bridge exposes 5 slots (the original scene shipped 4); keep the same 500px footprint by
+   letting the cells shrink from 121px to 96px. Same outlined-row treatment as `.menu-button`. */
+.load-slot {
+  width: 96px;
+  height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 20px;
+  letter-spacing: 1;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* --- Left sliding submenus (credits / team). Same hugging, centred card and frame as the main
+   right-hand sidebar, mirrored so the blue frame edge faces the centre of the screen. The slide
+   itself lives on `.sidebar-slot--left` so the panel can be content-sized. --- */
+.submenu-panel {
+  position: relative;
+  width: 100%;
+  flex-direction: column;
+  padding-top: 20px;
+  background-color: rgba(10, 12, 16, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  border-right-color: rgba(89, 137, 217, 0.6);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+/* Darkens the bottom edge so the panel sinks into the scene, matching the main sidebar. */
+.submenu-panel__vignette {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
+  pointer-events: none;
+}
+
+/* Console heading shared with the settings panel: a blue mark and an uppercase label. */
+.submenu-header {
+  height: 56px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.submenu-header__mark {
+  width: 4px;
+  height: 24px;
+  background-color: #5989d9;
+}
+
+.submenu-header__title {
+  color: #ffffff;
+  font-size: 18px;
+  letter-spacing: 3;
+}
+
+.submenu-list {
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 8px 0 20px;
+}
+
+/* Rows are inset, left-aligned entries separated by hairlines rather than full-bleed blocks. */
+.credit-item {
+  width: 100%;
+  height: 72px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(0, 0, 0, 0);
   cursor: pointer;
 }
 
 .credit-name {
-  width: 300px;
-  color: #000000;
-  font-size: 32px;
-  text-align: center;
+  width: 100%;
+  color: #ffffff;
+  font-size: 21px;
+  text-align: left;
 }
 
 .credit-desc {
-  width: 300px;
-  color: #000000;
-  font-size: 20px;
+  width: 100%;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
   font-style: italic;
-  text-align: center;
+  text-align: left;
 }
 
 /* ------------------------------------------------------------------ */
@@ -259,6 +356,10 @@
   opacity: 0.5;
 }
 
+.pause-icon:hover {
+  opacity: 1;
+}
+
 .pause-icon--pulsing {
   opacity: 1;
 }
@@ -341,6 +442,7 @@
   margin-top: 4px;
   flex-direction: row;
   align-items: flex-start;
+  background-color: rgba(0, 0, 0, 0.35);
 }
 
 .queue-card__progress {
@@ -358,7 +460,10 @@
   width: 400px;
   height: 1020px;
   background-color: rgba(89, 89, 89, 0.92);
-  overflow: hidden;
+  /* The facility/priority/shipping submenus are children of this panel but are anchored to its
+     right edge (which coincides with the screen edge), so they sit just left of it. Clipping
+     here hides them entirely. */
+  overflow: visible;
   transition-property: right;
   transition-duration: 0.25s;
   transition-timing-function: ease-out;
@@ -441,6 +546,7 @@
   background-color: #595959;
   color: #ffffff;
   font-size: 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
 }
 
 .planet-panel__scroll {
@@ -574,6 +680,7 @@
 .inventory-item__count {
   color: #ffffff;
   font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
 }
 
 /* --- Submenus (facility build / priorities / shipping) --- */
@@ -706,7 +813,7 @@
 }
 
 .priority-row__text {
-  width: 240px;
+  width: 200px;
   flex-direction: column;
 }
 
@@ -721,6 +828,7 @@
 }
 
 .priority-row__controls {
+  flex-shrink: 0;
   flex-direction: row;
 }
 
@@ -901,64 +1009,127 @@
   font-size: 14px;
 }
 
-/* ------------------------------------------------------------------ */
-/* Settings, original `SettingsMenu` prefab                            */
-/* ------------------------------------------------------------------ */
-.settings-overlay {
+/* Click-outside catcher for the secondary sidebars. Sits above the main menu but below the
+   sliding panels, so tapping the empty space around an open panel dismisses it. */
+.sidebar-scrim {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: rgba(8, 9, 12, 0.72);
 }
 
+/* ------------------------------------------------------------------ */
+/* Settings, original `SettingsMenu` prefab                            */
+/* ------------------------------------------------------------------ */
+/* Wide left-hand sidebar. Stays mounted so `left` can animate it in and out like the submenus.
+   Fixed 860px floor, growing to two-thirds of the screen up to a 1200px cap. */
+.settings-sidebar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 66.666%;
+  min-width: 860px;
+  max-width: 1200px;
+  transition-property: left;
+  transition-duration: 0.18s;
+  transition-timing-function: ease-out;
+}
+
+/* Original `Panel`: 1000x760. Restyled into the same dark, flat language as the other sidebars,
+   now stretched to full height with the blue frame edges facing the centre of the screen. */
 .settings-panel {
-  width: 720px;
-  height: 520px;
+  position: relative;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
-  background-color: rgba(51, 51, 55, 0.98);
+  background-color: rgba(10, 12, 16, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  border-right-color: rgba(89, 137, 217, 0.6);
+  overflow: hidden;
+}
+
+/* Darkens the bottom edge so the panel sinks into the scene, matching the other sidebars. */
+.settings-panel__vignette {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
+  pointer-events: none;
+}
+
+.settings-header {
+  height: 62px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-header__mark {
+  width: 4px;
+  height: 28px;
+  background-color: #5989d9;
+}
+
+.settings-header__title {
+  color: #ffffff;
+  font-size: 20px;
+  letter-spacing: 3;
 }
 
 .settings-tabs {
-  height: 48px;
+  height: 52px;
+  flex-shrink: 0;
   flex-direction: row;
-  align-items: center;
-  background-color: #2a2a2e;
+  align-items: stretch;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Tabs are flat labels; selection is shown with a blue underline rather than a filled block.
+   They share the sidebar width evenly. */
 .settings-tab {
-  min-width: 110px;
-  height: 48px;
+  flex: 1;
+  height: 52px;
   padding: 0 12px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border-bottom: 2px solid rgba(0, 0, 0, 0);
   border-radius: 0;
-  background-color: #3a3a3e;
-  color: #ffffff;
-  font-size: 20px;
+  background-color: rgba(0, 0, 0, 0);
+  color: #bdbdbd;
+  font-size: 22px;
   text-align: center;
   cursor: pointer;
 }
 
 .settings-tab--active {
-  background-color: #5989d9;
+  border-bottom-color: #5989d9;
+  color: #ffffff;
 }
 
-.settings-close {
-  width: 48px;
-  height: 48px;
+/* Dismiss button shared by every secondary sidebar (submenus and settings). */
+.sidebar-close {
+  width: 40px;
+  height: 40px;
   margin-left: auto;
+  flex-shrink: 0;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 0;
-  background-color: #8a2b2b;
+  background-color: rgba(255, 255, 255, 0.04);
   color: #ffffff;
-  font-size: 22px;
+  font-size: 18px;
   text-align: center;
   cursor: pointer;
 }
@@ -966,16 +1137,44 @@
 .settings-body {
   flex: 1;
   flex-direction: column;
-  padding: 16px;
+  padding: 12px 20px 24px 20px;
   overflow: scroll;
+  /* Group headings provide the rhythm; rows sit flush inside each group. */
+  gap: 0;
+}
+
+/* Console-style group heading: a blue tick and an uppercase label. */
+.settings-group {
+  flex-direction: column;
+  margin-top: 18px;
+}
+
+.settings-group__head {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.settings-group__tick {
+  width: 3px;
+  height: 12px;
+  background-color: #5989d9;
+}
+
+.settings-group__label {
+  color: #8a8a94;
+  font-size: 15px;
+  letter-spacing: 2;
 }
 
 .settings-row {
-  height: 46px;
+  height: 52px;
   flex-shrink: 0;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .settings-row--dim {
@@ -983,13 +1182,117 @@
 }
 
 .settings-row__label {
-  color: #ffffff;
-  font-size: 20px;
+  color: #c4c4c4;
+  font-size: 22px;
+  animation-name: settings-row-in;
+  animation-duration: 0.18s;
+  animation-timing-function: ease-out;
 }
 
+/* Fixed-width control column so the "primary" control of every row sits on the same centre axis:
+   the selector's current option, the meter's segments and the on/off toggle all share it. The
+   audio stepper is pinned to the right slot, mirroring the selector's next-option slot. */
 .settings-row__controls {
+  width: 500px;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
+  position: relative;
+  animation-name: settings-row-in;
+  animation-duration: 0.18s;
+  animation-timing-function: ease-out;
+}
+
+/* Every row enters the same way on a tab change, so a lone selector no longer slides while the
+   toggles and steppers pop. Sits on the children (not the row) so `--dim` opacity still applies. */
+@keyframes settings-row-in {
+  from {
+    opacity: 0;
+    translate: 16px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* A lone centred control (toggle/stepper) would leave the right slot empty and the row lopsided;
+   a faint rule holds the slot where the selector's next option would sit, without drawing a box. */
+.settings-slot-ghost {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 150px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-slot-ghost__line {
+  width: 100px;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition-property: background-color;
+  transition-duration: 0.12s;
+  transition-timing-function: ease-out;
+}
+
+/* Ties the filler to the row: hovering the option lights its slot in the selection blue. */
+.settings-slot-ghost__line--hot {
+  background-color: #5989d9;
+}
+
+/* Segmented level readout for the audio mixer; matches the selector's centre-slot width. */
+.settings-meter {
+  width: 200px;
+  height: 10px;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+}
+
+.settings-stepper-slot {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 150px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-meter__seg {
+  flex: 1;
+  height: 10px;
+  padding: 0;
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  /* The hover pop is animated; colour changes stay instant so the tail tracks the cursor. */
+  transition-property: scale;
+  transition-duration: 0.12s;
+  transition-timing-function: ease-out;
+}
+
+/* The committed level. */
+.settings-meter__seg--on {
+  background-color: #5989d9;
+}
+
+/* The pending span between the committed level and the cursor, in either direction. */
+.settings-meter__seg--preview {
+  background-color: rgba(89, 137, 217, 0.45);
+}
+
+/* The segment directly under the cursor scales up and brightens on top of the tail. */
+.settings-meter__seg--hovered {
+  background-color: #ffffff;
+}
+
+.settings-meter__seg--on.settings-meter__seg--hovered {
+  background-color: #93b4ea;
 }
 
 .settings-stepper {
@@ -1003,9 +1306,10 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
   font-size: 20px;
   text-align: center;
   cursor: pointer;
@@ -1022,21 +1326,43 @@
   text-align: center;
 }
 
+/* The readout is scrubbable and click-to-edit, so it advertises the drag affordance. */
+.settings-value--scrub {
+  cursor: ew-resize;
+}
+
+/* Inline editor shown in place of the readout; the blue frame marks the active field. */
+.settings-value--edit {
+  width: 80px;
+  min-width: 80px;
+  height: 30px;
+  padding: 0 4px;
+  border: 1px solid #5989d9;
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 20px;
+  text-align: center;
+}
+
 .settings-toggle {
   min-width: 70px;
   height: 30px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
   font-size: 18px;
   text-align: center;
   cursor: pointer;
 }
 
+/* Blue stays reserved for selection, as on the HUD's planet tabs. */
 .settings-toggle--on {
+  border-color: #5989d9;
   background-color: #5989d9;
   color: #ffffff;
 }
@@ -1048,21 +1374,147 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background-color: #ffffff;
-  color: #323232;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
   font-size: 18px;
   text-align: center;
   cursor: pointer;
 }
 
+/* Spans the selector's centre + right slots: left edge on the current option's frame, right edge on
+   the rail's right edge (the auto margin seats it against the 500px rail's end). */
 .settings-input {
-  width: 260px;
+  width: 350px;
+  margin-left: auto;
   height: 30px;
   padding: 0 6px;
-  background-color: #ffffff;
-  color: #323232;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
   font-size: 18px;
+}
+
+/* Carousel selector: current option framed, neighbours faded to either side. The full-width rail
+   reads as a single control surface spanning the three slots. */
+.settings-selector {
+  width: 500px;
+  height: 34px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.settings-selector__strip {
+  flex-direction: row;
+  align-items: center;
+}
+
+/* Directional slide replays on an actual pick only; on first mount (a tab change) `--anim` is
+   absent so the strip enters with its row instead of sliding a second time. */
+.settings-selector__strip--right.settings-selector__strip--anim {
+  animation-name: settings-selector-in-right;
+  animation-duration: 0.18s;
+  animation-timing-function: ease-out;
+}
+
+.settings-selector__strip--left.settings-selector__strip--anim {
+  animation-name: settings-selector-in-left;
+  animation-duration: 0.18s;
+  animation-timing-function: ease-out;
+}
+
+@keyframes settings-selector-in-right {
+  from {
+    opacity: 0;
+    translate: 16px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes settings-selector-in-left {
+  from {
+    opacity: 0;
+    translate: -16px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.settings-selector__slot {
+  width: 150px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.settings-selector__side {
+  width: 150px;
+  height: 30px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 0, 0, 0);
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0);
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 16px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.settings-selector__side:hover {
+  color: #ffffff;
+  border-color: #5989d9;
+}
+
+.settings-selector__current {
+  width: 200px;
+  height: 30px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.settings-selector__current:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: #5989d9;
+}
+
+/* Interactive controls echo the filler rule: a blue contour on hover, the same accent the row's
+   slot lights up with. Border-width is unchanged (sides carry a transparent one) so nothing shifts. */
+.settings-btn,
+.settings-toggle,
+.settings-cycle,
+.settings-input,
+.settings-selector__side,
+.settings-selector__current {
+  transition-property: border-color;
+  transition-duration: 0.12s;
+  transition-timing-function: ease-out;
+}
+
+.settings-input:hover,
+.settings-input:focus {
+  border-color: #5989d9;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1154,4 +1606,268 @@
   color: #323232;
   font-size: 18px;
   text-align: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Interaction feedback                                                */
+/* ReactUnity exposes :hover/:active. Pressed states stay monochrome   */
+/* so the interface keeps its stark, flat character.                   */
+/* ------------------------------------------------------------------ */
+.pause-button:hover,
+.pause-slot:hover,
+.planet-panel__action:hover,
+.hud-submenu__return:hover,
+.priority-row__btn:hover,
+.dialog__choice:hover {
+  background-color: #ededed;
+}
+
+.pause-button:active,
+.pause-slot:active,
+.planet-panel__action:active,
+.hud-submenu__return:active,
+.priority-row__btn:active,
+.dialog__choice:active {
+  background-color: #d6d6d6;
+}
+
+/* Main-menu panel rows: outlined, so interaction adds a translucent white wash. */
+.menu-button:hover,
+.load-slot:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.menu-button:active,
+.load-slot:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.menu-button--primary:hover {
+  background-color: #ededed;
+}
+
+.menu-button--primary:active {
+  background-color: #d6d6d6;
+}
+
+/* Unused save slots stay dimmed even while hovered/pressed. */
+.load-slot--disabled,
+.load-slot--disabled:hover,
+.load-slot--disabled:active {
+  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.35);
+  cursor: default;
+}
+
+.credit-item:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.credit-item:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Settings controls share the outlined-row treatment. */
+.settings-row:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.settings-btn:hover,
+.settings-toggle:hover,
+.settings-cycle:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: #5989d9;
+}
+
+.settings-btn:active,
+.settings-toggle:active,
+.settings-cycle:active {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.settings-toggle--on:hover {
+  background-color: #6a97de;
+}
+
+.settings-toggle--on:active {
+  background-color: #4f7bc6;
+}
+
+.facility-slot:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.facility-slot:active {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.facility-slot--empty:hover {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.inventory-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.hud-submenu__cell:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.shipping-ship:hover {
+  background-color: #b5b5b5;
+}
+
+.shipping-ship--selected:hover {
+  background-color: #f2f2f2;
+}
+
+.settings-tab:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-close:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Empty-state copy, used when a panel has nothing to list. */
+.task-queue__empty {
+  width: 200px;
+  margin-top: 30px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared button component (lose screen and future full-screen menus)  */
+/* ------------------------------------------------------------------ */
+.button {
+  width: 100%;
+  height: 56px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 0;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  font-size: 22px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #ededed;
+}
+
+.button:active {
+  background-color: #d6d6d6;
+}
+
+.button--ghost {
+  background-color: rgba(0, 0, 0, 0);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.button--ghost:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.button--ghost:active {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.button--disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ */
+/* Lose screen, brought back into the game's monochrome design         */
+/* ------------------------------------------------------------------ */
+.lose-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(12, 14, 18, 0.82);
+}
+
+.lose-panel {
+  width: 620px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lose-title {
+  width: 100%;
+  color: #e05252;
+  font-size: 64px;
+  text-align: center;
+}
+
+.lose-subtitle {
+  width: 100%;
+  margin-top: 10px;
+  color: #bdbdbd;
+  font-size: 20px;
+  text-align: center;
+}
+
+.lose-stats {
+  width: 100%;
+  margin-top: 30px;
+  flex-direction: column;
+}
+
+.lose-stat {
+  height: 44px;
+  margin-bottom: 3px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.lose-stat__label {
+  color: #c4c4c4;
+  font-size: 19px;
+}
+
+.lose-stat__value {
+  color: #ffffff;
+  font-size: 19px;
+}
+
+.lose-actions {
+  width: 340px;
+  margin-top: 30px;
+  flex-direction: column;
+}
+
+/* --- Population graph baseline --- */
+.planet-graph__baseline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.planet-graph__grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
 }

@@ -15,9 +15,10 @@ export function TaskQueue({ state }: { state: GameState }) {
         <text>Task Queue</text>
       </view>
       <view className="task-queue__list">
+        {orders.length === 0 && <text className="task-queue__empty">No active tasks</text>}
         {orders.map((order, index) => (
           <view key={index} className="queue-card">
-            <text className="queue-card__type">{order.type.replace(/([A-Z])/g, ' $0')}</text>
+            <text className="queue-card__type">{order.type.replace(/([a-z0-9])([A-Z])/g, '$1 $2')}</text>
             <text className="queue-card__line">{`Assigned: ${order.assigned}/${order.maxPeople} people`}</text>
             <text className="queue-card__line">{`Speed: x${order.speed}`}</text>
             <text className="queue-card__line">{`Tasks: ${order.lengthLeft}/${order.length}`}</text>

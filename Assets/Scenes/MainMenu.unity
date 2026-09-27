@@ -508,6 +508,12 @@ MonoBehaviour:
   - Name: SoftPolyStudios
     Description: Low Poly Crown
     URL: https://softpolystudios.itch.io/low-poly-crown-free
+  - Name: Gokhan Kurt
+    Description: ReactUnity
+    URL: https://reactunity.github.io/
+  - Name: Cysharp
+    Description: UniTask
+    URL: https://github.com/Cysharp/UniTask
 --- !u!4 &280221348 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5639594936598711715, guid: 74d19d5d4519d2647a5c4734d658a1ba, type: 3}

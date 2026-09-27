@@ -17,75 +17,82 @@ export function PauseBar({ state }: { state: GameState }) {
   const slots = state.slots ?? [];
 
   return (
-    <view className="pause-bar">
-      {state.paused && (
-        <view className="pause-menu">
-          <view className="pause-row">
-            <button className="pause-button" onClick={actions.goToMainMenu}>
-              <text>Exit</text>
-            </button>
-            <button
-              className="pause-button"
-              onClick={() => setOpenSlots((current) => (current === 'load' ? null : 'load'))}
-            >
-              <text>Load</text>
-            </button>
-            <button
-              className="pause-button"
-              onClick={() => setOpenSlots((current) => (current === 'save' ? null : 'save'))}
-            >
-              <text>Save</text>
-            </button>
-            {extended && (
-              <button className="pause-button" onClick={() => actions.setPrompt(!state.prompt)}>
-                <text>{state.prompt ? 'Hide Help' : 'Show Help'}</text>
+    <>
+      <view className="pause-bar">
+        {state.paused && (
+          <view className="pause-menu">
+            <view className="pause-row">
+              <button className="pause-button" onClick={actions.goToMainMenu}>
+                <text>Exit</text>
               </button>
-            )}
-            {extended && (
-              <button className="pause-button" onClick={() => setSettingsOpen(true)}>
-                <text>Settings</text>
+              <button
+                className="pause-button"
+                onClick={() => setOpenSlots((current) => (current === 'load' ? null : 'load'))}
+              >
+                <text>Load</text>
               </button>
-            )}
-            <button className="pause-button pause-extend" onClick={() => setExtended((e) => !e)}>
-              <text>{extended ? '>' : '<'}</text>
-            </button>
-          </view>
-
-          {openSlots && (
-            <view className="pause-slots">
-              {slots.map((slot) => {
-                const disabled = openSlots === 'load' && !slot.used;
-                return (
-                  <button
-                    key={slot.index}
-                    className={cn('pause-slot', disabled && 'pause-slot--disabled')}
-                    onClick={
-                      disabled
-                        ? undefined
-                        : () =>
-                            openSlots === 'save'
-                              ? actions.saveGame(slot.index)
-                              : actions.loadGame(slot.index)
-                    }
-                  >
-                    <text>{`Slot ${slot.index}`}</text>
-                  </button>
-                );
-              })}
+              <button
+                className="pause-button"
+                onClick={() => setOpenSlots((current) => (current === 'save' ? null : 'save'))}
+              >
+                <text>Save</text>
+              </button>
+              {extended && (
+                <button className="pause-button" onClick={() => actions.setPrompt(!state.prompt)}>
+                  <text>{state.prompt ? 'Hide Help' : 'Show Help'}</text>
+                </button>
+              )}
+              {extended && (
+                <button className="pause-button" onClick={() => setSettingsOpen(true)}>
+                  <text>Settings</text>
+                </button>
+              )}
+              <button className="pause-button pause-extend" onClick={() => setExtended((e) => !e)}>
+                <text>{extended ? '>' : '<'}</text>
+              </button>
             </view>
-          )}
-        </view>
-      )}
 
-      <button
-        className={cn('pause-icon', state.paused && 'pause-icon--pulsing')}
-        onClick={actions.togglePause}
-      >
-        <view className="pause-icon__bar" />
-        <view className="pause-icon__bar" />
-      </button>
+            {openSlots && (
+              <view className="pause-slots">
+                {slots.map((slot) => {
+                  const disabled = openSlots === 'load' && !slot.used;
+                  return (
+                    <button
+                      key={slot.index}
+                      className={cn('pause-slot', disabled && 'pause-slot--disabled')}
+                      onClick={
+                        disabled
+                          ? undefined
+                          : () =>
+                              openSlots === 'save'
+                                ? actions.saveGame(slot.index)
+                                : actions.loadGame(slot.index)
+                      }
+                    >
+                      <text>{`Slot ${slot.index}`}</text>
+                    </button>
+                  );
+                })}
+              </view>
+            )}
+          </view>
+        )}
 
-      {settingsOpen && <SettingsPanel settings={state.settings} onClose={() => setSettingsOpen(false)} />}
-    </view>
+        <button
+          className={cn('pause-icon', state.paused && 'pause-icon--pulsing')}
+          onClick={actions.togglePause}
+        >
+          <view className="pause-icon__bar" />
+          <view className="pause-icon__bar" />
+        </button>
+      </view>
+
+      {settingsOpen && <view className="sidebar-scrim" onClick={() => setSettingsOpen(false)} />}
+      <SettingsPanel
+        open={settingsOpen}
+        settings={state.settings}
+        onClose={() => setSettingsOpen(false)}
+      />
+    </>
   );
 }

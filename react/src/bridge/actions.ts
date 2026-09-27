@@ -39,6 +39,7 @@ export const actions = {
   setSettingBool: (key: string, value: boolean) => call<void>('setSettingBool', key, value),
   setLlmSetting: (key: string, value: string) => call<void>('setLlmSetting', key, value),
   cycleSetting: (key: string) => call<void>('cycleSetting', key),
+  selectSetting: (key: string, index: number) => call<void>('selectSetting', key, index),
   shippingSetMode: (mode: string) => call<void>('shippingSetMode', mode),
   shippingSelectShip: (index: number) => call<void>('shippingSelectShip', index),
   shippingRefuel: () => call<void>('shippingRefuel'),
