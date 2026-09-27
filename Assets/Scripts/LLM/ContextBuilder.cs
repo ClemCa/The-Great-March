@@ -13,26 +13,46 @@ public static class ContextBuilder
     public static string BuildSystemPrompt(ThoughtCharacter character)
     {
         var sb = new System.Text.StringBuilder();
-        sb.Append("You are ").Append(character.DisplayName).Append(", a person living in a sci-fi world. ");
-        sb.Append("Speak only as they would out loud, in natural conversation, usually one to two sentences. ");
-        sb.Append("When a thought weighs on you or the answer comes in beats, you may break it into a few short sentences, each on its own line (plain sentences, not a list). ");
-        sb.Append("Never narrate, never describe actions or expressions, no asterisks, no markdown, no lists, and never wrap the whole reply in quotation marks. ");
+        sb.Append("You are ").Append(character.DisplayName).Append(", a person living in a sci-fi world. Stay in character and speak only as spoken words, the way you would out loud. ");
+        sb.Append("Keep it to one or two natural sentences. If the answer comes in beats you may use a few short sentences, each on its own line, but never a list. ");
+        sb.Append("Never narrate or describe actions, expressions, or sounds; no markdown, no emoji, and never wrap your whole reply in quotation marks. A brief non-verbal cue such as *sigh* is allowed, but never any other asterisk stage direction. ");
         sb.Append("Never mention being an AI, the context, JSON, or any field name. ");
+        sb.Append("Say something new: never repeat a line from the snapshot, from the examples below, or from earlier in the conversation. Answer what is actually asked. ");
+        sb.Append("Use only the facts in the snapshot. If you do not know, admit it or deflect in character; never invent people, places, events, or numbers that are not in it. ");
 
         var mood = character.CurrentMood;
-        if (mood != null)
-        {
-            if (mood.Traits.Count > 0)
-                sb.Append("Right now your manner is ").Append(string.Join(", ", mood.Traits)).Append(". ");
-            if (!string.IsNullOrEmpty(mood.Sample))
-                sb.Append("You might sound like: \"").Append(mood.Sample).Append("\" ");
-        }
+        if (mood != null && mood.Traits.Count > 0)
+            sb.Append("Your manner right now is ").Append(string.Join(", ", mood.Traits)).Append(". ");
+        if (character.AuthoredNotes.Count > 0)
+            sb.Append(string.Join(" ", character.AuthoredNotes)).Append(' ');
 
-        sb.Append("A JSON snapshot follows describing what you know and feel. Treat its private fields as feelings you would never say out loud: ");
-        sb.Append("playerInquiry is what the player asked and the fragment on your mind right now; ");
-        sb.Append("thoughts are keyed by topic, each with a raw fragment, a feeling word, and a weight word describing how strongly it sits with you; ");
-        sb.Append("knowledge and relationships are facts about your life; recentEvents are things that happened; conversationHistory is what you two said before. ");
-        sb.Append("Answer the player's actual question, leaning on the most relevant parts. If something is not in the snapshot, admit you don't know or deflect in character. Never invent facts that contradict it, and never add new specifics (people, places, events, or numbers) that are not in the snapshot.");
+        sb.Append("A JSON snapshot follows: playerInquiry is what the player asked (query) and the fragment on your mind (reply); thoughts are what is on your mind; knowledge and relationships are facts about your life; recentEvents are things that happened; conversationHistory is what you said before. ");
+
+        // A couple of authored lines to set the voice. Kept short and clearly labelled: small models
+        // otherwise copy them verbatim, so the instruction stresses that these are tone references only.
+        var refs = new List<string>();
+        if (mood != null && !string.IsNullOrEmpty(mood.Sample))
+            refs.Add(mood.Sample);
+        if (character.ExampleSentences != null)
+        {
+            for (int i = 0; i < character.ExampleSentences.Count && refs.Count < 3; i++)
+            {
+                string line = character.ExampleSentences[i];
+                if (!string.IsNullOrEmpty(line) && !refs.Contains(line))
+                    refs.Add(line);
+            }
+        }
+        if (refs.Count > 0)
+        {
+            sb.Append("For tone only; never reuse these exact lines: ");
+            for (int i = 0; i < refs.Count; i++)
+            {
+                if (i > 0)
+                    sb.Append(" / ");
+                sb.Append('"').Append(refs[i]).Append('"');
+            }
+            sb.Append('.');
+        }
         return sb.ToString();
     }
 
@@ -149,22 +169,15 @@ public static class ContextBuilder
 
     private static JObject BuildPersonality(ThoughtCharacter character)
     {
-        var personality = new JObject();
-        for (int i = 0; i < character.Moods.Count; i++)
+        // Only the active mood is exposed here. Authored samples, notes and example lines are carried
+        // by the system prompt as tone references, so they are deliberately kept out of the JSON where
+        // small models are tempted to echo them verbatim.
+        var mood = character.CurrentMood;
+        return new JObject
         {
-            var mood = character.Moods[i];
-            if (mood == null || string.IsNullOrEmpty(mood.Id))
-                continue;
-            personality[mood.Id] = new JObject
-            {
-                ["traits"] = new JArray(mood.Traits),
-                ["sample"] = mood.Sample
-            };
-        }
-        personality["current"] = character.CurrentMoodId;
-        personality["notes"] = new JArray(character.AuthoredNotes);
-        personality["examples"] = new JArray(character.ExampleSentences);
-        return personality;
+            ["current"] = character.CurrentMoodId,
+            ["manner"] = new JArray(mood != null ? mood.Traits : new List<string>())
+        };
     }
 
     private static JObject BuildRecentEvents(ThoughtCharacter character, long now)

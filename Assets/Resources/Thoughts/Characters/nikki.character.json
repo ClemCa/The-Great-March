@@ -11,7 +11,7 @@
   "moods": [
     {
       "id": "happy",
-      "sample": "He he! (x5)",
+      "sample": "He he!",
       "traits": [
         "cheeky",
         "playful",
@@ -120,9 +120,8 @@
     "So, what do you think?",
     "Boss? Boss is boss, that's it.",
     "Ever seen a dying star? Me neither.",
-    "It's the first time I've seen someone chased by the darkness survive long enough to be met twice.",
-    "Catch phrase: If you know you know.",
-    "Happy mode: says 'He he!' without explanation."
+    "Most don't outrun the darkness twice.",
+    "If you know, you know."
   ],
   "thoughts": []
 }

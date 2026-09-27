@@ -17,7 +17,7 @@
     "relationships": { "type": "array", "items": { "$ref": "#/definitions/relationship" } },
     "knowledge": { "type": "array", "items": { "$ref": "#/definitions/knowledge" } },
     "notes": { "type": "array", "items": { "type": "string" }, "description": "Always injected into the LLM context." },
-    "examples": { "type": "array", "items": { "type": "string" }, "description": "Always injected voice examples." },
+    "examples": { "type": "array", "items": { "type": "string" }, "description": "Voice lines used as tone references in the system prompt. Never injected verbatim as text to repeat, so they must read as real spoken sentences (no meta notes like 'Catch phrase:')." },
     "thoughts": { "type": "array", "items": { "$ref": "#/definitions/thought" } }
   },
   "definitions": {
@@ -29,7 +29,7 @@
         "id": { "type": "string", "examples": ["normal", "depressed"] },
         "valenceCenter": { "type": "number", "minimum": 0, "maximum": 1 },
         "traits": { "type": "array", "items": { "type": "string" } },
-        "sample": { "type": "string" }
+        "sample": { "type": "string", "description": "One clean line in this mood's voice. Injected as a tone reference only; the model is told never to reuse it verbatim. Keep it free of annotations like (x5); a non-verbal cue such as *sigh* is allowed." }
       }
     },
     "talkPolicy": {
