@@ -473,7 +473,7 @@ export function SettingsPanel({
 
           {tab === 2 && (
             <Group label="ASSISTANCE">
-              <Row label="Show Help Prompts" ghost>
+              <Row label="Show Tooltips" ghost>
                 <Toggle on={settings.showPrompt} onClick={() => actions.setSettingBool('showPrompt', !settings.showPrompt)} />
               </Row>
             </Group>

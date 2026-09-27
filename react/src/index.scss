@@ -301,103 +301,23 @@
   pointer-events: none;
 }
 
-/* --- Pause cluster (top-right), original `PauseCanvas` --- */
-.pause-bar {
+/* --- Pause cluster (top-right). A square toggle button holds the corner; while paused it swaps
+   to a resume glyph and drops a console-styled panel of session actions. --- */
+.pause-cluster {
   position: absolute;
   top: 0;
   right: 0;
-  flex-direction: row;
-  align-items: flex-start;
-  padding: 10px;
-}
-
-.pause-menu {
   flex-direction: column;
   align-items: flex-end;
-  margin-right: 8px;
+  gap: 10px;
+  padding: 14px;
 }
 
-.pause-row {
-  flex-direction: row;
-  align-items: center;
-}
-
-/* Outlined chips matching the menus' secondary rows. */
-.pause-button {
-  min-width: 54px;
-  height: 26px;
-  margin-left: 4px;
-  padding: 0 10px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0;
-  background-color: rgba(10, 12, 16, 0.86);
-  color: #ffffff;
-  font-size: 16px;
-  letter-spacing: 1;
-  text-align: center;
-  cursor: pointer;
-}
-
-.pause-button:hover {
-  background-color: rgba(255, 255, 255, 0.14);
-  border-color: #5989d9;
-}
-
-.pause-button:active {
-  background-color: rgba(255, 255, 255, 0.22);
-}
-
-.pause-extend {
-  min-width: 26px;
-  width: 26px;
-  padding: 0;
-}
-
-.pause-slots {
-  flex-direction: row;
-  margin-top: 4px;
-}
-
-.pause-slot {
-  width: 54px;
-  height: 26px;
-  margin-left: 4px;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0;
-  background-color: rgba(10, 12, 16, 0.86);
-  color: #ffffff;
-  font-size: 16px;
-  letter-spacing: 1;
-  text-align: center;
-  cursor: pointer;
-}
-
-.pause-slot:hover {
-  background-color: rgba(255, 255, 255, 0.14);
-  border-color: #5989d9;
-}
-
-.pause-slot:active {
-  background-color: rgba(255, 255, 255, 0.22);
-}
-
-.pause-slot--disabled,
-.pause-slot--disabled:hover {
-  border-color: rgba(255, 255, 255, 0.08);
-  background-color: rgba(255, 255, 255, 0.02);
-  color: rgba(255, 255, 255, 0.3);
-  cursor: default;
-}
-
+/* Plain white pause bars: light and translucent at rest, brightening on hover and while paused. */
 .pause-icon {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
   flex-direction: row;
   align-items: center;
   justify-content: center;
@@ -421,6 +341,142 @@
   height: 20px;
   margin: 0 3px;
   background-color: #ffffff;
+}
+
+/* Dropdown card: same dark, flat, framed language as the other sidebars, with the blue leading
+   edge on the sides facing the centre of the screen. */
+.pause-panel {
+  position: relative;
+  width: 280px;
+  flex-direction: column;
+  background-color: rgba(10, 12, 16, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  border-left-color: rgba(89, 137, 217, 0.6);
+  overflow: hidden;
+  animation-name: pause-panel-in;
+  animation-duration: 0.18s;
+  animation-timing-function: ease-out;
+}
+
+@keyframes pause-panel-in {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.pause-panel__vignette {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
+  pointer-events: none;
+}
+
+.pause-panel__actions {
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+/* Full-width, left-aligned action rows (the credit-list treatment), so the panel scans as one
+   list rather than a strip of chips. */
+.pause-action {
+  width: 100%;
+  height: 50px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 20px;
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0);
+  color: #ffffff;
+  font-size: 19px;
+  letter-spacing: 1;
+  cursor: pointer;
+}
+
+.pause-action:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.pause-action:active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* The single filled action, mirroring the main menu's primary row. */
+.pause-action--primary {
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.pause-action--primary:hover {
+  background-color: #e6e6e6;
+}
+
+.pause-sep {
+  width: 100%;
+  height: 1px;
+  margin: 6px 0;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Slot list shown inline under the save/load row: indented and sunk a shade so it reads as a
+   sub-level of that action. */
+.pause-slots {
+  flex-direction: column;
+  padding: 2px 0 4px;
+  background-color: rgba(0, 0, 0, 0.28);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pause-slot-row {
+  width: 100%;
+  height: 44px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 0 34px;
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0);
+  cursor: pointer;
+}
+
+.pause-slot-row:hover {
+  background-color: rgba(89, 137, 217, 0.14);
+}
+
+.pause-slot-row__label {
+  color: #ffffff;
+  font-size: 17px;
+  letter-spacing: 1;
+}
+
+.pause-slot-row__meta {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  letter-spacing: 1;
+}
+
+.pause-slot-row--disabled,
+.pause-slot-row--disabled:hover {
+  background-color: rgba(0, 0, 0, 0);
+  cursor: default;
+}
+
+.pause-slot-row__label--disabled {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.pause-slot-row__meta--disabled {
+  color: rgba(255, 255, 255, 0.22);
 }
 
 /* --- Task queue (left), original `Queue` canvas. Restyled as a left-hand
