@@ -7,7 +7,7 @@ public class clickToChangeFlare:MonoBehaviour{
     public Flare flare2;
     public Light lig;
     public void Update() {
-        if(InputHelper.MouseLeftDown)
+        if(Input.GetKeyDown(KeyCode.Mouse0))
         {
         if(lig.flare == flare1){
          lig.flare = flare2;

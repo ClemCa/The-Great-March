@@ -77,7 +77,7 @@ namespace ClemCAddons
         /// </summary>
         /// <param name="bytes">The source bytes.</param>
         /// <param name="type">The type to be cast to.</param>
-        public static dynamic ToType(this byte[] bytes, Type type)
+        public static object ToType(this byte[] bytes, Type type)
         {
             return JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes), type);
         } // noice. Am actually impressed with it
@@ -206,65 +206,6 @@ namespace ClemCAddons
             return r.ToArray();
         }
         #endregion Add
-        #region AddValue
-#if (UNITY_STANDALONE_WIN)
-
-        /// <summary>Add a value to every value in the array</summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source">The source array.</param>
-        /// <param name="value">The value to add.</param>
-        public static T[] AddValue<T>(this T[] source, T value)
-        {
-            dynamic result = source;
-            for (int i = 0; i < source.Length; i++)
-            {
-                result[i] = result[i] + value;
-            }
-            return source;
-        }
-        /// <summary>Substract a value from every value in the array</summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source">The source array.</param>
-        /// <param name="value">The value to add.</param>
-        public static T[] SubstractValue<T>(this T[] source, T value)
-        {
-            dynamic result = source;
-            for (int i = 0; i < source.Length; i++)
-            {
-                result[i] = result[i] - value;
-            }
-            return source;
-        }
-        /// <summary>Multiply every value in the array</summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source">The source array.</param>
-        /// <param name="value">The value to multiply.</param>
-        public static T[] MultiplyValue<T>(this T[] source, T value)
-        {
-            dynamic result = source;
-            for (int i = 0; i < source.Length; i++)
-            {
-                result[i] = result[i] * value;
-            }
-            return source;
-        }
-        /// <summary>Divide every value in the array</summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source">The source array.</param>
-        /// <param name="value">The value to divide.</param>
-        public static T[] DivideValue<T>(this T[] source, T value)
-        {
-            dynamic result = source;
-            for (int i = 0; i < source.Length; i++)
-            {
-                result[i] = result[i] / value;
-            }
-            return source;
-        }
-#endif
-
-        #endregion AddValue
-
         #region Find
         /// <summary>Find the index of an item.</summary>
         /// <param name="source">The source array.</param>
@@ -336,9 +277,8 @@ namespace ClemCAddons
         /// <param name="index">Index to replace at.</param>
         public static T[] SetAt<T>(this T[] source, T value, int index)
         {
-            dynamic result = source;
-            result[index] = value;
-            return result;
+            source[index] = value;
+            return source;
         }
         /// <summary>Set the value at an index, extends the array if it doesn't exist</summary>
         /// <param name="source">The source array.</param>
@@ -350,9 +290,8 @@ namespace ClemCAddons
             {
                 Array.Resize(ref source, index + 1);
             }
-            dynamic result = source;
-            result[index] = value;
-            return result;
+            source[index] = value;
+            return source;
         }
 #endif
 
@@ -365,9 +304,8 @@ namespace ClemCAddons
             if (source.Length <= index)
             {
                 Array.Resize(ref source, index + 1);
-                dynamic result = source;
-                result[index] = value;
-                return result;
+                source[index] = value;
+                return source;
             }
             return source;
         }
@@ -3665,7 +3603,7 @@ namespace ClemCAddons
         /// <param name="source">The source object.</param>
         public static T Clone<T>(this T source) // inspired by https://stackoverflow.com/a/78612
         {
-            return source.ToBytes().ToType(typeof(T));
+            return (T)source.ToBytes().ToType(typeof(T));
         }
         #endregion Class Additions
         // good

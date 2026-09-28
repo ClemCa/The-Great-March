@@ -486,9 +486,13 @@ namespace TheGreatMarch.React
                     LLMSettings.Save();
                     break;
                 case "provider":
-                    LLMSettings.Provider = LLMSettings.Provider == LLMProviderKind.Ollama ? LLMProviderKind.OpenAICompatible : LLMProviderKind.Ollama;
+                {
+                    var providers = (LLMProviderKind[])Enum.GetValues(typeof(LLMProviderKind));
+                    int providerIndex = Array.IndexOf(providers, LLMSettings.Provider);
+                    LLMSettings.Provider = providers[(providerIndex + 1) % providers.Length];
                     LLMSettings.Save();
                     break;
+                }
             }
         }
 
@@ -983,6 +987,7 @@ namespace TheGreatMarch.React
                 case "FastApproximate": return "FXAA";
                 case "SubpixelMorphologicalAntiAliasing": return "SMAA";
                 case "OpenAICompatible": return "OpenAI Compatible";
+                case "Local": return "Local (bundled)";
                 default: return name;
             }
         }

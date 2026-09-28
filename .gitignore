@@ -73,3 +73,10 @@ crashlytics-build.properties
 
 # Hand-written tooling outside Assets (e.g. Tools/ThoughtsSmokeTest);
 /Tools/
+
+# Bundled in-process LLM artifacts. The GGUF and the LLamaSharp natives are large and are NOT
+# committed (no Git LFS); they are treated as external artifacts and staged on demand with
+# Tools > NPC Model > Provision Local Bundle. The small managed plugins ARE tracked so a fresh
+# clone compiles; publish them with their .meta files after Unity first imports them.
+/Assets/StreamingAssets/LLamaSharp/
+/Assets/StreamingAssets/LLamaSharp.meta

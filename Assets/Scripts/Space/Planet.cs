@@ -255,7 +255,7 @@ public class Planet : MonoBehaviour
 
         for (int i = 0; i < list.Count; i++)
         {
-            dynamic resource;
+            object resource;
             int value;
             if (list[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
             {
@@ -336,7 +336,7 @@ public class Planet : MonoBehaviour
         int hydrogenbattery = GetResource(Registry.AdvancedResources.HydrogenBattery);
         for (int i = 0; i < list.Count; i++)
         {
-            dynamic resource;
+            object resource;
             int value;
             if (list[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
             {
@@ -647,7 +647,7 @@ public class Planet : MonoBehaviour
 
             for (int i = 0; i < foodPriorities.Count; i++)
             {
-                dynamic resource;
+                object resource;
                 int value;
                 if (foodPriorities[i] < Enum.GetNames(typeof(Registry.Resources)).Length)
                 {

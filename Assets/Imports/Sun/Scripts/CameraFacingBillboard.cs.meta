@@ -8,3 +8,10 @@ MonoImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 2990
+  packageName: Sun
+  packageVersion: 1.2
+  assetPath: Assets/Imports/Sun/Scripts/CameraFacingBillboard.cs
+  uploadId: 643129

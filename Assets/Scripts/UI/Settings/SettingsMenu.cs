@@ -43,6 +43,9 @@ public class SettingsMenu : MonoBehaviour
         "Ollama only works if it is started with CORS enabled (set OLLAMA_ORIGINS to this page's " +
         "origin); otherwise use an OpenAI-compatible endpoint.";
 
+    public const string WebGlLocalNote =
+        "The bundled Local model runs in-process and is only available in desktop builds, not WebGL.";
+
     private Button _close;
 
     private static readonly string[] SectionNames = { "Audio", "Display", "Gameplay", "Dialogue" };
@@ -282,7 +285,9 @@ public class SettingsMenu : MonoBehaviour
 
     private void CycleProvider()
     {
-        LLMSettings.Provider = LLMSettings.Provider == LLMProviderKind.Ollama ? LLMProviderKind.OpenAICompatible : LLMProviderKind.Ollama;
+        var values = (LLMProviderKind[])Enum.GetValues(typeof(LLMProviderKind));
+        int index = Array.IndexOf(values, LLMSettings.Provider);
+        LLMSettings.Provider = values[(index + 1) % values.Length];
         SetCycle(Find<TextMeshProUGUI>("Provider_Value"), LLMSettings.Provider.ToString());
         RefreshDialogueInteractable();
     }
@@ -290,10 +295,11 @@ public class SettingsMenu : MonoBehaviour
     private void RefreshDialogueInteractable()
     {
         bool online = LLMSettings.Mode == LLMMode.LLM;
+        bool remote = online && LLMSettings.Provider != LLMProviderKind.Local;
         if (_provider != null) _provider.interactable = online;
-        if (_baseUrl != null) _baseUrl.interactable = online;
+        if (_baseUrl != null) _baseUrl.interactable = remote;
         if (_model != null) _model.interactable = online;
-        if (_apiKey != null) _apiKey.interactable = online;
+        if (_apiKey != null) _apiKey.interactable = remote;
         if (_temperature != null) _temperature.interactable = online;
         RefreshWebGlNote();
     }
@@ -303,9 +309,14 @@ public class SettingsMenu : MonoBehaviour
         if (_webglNote == null)
             return;
 
-        bool ollamaLimited = Application.platform == RuntimePlatform.WebGLPlayer
-            && LLMSettings.Provider == LLMProviderKind.Ollama;
-        _webglNote.gameObject.SetActive(ollamaLimited);
+        bool webgl = Application.platform == RuntimePlatform.WebGLPlayer;
+        bool ollamaLimited = webgl && LLMSettings.Provider == LLMProviderKind.Ollama;
+        bool localLimited = webgl && LLMSettings.Provider == LLMProviderKind.Local;
+        _webglNote.gameObject.SetActive(ollamaLimited || localLimited);
+        if (localLimited)
+            _webglNote.text = WebGlLocalNote;
+        else if (ollamaLimited)
+            _webglNote.text = WebGlOllamaNote;
     }
 
     private string ResolutionLabel()

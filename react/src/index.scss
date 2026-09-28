@@ -43,8 +43,10 @@
 
 /* --- Sidebar slots. Each panel hugs its content and floats vertically centred: a short panel
    (Team) becomes a small card, a tall one (Credits) a tall card, and the main panel a card
-   around its buttons — never a half-empty slab. The slot is click-through so the empty space
-   above and below a panel does not swallow input. --- */
+   around its buttons — never a half-empty slab. The slot has no background or handlers, so its
+   empty space is never a raycast target and clicks pass through to the world. (Do NOT give it
+   `pointer-events: none`: ReactUnity would wrap it in a CanvasGroup with blocksRaycasts=false,
+   and UGUI's Graphic.Raycast walks ancestors, so the panel's buttons underneath stop working.) --- */
 .sidebar-slot {
   position: absolute;
   top: 0;
@@ -52,7 +54,6 @@
   width: 300px;
   flex-direction: column;
   justify-content: center;
-  pointer-events: none;
 }
 
 .sidebar-slot--right {

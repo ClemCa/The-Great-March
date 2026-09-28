@@ -4,3 +4,10 @@ TextScriptImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 2990
+  packageName: Sun
+  packageVersion: 1.2
+  assetPath: Assets/Imports/Sun/Animated Sun - Readme.txt
+  uploadId: 643129

@@ -8,6 +8,7 @@ public enum LLMMode
 
 public enum LLMProviderKind
 {
+    Local,
     Ollama,
     OpenAICompatible
 }
@@ -21,18 +22,19 @@ public static class LLMSettings
 
     public const string OllamaDefaultBase = "http://localhost:11434";
     public const string OpenAIDefaultBase = "https://api.openai.com/v1";
-    public const string DefaultOllamaModel = "llama3.2:3b";
+    public const string DefaultOllamaModel = "qwen3-0.6b-npc";
     public const string DefaultOpenAIModel = "gpt-4o-mini";
+    public const string DefaultLocalModelFile = "qwen3-0.6b-npc-v4-q4_k_m.gguf";
 
     public static LLMMode Mode
     {
-        get { return (LLMMode)PlayerPrefs.GetInt(Prefix + "mode", (int)LLMMode.Raw); }
+        get { return (LLMMode)PlayerPrefs.GetInt(Prefix + "mode", (int)LLMMode.LLM); }
         set { PlayerPrefs.SetInt(Prefix + "mode", (int)value); }
     }
 
     public static LLMProviderKind Provider
     {
-        get { return (LLMProviderKind)PlayerPrefs.GetInt(Prefix + "provider", (int)LLMProviderKind.Ollama); }
+        get { return (LLMProviderKind)PlayerPrefs.GetInt(Prefix + "provider", (int)LLMProviderKind.Local); }
         set { PlayerPrefs.SetInt(Prefix + "provider", (int)value); }
     }
 
@@ -46,6 +48,13 @@ public static class LLMSettings
     {
         get { return PlayerPrefs.GetString(Prefix + "model", ""); }
         set { PlayerPrefs.SetString(Prefix + "model", value == null ? "" : value.Trim()); }
+    }
+
+    /// <summary>Filename (or overridable path) of the GGUF bundled for the in-process Local provider.</summary>
+    public static string LocalModelFile
+    {
+        get { return PlayerPrefs.GetString(Prefix + "localModelFile", DefaultLocalModelFile); }
+        set { PlayerPrefs.SetString(Prefix + "localModelFile", value == null ? "" : value.Trim()); }
     }
 
     public static string ApiKey
@@ -80,6 +89,8 @@ public static class LLMSettings
 
     public static string EffectiveBaseUrl()
     {
+        if (Provider == LLMProviderKind.Local)
+            return "";
         if (!string.IsNullOrEmpty(BaseUrl))
             return NormalizeBase(BaseUrl, ProviderDefaultBase(Provider));
         return ProviderDefaultBase(Provider);
@@ -87,6 +98,8 @@ public static class LLMSettings
 
     public static string EffectiveModel()
     {
+        if (Provider == LLMProviderKind.Local)
+            return LocalModelFile;
         if (!string.IsNullOrEmpty(Model))
             return Model;
         return Provider == LLMProviderKind.Ollama ? DefaultOllamaModel : DefaultOpenAIModel;
@@ -94,7 +107,15 @@ public static class LLMSettings
 
     public static string ProviderDefaultBase(LLMProviderKind provider)
     {
-        return provider == LLMProviderKind.Ollama ? OllamaDefaultBase : OpenAIDefaultBase;
+        switch (provider)
+        {
+            case LLMProviderKind.Local:
+                return "";
+            case LLMProviderKind.OpenAICompatible:
+                return OpenAIDefaultBase;
+            default:
+                return OllamaDefaultBase;
+        }
     }
 
     public static string NormalizeBase(string url, string fallback)

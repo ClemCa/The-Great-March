@@ -15,6 +15,8 @@ public static class LLMProviderFactory
     {
         switch (kind)
         {
+            case LLMProviderKind.Local:
+                return new LocalLlamaProvider();
             case LLMProviderKind.OpenAICompatible:
                 return new OpenAICompatibleProvider();
             default:
