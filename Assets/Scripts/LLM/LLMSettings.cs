@@ -22,9 +22,9 @@ public static class LLMSettings
 
     public const string OllamaDefaultBase = "http://localhost:11434";
     public const string OpenAIDefaultBase = "https://api.openai.com/v1";
-    public const string DefaultOllamaModel = "qwen3-0.6b-npc";
+    public const string DefaultOllamaModel = "qwen3:1.7b";
     public const string DefaultOpenAIModel = "gpt-4o-mini";
-    public const string DefaultLocalModelFile = "qwen3-0.6b-npc-v4-q4_k_m.gguf";
+    public const string DefaultLocalModelFile = "qwen3-1.7b-npc-v5-q4_k_m.gguf";
 
     public static LLMMode Mode
     {

@@ -121,7 +121,12 @@ public class LLMDialogueManager : MonoBehaviour
             if (displayer != null)
                 displayer.BeginStream(character.DisplayName);
 
-            var request = BuildRequest(character, query, resolution.RawText, question);
+            // A resolved thought contributes its fragment as the seed. When nothing was found the
+            // resolver's RawText is a canned deflection ("I'd rather not get into that."); feeding
+            // that as the reply makes the model parrot it, so we send the policy instead and let the
+            // model voice the evasion itself.
+            string replySeed = resolution.Found ? resolution.RawText : "";
+            var request = BuildRequest(character, query, replySeed, question, resolution.Policy);
             var provider = LLMProviderFactory.Create(LLMSettings.Provider);
 
             string streamed = "";
@@ -159,8 +164,8 @@ public class LLMDialogueManager : MonoBehaviour
             onFinished(resolution, finalText);
     }
 
-    private LLMRequest BuildRequest(ThoughtCharacter character, string query, string rawReply, string question)
+    private LLMRequest BuildRequest(ThoughtCharacter character, string query, string rawReply, string question, TalkPolicy policy)
     {
-        return ContextBuilder.BuildRequest(character, query, rawReply, question, GameClock.Now);
+        return ContextBuilder.BuildRequest(character, query, rawReply, question, GameClock.Now, policy);
     }
 }

@@ -8,6 +8,10 @@ using System.Text;
 /// expose the enable_thinking kwarg, so the format is built explicitly here. The structure
 /// mirrors the model's chat_template.jinja, including the empty thinking block that the template
 /// emits when enable_thinking is false (parity with Ollama's think=false).
+///
+/// The non-thinking form also appends the "/no_think" switch to the final user turn, exactly as
+/// the SFT training data (see Tools/Distillation/train_sft.py) and the game's OllamaProvider do.
+/// The bundled student was trained with that switch present, so omitting it here degrades replies.
 /// </summary>
 public static class Qwen3Prompt
 {
@@ -29,12 +33,18 @@ public static class Qwen3Prompt
 
         if (messages != null)
         {
+            int last = messages.Count - 1;
             for (int i = 0; i < messages.Count; i++)
             {
                 var message = messages[i];
                 if (message == null)
                     continue;
-                sb.Append(ImStart).Append(message.Role).Append('\n').Append(message.Content).Append(ImEnd).Append('\n');
+
+                string content = message.Content;
+                if (!enableThinking && i == last && message.Role == "user")
+                    content = LLMThinking.AppendNoThink(content);
+
+                sb.Append(ImStart).Append(message.Role).Append('\n').Append(content).Append(ImEnd).Append('\n');
             }
         }
 

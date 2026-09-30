@@ -19,6 +19,7 @@ public static class ContextBuilder
         sb.Append("Never mention being an AI, the context, JSON, or any field name. ");
         sb.Append("Say something new: never repeat a line from the snapshot, from the examples below, or from earlier in the conversation. Answer what is actually asked. ");
         sb.Append("Use only the facts in the snapshot. If you do not know, admit it or deflect in character; never invent people, places, events, or numbers that are not in it. ");
+        sb.Append("playerInquiry.policy says how willing you are to discuss the topic: open or enthusiastic means share freely (enthusiastic with relish), reluctant means a brief non-answer or a change of subject, secretive means refuse without giving details, unknown means you honestly do not know. Let it set your tone, but never name it. ");
 
         var mood = character.CurrentMood;
         if (mood != null && mood.Traits.Count > 0)
@@ -60,7 +61,7 @@ public static class ContextBuilder
     /// Single source of truth for the outgoing request, shared by the game and the
     /// off-Unity prompt harness so refinements are tested exactly as shipped.
     /// </summary>
-    public static LLMRequest BuildRequest(ThoughtCharacter character, string query, string reply, string question, long now)
+    public static LLMRequest BuildRequest(ThoughtCharacter character, string query, string reply, string question, long now, TalkPolicy? policy = null)
     {
         var request = new LLMRequest
         {
@@ -71,13 +72,13 @@ public static class ContextBuilder
             SystemPrompt = BuildSystemPrompt(character),
             Messages = new List<LLMMessage>()
         };
-        request.Messages.Add(new LLMMessage("user", BuildUserMessage(character, query, reply, question, now)));
+        request.Messages.Add(new LLMMessage("user", BuildUserMessage(character, query, reply, question, now, policy)));
         return request;
     }
 
-    public static string BuildUserMessage(ThoughtCharacter character, string query, string reply, string question, long now)
+    public static string BuildUserMessage(ThoughtCharacter character, string query, string reply, string question, long now, TalkPolicy? policy = null)
     {
-        string context = BuildContextJson(character, query, reply, now);
+        string context = BuildContextJson(character, query, reply, now, null, policy);
         return "Context:\n" + context + "\n\nThe player asks: " + question;
     }
 
@@ -125,18 +126,21 @@ public static class ContextBuilder
 
     public static string BuildContextJson(ThoughtCharacter character, string query, string reply, long now)
     {
-        return BuildContextJson(character, query, reply, now, null);
+        return BuildContextJson(character, query, reply, now, null, null);
     }
 
-    public static string BuildContextJson(ThoughtCharacter character, string query, string reply, long now, EmergingThought emerging)
+    public static string BuildContextJson(ThoughtCharacter character, string query, string reply, long now, EmergingThought emerging, TalkPolicy? policy = null)
     {
         var root = new JObject();
 
-        root["playerInquiry"] = new JObject
+        var inquiry = new JObject
         {
             ["query"] = query == null ? "" : query,
             ["reply"] = reply == null ? "" : reply
         };
+        if (policy.HasValue)
+            inquiry["policy"] = PolicyWord(policy.Value);
+        root["playerInquiry"] = inquiry;
 
         root["personality"] = BuildPersonality(character);
         root["recentEvents"] = BuildRecentEvents(character, now);
@@ -288,6 +292,18 @@ public static class ContextBuilder
             };
         }
         return thoughts;
+    }
+
+    private static string PolicyWord(TalkPolicy policy)
+    {
+        switch (policy)
+        {
+            case TalkPolicy.Reluctant: return "reluctant";
+            case TalkPolicy.Secretive: return "secretive";
+            case TalkPolicy.Enthusiastic: return "enthusiastic";
+            case TalkPolicy.Unknown: return "unknown";
+            default: return "open";
+        }
     }
 
     private static string WeightWord(float weight)
