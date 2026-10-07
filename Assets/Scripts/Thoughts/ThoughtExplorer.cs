@@ -30,6 +30,8 @@ public class ThoughtExplorer : MonoBehaviour
     [ContextMenu("Begin Exploration")]
     public void Begin()
     {
+        if (!LLMSettings.EnableThoughtExploration)
+            return;
         _character = ThoughtCharacterRegistry.Get(_characterId);
         if (_character == null)
         {
@@ -41,6 +43,8 @@ public class ThoughtExplorer : MonoBehaviour
 
     public void ShowOptions(string pathId)
     {
+        if (!LLMSettings.EnableThoughtExploration)
+            return;
         if (_character == null || Displayer == null)
             return;
 

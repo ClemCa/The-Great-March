@@ -59,6 +59,14 @@
     {
       "nodeId": "world/places",
       "policy": "Open"
+    },
+    {
+      "nodeId": "opinions/politics",
+      "policy": "Secretive"
+    },
+    {
+      "nodeId": "history/world",
+      "policy": "Unknown"
     }
   ],
   "relationships": [

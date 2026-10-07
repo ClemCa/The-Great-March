@@ -47,7 +47,7 @@ public class LLMDialogueManager : MonoBehaviour
     /// </summary>
     public void Meet(ThoughtCharacter character, Action<EmergingThought, string> onFinished = null)
     {
-        if (LLMSettings.Mode != LLMMode.LLM || character == null)
+        if (!LLMSettings.EnableThoughtExploration || LLMSettings.Mode != LLMMode.LLM || character == null)
             return;
         if (LLMThinking.IsUnreliable(LLMSettings.EffectiveModel()))
             return;

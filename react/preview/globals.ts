@@ -24,6 +24,7 @@ function settings(overrides: Partial<SettingsSnapshot> = {}): SettingsSnapshot {
     quality: 'High',
     antialiasing: 'SMAA',
     antialiasingQuality: 'High',
+    thoughtExploration: true,
     mode: 'LLM',
     provider: 'OpenAI Compatible',
     baseUrl: 'http://localhost:11434',

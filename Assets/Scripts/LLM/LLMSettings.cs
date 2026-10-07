@@ -81,6 +81,13 @@ public static class LLMSettings
         set { PlayerPrefs.SetInt(Prefix + "summarized", Mathf.Max(0, value)); }
     }
 
+    /// <summary>Master switch for thought exploration; when off the feature is unavailable entirely.</summary>
+    public static bool EnableThoughtExploration
+    {
+        get { return PlayerPrefs.GetInt(Prefix + "thoughtExploration", 1) == 1; }
+        set { PlayerPrefs.SetInt(Prefix + "thoughtExploration", value ? 1 : 0); }
+    }
+
     public static bool IncludeThoughtsJson
     {
         get { return PlayerPrefs.GetInt(Prefix + "thoughtsJson", 1) == 1; }

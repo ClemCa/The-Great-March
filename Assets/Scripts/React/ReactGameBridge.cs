@@ -432,6 +432,7 @@ namespace TheGreatMarch.React
                 case "vsync": Settings.VSync = value; break;
                 case "fullscreen": Settings.Fullscreen = value; break;
                 case "thoughts": LLMSettings.IncludeThoughtsJson = value; LLMSettings.Save(); break;
+                case "thoughtExploration": LLMSettings.EnableThoughtExploration = value; LLMSettings.Save(); break;
             }
         }
 
@@ -920,6 +921,7 @@ namespace TheGreatMarch.React
             s.antialiasing = ReadableName(Settings.AntialiasingMode.ToString());
             s.antialiasingQuality = ReadableName(Settings.AntialiasingQuality.ToString());
 
+            s.thoughtExploration = LLMSettings.EnableThoughtExploration;
             s.mode = ReadableName(LLMSettings.Mode.ToString());
             s.provider = ReadableName(LLMSettings.Provider.ToString());
             s.baseUrl = LLMSettings.BaseUrl;
@@ -1518,6 +1520,7 @@ namespace TheGreatMarch.React
             public string quality;
             public string antialiasing;
             public string antialiasingQuality;
+            public bool thoughtExploration;
             public string mode;
             public string provider;
             public string baseUrl;

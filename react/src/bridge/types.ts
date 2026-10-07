@@ -144,6 +144,7 @@ export interface SettingsSnapshot {
   quality: string;
   antialiasing: string;
   antialiasingQuality: string;
+  thoughtExploration: boolean;
   mode: string;
   provider: string;
   baseUrl: string;

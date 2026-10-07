@@ -169,11 +169,11 @@ function Stepper({
 }) {
   return (
     <view className="settings-stepper">
-      <button className="settings-btn" onClick={() => onDelta(-1)}>
+      <button className={cn('settings-btn', disabled && 'settings-btn--off')} onClick={disabled ? undefined : () => onDelta(-1)}>
         <text>-</text>
       </button>
       <NumberField value={value} onChange={onChange} disabled={disabled} {...field} />
-      <button className="settings-btn" onClick={() => onDelta(1)}>
+      <button className={cn('settings-btn', disabled && 'settings-btn--off')} onClick={disabled ? undefined : () => onDelta(1)}>
         <text>+</text>
       </button>
     </view>
@@ -373,7 +373,7 @@ export function SettingsPanel({
   onClose: () => void;
 }) {
   const [tab, setTab] = useState(0);
-  const llmDisabled = settings.mode !== 'LLM';
+  const llmDisabled = !settings.thoughtExploration;
   const selectorFor = (key: string) => settings.selectors?.find((entry) => entry.key === key);
 
   return (
@@ -480,80 +480,93 @@ export function SettingsPanel({
           )}
 
           {tab === 3 && (
-            <>
-              <Group label="MODEL">
-                <Row label="Mode">
-                  <Selector settingKey="mode" value={settings.mode} selector={selectorFor('mode')} />
-                </Row>
-                <Row label="Provider" dim={llmDisabled}>
-                  <Selector
-                    settingKey="provider"
-                    value={settings.provider}
-                    selector={selectorFor('provider')}
-                    disabled={llmDisabled}
-                  />
-                </Row>
-                <Row label="Base URL" dim={llmDisabled}>
-                  <input
-                    className="settings-input"
-                    value={settings.baseUrl}
-                    placeholder="default"
-                    disabled={llmDisabled}
-                    onEndEdit={(value) => actions.setLlmSetting('baseUrl', value)}
-                  />
-                </Row>
-                <Row label="Model" dim={llmDisabled}>
-                  <input
-                    className="settings-input"
-                    value={settings.model}
-                    placeholder="default"
-                    disabled={llmDisabled}
-                    onEndEdit={(value) => actions.setLlmSetting('model', value)}
-                  />
-                </Row>
-                <Row label="API Key" dim={llmDisabled}>
-                  <input
-                    className="settings-input"
-                    value={settings.apiKey}
-                    placeholder="none"
-                    disabled={llmDisabled}
-                    onEndEdit={(value) => actions.setLlmSetting('apiKey', value)}
-                  />
-                </Row>
-                <Row label="Temperature" dim={llmDisabled} ghost>
-                  <Stepper
-                    value={Math.round(settings.temperature * 100) / 100}
-                    onDelta={(d) =>
-                      actions.setSettingFloat('temperature', Math.max(0, Math.min(2, settings.temperature + d * 0.05)))
-                    }
-                    onChange={(value) => actions.setSettingFloat('temperature', value)}
-                    field={TEMPERATURE_FIELD}
-                    disabled={llmDisabled}
-                  />
-                </Row>
-              </Group>
-              <Group label="MEMORY">
-                <Row label="Verbatim History" ghost>
-                  <Stepper
-                    value={settings.verbatim}
-                    onDelta={(d) => actions.setSettingFloat('verbatim', Math.max(0, settings.verbatim + d))}
-                    onChange={(value) => actions.setSettingFloat('verbatim', value)}
-                    field={HISTORY_FIELD}
-                  />
-                </Row>
-                <Row label="Summarized History" ghost>
-                  <Stepper
-                    value={settings.summarized}
-                    onDelta={(d) => actions.setSettingFloat('summarized', Math.max(0, settings.summarized + d))}
-                    onChange={(value) => actions.setSettingFloat('summarized', value)}
-                    field={HISTORY_FIELD}
-                  />
-                </Row>
-                <Row label="Include Thoughts JSON" ghost>
-                  <Toggle on={settings.thoughts} onClick={() => actions.setSettingBool('thoughts', !settings.thoughts)} />
-                </Row>
-              </Group>
-            </>
+            <Group label="EXPERIMENTAL">
+              <Row label="Enable Thought Exploration" ghost>
+                <Toggle
+                  on={settings.thoughtExploration}
+                  onClick={() => actions.setSettingBool('thoughtExploration', !settings.thoughtExploration)}
+                />
+              </Row>
+              <Row label="Mode" dim={llmDisabled}>
+                <Selector
+                  settingKey="mode"
+                  value={settings.mode}
+                  selector={selectorFor('mode')}
+                  disabled={llmDisabled}
+                />
+              </Row>
+              <Row label="Provider" dim={llmDisabled}>
+                <Selector
+                  settingKey="provider"
+                  value={settings.provider}
+                  selector={selectorFor('provider')}
+                  disabled={llmDisabled}
+                />
+              </Row>
+              <Row label="Base URL" dim={llmDisabled}>
+                <input
+                  className="settings-input"
+                  value={settings.baseUrl}
+                  placeholder="default"
+                  disabled={llmDisabled}
+                  onEndEdit={(value) => actions.setLlmSetting('baseUrl', value)}
+                />
+              </Row>
+              <Row label="Model" dim={llmDisabled}>
+                <input
+                  className="settings-input"
+                  value={settings.model}
+                  placeholder="default"
+                  disabled={llmDisabled}
+                  onEndEdit={(value) => actions.setLlmSetting('model', value)}
+                />
+              </Row>
+              <Row label="API Key" dim={llmDisabled}>
+                <input
+                  className="settings-input"
+                  value={settings.apiKey}
+                  placeholder="none"
+                  disabled={llmDisabled}
+                  onEndEdit={(value) => actions.setLlmSetting('apiKey', value)}
+                />
+              </Row>
+              <Row label="Temperature" dim={llmDisabled} ghost>
+                <Stepper
+                  value={Math.round(settings.temperature * 100) / 100}
+                  onDelta={(d) =>
+                    actions.setSettingFloat('temperature', Math.max(0, Math.min(2, settings.temperature + d * 0.05)))
+                  }
+                  onChange={(value) => actions.setSettingFloat('temperature', value)}
+                  field={TEMPERATURE_FIELD}
+                  disabled={llmDisabled}
+                />
+              </Row>
+              <Row label="Verbatim History" dim={llmDisabled} ghost>
+                <Stepper
+                  value={settings.verbatim}
+                  onDelta={(d) => actions.setSettingFloat('verbatim', Math.max(0, settings.verbatim + d))}
+                  onChange={(value) => actions.setSettingFloat('verbatim', value)}
+                  field={HISTORY_FIELD}
+                  disabled={llmDisabled}
+                />
+              </Row>
+              <Row label="Summarized History" dim={llmDisabled} ghost>
+                <Stepper
+                  value={settings.summarized}
+                  onDelta={(d) => actions.setSettingFloat('summarized', Math.max(0, settings.summarized + d))}
+                  onChange={(value) => actions.setSettingFloat('summarized', value)}
+                  field={HISTORY_FIELD}
+                  disabled={llmDisabled}
+                />
+              </Row>
+              <Row label="Include Thoughts JSON" dim={llmDisabled} ghost>
+                <Toggle
+                  on={settings.thoughts}
+                  onClick={() => actions.setSettingBool('thoughts', !settings.thoughts)}
+                  disabled={llmDisabled}
+                />
+              </Row>
+            </Group>
           )}
         </view>
         <button className="sidebar-close" onClick={onClose}>
