@@ -1,6 +1,6 @@
 import { actions } from '../bridge/actions';
 import type { Credit } from '../menu/credits';
-import { HudMark } from '../components/HudMark';
+import { Panel } from '../components/Panel';
 
 interface SubMenuPanelProps {
   open: boolean;
@@ -22,12 +22,7 @@ export function SubMenuPanel({ open, entries, title, icon, onClose }: SubMenuPan
       className="sidebar-slot sidebar-slot--left"
       style={{ left: open ? 0 : -300 }}
     >
-      <view className="submenu-panel">
-        <view className="submenu-panel__vignette" />
-        <view className="submenu-header">
-          <HudMark icon={icon} />
-          <text className="submenu-header__title">{title}</text>
-        </view>
+      <Panel className="submenu-panel" edge="right" surface="menu" title={title} icon={icon} onClose={onClose}>
         <scroll className="submenu-list">
           {entries.map((entry) => (
             <view key={entry.name} className="credit-item" onClick={() => actions.openUrl(entry.url)}>
@@ -36,10 +31,7 @@ export function SubMenuPanel({ open, entries, title, icon, onClose }: SubMenuPan
             </view>
           ))}
         </scroll>
-        <button className="sidebar-close" onClick={onClose}>
-          <text>X</text>
-        </button>
-      </view>
+      </Panel>
     </view>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { actions } from '../bridge/actions';
 import type { GameState, SlotEntry } from '../bridge/types';
 import { cn } from '../lib/cn';
+import { Panel } from './Panel';
 import { SettingsPanel } from './SettingsPanel';
 
 /**
@@ -30,9 +31,7 @@ export function PauseBar({ state }: { state: GameState }) {
         </button>
 
         {state.paused && (
-          <view className="pause-panel">
-            <view className="pause-panel__vignette" />
-
+          <Panel className="pause-panel" edge="left" surface="menu">
             <view className="pause-panel__actions">
               <button className="pause-action pause-action--primary" onClick={actions.togglePause}>
                 <text>Resume</text>
@@ -65,7 +64,7 @@ export function PauseBar({ state }: { state: GameState }) {
                 <text>Exit to Main Menu</text>
               </button>
             </view>
-          </view>
+          </Panel>
         )}
       </view>
 

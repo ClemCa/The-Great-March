@@ -4,6 +4,7 @@ import { actions } from '../bridge/actions';
 import type { GameState } from '../bridge/types';
 import { cn } from '../lib/cn';
 import { HudMark } from './HudMark';
+import { Panel } from './Panel';
 import { PlanetGraph } from './PlanetGraph';
 import { FacilityBuildMenu } from './FacilityBuildMenu';
 import { PriorityMenu } from './PriorityMenu';
@@ -31,16 +32,16 @@ export function PlanetPanel({ state }: { state: GameState }) {
   const wildcardOptions = planet ? planet.facilityOptions.filter((o) => o.wildcard) : [];
 
   return (
-    <view className={cn('planet-panel', open && 'planet-panel--open')}>
+    <Panel
+      className={cn('planet-panel', open && 'planet-panel--open')}
+      edge="left"
+      surface="hud"
+      title={planet?.name}
+      icon="stairs"
+      headerSize="lg"
+    >
       {planet && (
         <>
-          <view className="hud-vignette" />
-
-          <view className="planet-panel__title">
-            <HudMark icon="stairs" />
-            <text className="planet-panel__title-text">{planet.name}</text>
-          </view>
-
           <view className="planet-panel__baseinfo">
             <text className="planet-panel__baseinfo-text">{`Name: ${planet.name}`}</text>
             <text className="planet-panel__baseinfo-text">{`People: ${planet.people}`}</text>
@@ -172,6 +173,6 @@ export function PlanetPanel({ state }: { state: GameState }) {
           {shippingOpen && <ShippingMenu planet={planet} onClose={() => setShippingOpen(false)} />}
         </>
       )}
-    </view>
+    </Panel>
   );
 }

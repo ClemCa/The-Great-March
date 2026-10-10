@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MenuButton } from '../components/MenuButton';
+import { Panel } from '../components/Panel';
 import { SubMenuPanel } from './SubMenuPanel';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { actions } from '../bridge/actions';
@@ -41,9 +42,7 @@ export function MainMenuScreen({ state }: { state: GameState }) {
       {(panel !== null || settingsOpen) && <view className="sidebar-scrim" onClick={closeAll} />}
 
       <view className="sidebar-slot sidebar-slot--right">
-        <view className="side-panel">
-          <view className="side-panel__vignette" />
-
+        <Panel className="side-panel" edge="left" surface="menu">
           {loadOpen && (
             <view className="load-slots">
               {slots.map((slot) => (
@@ -69,7 +68,7 @@ export function MainMenuScreen({ state }: { state: GameState }) {
               <MenuButton label="Exit" ghost onClick={actions.exit} />
             </view>
           </view>
-        </view>
+        </Panel>
       </view>
 
       <SubMenuPanel

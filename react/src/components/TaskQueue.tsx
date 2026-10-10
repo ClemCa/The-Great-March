@@ -1,6 +1,6 @@
 import type { GameState } from '../bridge/types';
 import { cn } from '../lib/cn';
-import { HudMark } from './HudMark';
+import { Panel } from './Panel';
 
 /**
  * Left-hand task queue. Mirrors the original `Queue` canvas: it slides in only
@@ -11,12 +11,13 @@ export function TaskQueue({ state }: { state: GameState }) {
   const orders = planet ? (state.queue ?? []).filter((order) => order.planet === planet.name) : [];
 
   return (
-    <view className={cn('task-queue', !planet && 'task-queue--hidden')}>
-      <view className="hud-vignette" />
-      <view className="task-queue__title">
-        <HudMark icon="list" />
-        <text>Task Queue</text>
-      </view>
+    <Panel
+      className={cn('task-queue', !planet && 'task-queue--hidden')}
+      edge="right"
+      surface="hud"
+      title="Task Queue"
+      icon="list"
+    >
       <view className="task-queue__list">
         {orders.length === 0 && <text className="task-queue__empty">No active tasks</text>}
         {orders.map((order, index) => (
@@ -34,6 +35,6 @@ export function TaskQueue({ state }: { state: GameState }) {
           </view>
         ))}
       </view>
-    </view>
+    </Panel>
   );
 }

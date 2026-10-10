@@ -1,4 +1,5 @@
 import { cn } from '../lib/cn';
+import { Panel } from './Panel';
 import type { QuestSnapshot } from '../bridge/types';
 
 /**
@@ -9,9 +10,12 @@ export function QuestObjective({ quest }: { quest: QuestSnapshot | undefined }) 
   const visible = !!quest && quest.visible && !!quest.text;
 
   return (
-    <view className={cn('quest-objective', visible && 'quest-objective--open')}>
-      <view className="hud-vignette" />
+    <Panel
+      className={cn('quest-objective', visible && 'quest-objective--open')}
+      edge="bottom"
+      surface="hud"
+    >
       <text className="quest-objective__text">{visible ? quest!.text : ''}</text>
-    </view>
+    </Panel>
   );
 }

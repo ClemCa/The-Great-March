@@ -4,6 +4,7 @@ import { iconFor } from '../assets/icons';
 import type { PlanetSnapshot } from '../bridge/types';
 import { cn } from '../lib/cn';
 import { HudMark } from './HudMark';
+import { Panel } from './Panel';
 
 /** Rows are 60px tall; a drag moves one slot per row-height of accumulated vertical travel. */
 const ROW_STEP = 60;
@@ -59,46 +60,49 @@ export function PriorityMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
   };
 
   return (
-    <view className="hud-submenu hud-submenu--priority">
-      <view className="hud-vignette" />
-        <view className="hud-submenu__title">
-          <HudMark icon="consume" />
-          <text>Consumption Priorities</text>
+    <Panel
+      className="hud-submenu hud-submenu--priority"
+      edge="left"
+      surface="hud"
+      title="Consumption Priorities"
+      icon="consume"
+      headerSize="sm"
+      onClose={onClose}
+      closePlacement="flush"
+    >
+      <view className="priority-switches">
+        {/* What the list governs: feeding the population or refuelling ships. */}
+        <view className="priority-switches__group">
+          <button
+            className={cn('priority-toggle', !fuel && 'priority-toggle--on')}
+            onClick={() => setFuel(false)}
+          >
+            <text>People</text>
+          </button>
+          <button
+            className={cn('priority-toggle', fuel && 'priority-toggle--on')}
+            onClick={() => setFuel(true)}
+          >
+            <text>Fuel</text>
+          </button>
         </view>
 
-        <view className="priority-switches">
-          {/* What the list governs: feeding the population or refuelling ships. */}
-          <view className="priority-switches__group">
-            <button
-              className={cn('priority-toggle', !fuel && 'priority-toggle--on')}
-              onClick={() => setFuel(false)}
-            >
-              <text>People</text>
-            </button>
-            <button
-              className={cn('priority-toggle', fuel && 'priority-toggle--on')}
-              onClick={() => setFuel(true)}
-            >
-              <text>Fuel</text>
-            </button>
-          </view>
-
-          {/* Which variant of the same list we are editing: this planet's or the shared default. */}
-          <view className="priority-switches__group">
-            <button
-              className={cn('priority-toggle', !global && 'priority-toggle--on')}
-              onClick={() => setGlobal(false)}
-            >
-              <text>Local</text>
-            </button>
-            <button
-              className={cn('priority-toggle', global && 'priority-toggle--on')}
-              onClick={() => setGlobal(true)}
-            >
-              <text>Global</text>
-            </button>
-          </view>
+        {/* Which variant of the same list we are editing: this planet's or the shared default. */}
+        <view className="priority-switches__group">
+          <button
+            className={cn('priority-toggle', !global && 'priority-toggle--on')}
+            onClick={() => setGlobal(false)}
+          >
+            <text>Local</text>
+          </button>
+          <button
+            className={cn('priority-toggle', global && 'priority-toggle--on')}
+            onClick={() => setGlobal(true)}
+          >
+            <text>Global</text>
+          </button>
         </view>
+      </view>
 
       <scroll className="hud-submenu__list">
         <view className="priority-list">
@@ -113,11 +117,11 @@ export function PriorityMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
                   <HudMark icon="grip" className="hud-mark--sm" />
                 </view>
                 <image className="priority-row__icon" src={iconFor(resource?.icon)} />
-                <view className="priority-row__text">
-                  <text className="priority-row__name">{resource?.name ?? `#${id}`}</text>
-                    <text className="priority-row__value">
-                      {`${fuel ? 'Fueling' : 'Feeding'} power: ${resource?.value ?? 0}`}
-                    </text>
+                  <view className="priority-row__text">
+                    <text className="priority-row__name">{resource?.name ?? `#${id}`}</text>
+                  <text className="priority-row__value">
+                    {`${fuel ? 'Fueling' : 'Feeding'} power: ${resource?.value ?? 0}`}
+                  </text>
                 </view>
                 <view className="priority-row__controls">
                   <button
@@ -138,10 +142,6 @@ export function PriorityMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
           })}
         </view>
       </scroll>
-
-      <button className="hud-submenu__close" onClick={onClose}>
-        <text>X</text>
-      </button>
-    </view>
+    </Panel>
   );
 }

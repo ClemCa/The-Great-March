@@ -17,6 +17,130 @@
   color: #ffffff;
 }
 
+/* ------------------------------------------------------------------ */
+/* Console panel: the one frame behind every menu, HUD panel and submenu */
+/* ------------------------------------------------------------------ */
+/* Near-black surface, a hairline rule with a blue leading edge facing the centre of the screen,
+   and a bottom vignette that sinks it into the scene. Panels layer their own geometry, header
+   scale and body on top instead of restating the recipe, so a new panel is a position, a size
+   and an edge. `edge` says which side the blue line runs down; `surface` picks the opacity. */
+.console-panel {
+  flex-direction: column;
+  background-color: rgba(10, 12, 16, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(89, 137, 217, 0.6);
+  pointer-events: auto;
+}
+
+/* HUD surfaces sit over the scene and stay slightly translucent; menu surfaces read as sheets. */
+.console-panel--hud {
+  background-color: rgba(10, 12, 16, 0.96);
+}
+
+.console-panel--edge-left {
+  border-left-color: rgba(89, 137, 217, 0.6);
+}
+
+.console-panel--edge-right {
+  border-right-color: rgba(89, 137, 217, 0.6);
+}
+
+.console-panel--edge-bottom {
+  border-bottom-color: rgba(89, 137, 217, 0.6);
+}
+
+/* Darkens the bottom edge so the panel sinks into the scene instead of ending abruptly. */
+.console-panel__vignette {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
+  pointer-events: none;
+}
+
+/* Console heading: a blue mark and an uppercase label over a hairline rule. */
+.console-panel__header {
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.console-panel__header--sm {
+  height: 40px;
+  padding: 0 16px;
+  gap: 10px;
+}
+
+.console-panel__header--md {
+  height: 56px;
+  padding: 0 20px;
+}
+
+.console-panel__header--lg {
+  height: 71px;
+  padding: 0 20px;
+}
+
+/* Reserves the corner the inset dismiss button occupies so a title can never run under it. */
+.console-panel__header--roomy {
+  padding-right: 60px;
+}
+
+.console-panel__title {
+  color: #ffffff;
+  text-align: left;
+}
+
+.console-panel__header--sm .console-panel__title {
+  font-size: 17px;
+  letter-spacing: 2;
+}
+
+.console-panel__header--md .console-panel__title {
+  font-size: 18px;
+  letter-spacing: 3;
+}
+
+.console-panel__header--lg .console-panel__title {
+  font-size: 28px;
+  letter-spacing: 2;
+}
+
+/* Dismiss button shared by every secondary panel. Anchored to the panel's top-right corner rather
+   than laid out in the header flow, so surrounding padding can never shift it. */
+.console-panel__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Panels with a compact 40px title bar fill its trailing corner instead of sitting inset. */
+.console-panel__close--flush {
+  top: 0;
+  right: 0;
+}
+
+.console-panel__close:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
 /* --- Main menu title (original: 142.5px, centred, "The Great\n\nMarch") --- */
 .menu-title {
   position: absolute;
@@ -68,29 +192,12 @@
 }
 
 /* --- Right-hand menu panel. The original is a 300x880 white sheet; it is restyled into the
-   same dark, flat, layered language as the lose screen. The frame warms from blue (top-left)
-   to neutral, and a bottom vignette sinks it into the scene. Only the primary action stays
-   filled white. --- */
+   same dark, flat, layered language as the lose screen, as a console panel whose blue frame edge
+   faces the centre of the screen. Only the primary action stays filled white. --- */
 .side-panel {
   position: relative;
   width: 100%;
   flex-direction: column;
-  background-color: rgba(10, 12, 16, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
-  border-left-color: rgba(89, 137, 217, 0.6);
-  pointer-events: auto;
-}
-
-/* Darkens the bottom edge so the panel sinks into the scene instead of ending abruptly. */
-.side-panel__vignette {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
-  pointer-events: none;
 }
 
 .side-panel__body {
@@ -177,48 +284,13 @@
   cursor: pointer;
 }
 
-/* --- Left sliding submenus (credits / team). Same hugging, centred card and frame as the main
-   right-hand sidebar, mirrored so the blue frame edge faces the centre of the screen. The slide
-   itself lives on `.sidebar-slot--left` so the panel can be content-sized. --- */
+/* --- Left sliding submenus (credits / team). Same hugging, centred card as the main right-hand
+   sidebar, mirrored so the blue frame edge faces the centre of the screen. The slide itself lives
+   on `.sidebar-slot--left` so the panel can be content-sized. --- */
 .submenu-panel {
   position: relative;
   width: 100%;
-  flex-direction: column;
-  background-color: rgba(10, 12, 16, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
-  border-right-color: rgba(89, 137, 217, 0.6);
   overflow: hidden;
-  pointer-events: auto;
-}
-
-/* Darkens the bottom edge so the panel sinks into the scene, matching the main sidebar. */
-.submenu-panel__vignette {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
-  pointer-events: none;
-}
-
-/* Console heading shared with the settings panel: a blue mark and an uppercase label. Right inset
-   reserves room for the absolutely-positioned dismiss button. */
-.submenu-header {
-  height: 56px;
-  flex-shrink: 0;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 60px 0 20px;
-  gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.submenu-header__title {
-  color: #ffffff;
-  font-size: 18px;
-  letter-spacing: 3;
 }
 
 .submenu-list {
@@ -291,17 +363,6 @@
   background-color: #5989d9;
 }
 
-/* Bottom vignette, layered behind a panel's content so it sinks into the scene. */
-.hud-vignette {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
-  pointer-events: none;
-}
-
 /* --- Pause cluster (top-right). A square toggle button holds the corner; while paused it swaps
    to a resume glyph and drops a console-styled panel of session actions. --- */
 .pause-cluster {
@@ -344,16 +405,10 @@
   background-color: #ffffff;
 }
 
-/* Dropdown card: same dark, flat, framed language as the other sidebars, with the blue leading
-   edge on the sides facing the centre of the screen. */
+/* Dropdown card: a console panel with the blue leading edge facing the centre of the screen. */
 .pause-panel {
   position: relative;
   width: 280px;
-  flex-direction: column;
-  background-color: rgba(10, 12, 16, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
-  border-left-color: rgba(89, 137, 217, 0.6);
   overflow: hidden;
   animation-name: pause-panel-in;
   animation-duration: 0.18s;
@@ -369,16 +424,6 @@
     opacity: 1;
     translate: 0 0;
   }
-}
-
-.pause-panel__vignette {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
-  pointer-events: none;
 }
 
 .pause-panel__actions {
@@ -488,10 +533,6 @@
   left: 0;
   width: 300px;
   height: 600px;
-  background-color: rgba(10, 12, 16, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
-  border-right-color: rgba(89, 137, 217, 0.6);
   overflow: hidden;
   transition-property: left;
   transition-duration: 0.18s;
@@ -500,22 +541,6 @@
 
 .task-queue--hidden {
   left: -300px;
-}
-
-.task-queue__title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 20px;
-  gap: 12px;
-  color: #ffffff;
-  font-size: 18px;
-  letter-spacing: 3;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .task-queue__list {
@@ -579,10 +604,6 @@
   right: -400px;
   width: 400px;
   height: 1020px;
-  background-color: rgba(10, 12, 16, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
-  border-left-color: rgba(89, 137, 217, 0.6);
   /* The facility/priority/shipping submenus are children of this panel but are anchored to its
      right edge (which coincides with the screen edge), so they sit just left of it. Clipping
      here hides them entirely. */
@@ -594,26 +615,6 @@
 
 .planet-panel--open {
   right: 0;
-}
-
-.planet-panel__title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 71px;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 20px;
-  gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.planet-panel__title-text {
-  color: #ffffff;
-  font-size: 28px;
-  letter-spacing: 2;
-  text-align: left;
 }
 
 .planet-panel__baseinfo {
@@ -886,10 +887,6 @@
   right: 620px;
   width: 400px;
   height: 300px;
-  background-color: rgba(12, 14, 18, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
-  border-left-color: rgba(89, 137, 217, 0.6);
   overflow: hidden;
 }
 
@@ -903,18 +900,6 @@
   right: 520px;
   width: 380px;
   height: 510px;
-}
-
-.hud-submenu__title {
-  height: 40px;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 16px;
-  gap: 10px;
-  color: #ffffff;
-  font-size: 17px;
-  letter-spacing: 2;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hud-submenu__list {
@@ -1423,9 +1408,6 @@
   align-items: center;
   justify-content: center;
   padding: 0 20px;
-  background-color: rgba(10, 12, 16, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-bottom-color: rgba(89, 137, 217, 0.6);
   transition-property: top;
   transition-duration: 0.2s;
   transition-timing-function: ease-out;
@@ -1443,18 +1425,20 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Cursor tooltip, original `PromptMenu`. Adopts the HUD submenu frame (blue leading corner over
+/* Cursor tooltip, original `PromptMenu`. Adopts the console panel frame (blue leading corner over
    a near-black surface) and a console glyph + spaced heading, so help reads as part of the same
-   interface rather than an OS bubble. */
+   interface rather than an OS bubble. Follows the cursor, so it never swallows a click. --- */
 .tooltip {
   position: absolute;
   width: 300px;
   padding: 8px 12px 10px;
-  flex-direction: column;
   gap: 3px;
-  background-color: rgba(10, 12, 16, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
+}
+
+/* The tooltip promotes the shared leading edge to a solid, wider rule so the hovered surface
+   reads as the active one, and opts out of raycasts entirely. Doubled class beats the shared
+   `.console-panel` rules regardless of source order. */
+.console-panel.tooltip {
   border-left-color: #5989d9;
   border-left-width: 2px;
   pointer-events: none;
@@ -1523,39 +1507,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  flex-direction: column;
-  background-color: rgba(10, 12, 16, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-top-color: rgba(89, 137, 217, 0.6);
-  border-right-color: rgba(89, 137, 217, 0.6);
   overflow: hidden;
-}
-
-/* Darkens the bottom edge so the panel sinks into the scene, matching the other sidebars. */
-.settings-panel__vignette {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 30%);
-  pointer-events: none;
-}
-
-.settings-header {
-  height: 62px;
-  flex-shrink: 0;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 60px 0 16px;
-  gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.settings-header__title {
-  color: #ffffff;
-  font-size: 20px;
-  letter-spacing: 3;
 }
 
 .settings-tabs {
@@ -1587,39 +1539,6 @@
 .settings-tab--active {
   border-bottom-color: #5989d9;
   color: #ffffff;
-}
-
-/* Dismiss button shared by every secondary sidebar (submenus and settings). Anchored to the
-   panel's top-right corner rather than laid out in the header flow, so surrounding padding (e.g.
-   the submenu panel's top inset) can never shift it. */
-.sidebar-close,
-.hud-submenu__close {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 0;
-  background-color: rgba(255, 255, 255, 0.04);
-  color: #ffffff;
-  font-size: 18px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.sidebar-close {
-  top: 10px;
-  right: 10px;
-}
-
-/* HUD submenus have a compact 40px title bar, so the dismiss button fills its trailing corner
-   instead of sitting inset like the taller sidebar headers. */
-.hud-submenu__close {
-  top: 0;
-  right: 0;
 }
 
 .settings-body {
@@ -2243,11 +2162,6 @@
 
 .settings-tab:hover {
   background-color: rgba(255, 255, 255, 0.06);
-}
-
-.sidebar-close:hover,
-.hud-submenu__close:hover {
-  background-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Empty-state copy, used when a panel has nothing to list. */

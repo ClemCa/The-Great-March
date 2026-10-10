@@ -3,6 +3,7 @@ import { actions } from '../bridge/actions';
 import { iconFor } from '../assets/icons';
 import { cn } from '../lib/cn';
 import { HudMark } from './HudMark';
+import { Panel } from './Panel';
 import type { PlanetSnapshot, ShipEntry } from '../bridge/types';
 
 type Stage = 'ships' | 'load';
@@ -69,13 +70,20 @@ export function ShippingMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
   };
 
   return (
-    <view className="hud-submenu hud-submenu--shipping">
-      <view className="hud-vignette" />
-      <view className="hud-submenu__title">
-        <HudMark icon={stage === 'load' ? markForType(shipping.shipType || selected?.type || '') : 'arrow-r'} />
-        <text>{stage === 'load' ? titleForType(shipping.shipType || selected?.type || '') : `Shipping (${shipping.ships.length})`}</text>
-      </view>
-
+    <Panel
+      className="hud-submenu hud-submenu--shipping"
+      edge="left"
+      surface="hud"
+      title={
+        stage === 'load'
+          ? titleForType(shipping.shipType || selected?.type || '')
+          : `Shipping (${shipping.ships.length})`
+      }
+      icon={stage === 'load' ? markForType(shipping.shipType || selected?.type || '') : 'arrow-r'}
+      headerSize="sm"
+      onClose={onClose}
+      closePlacement="flush"
+    >
       <view className="shipping-body">
         {stage === 'ships' ? (
           <scroll className="ship-groups">
@@ -97,11 +105,7 @@ export function ShippingMenu({ planet, onClose }: { planet: PlanetSnapshot; onCl
           selected && <LoadStage planet={planet} ship={selected} onBack={() => setStage('ships')} />
         )}
       </view>
-
-      <button className="hud-submenu__close" onClick={onClose}>
-        <text>X</text>
-      </button>
-    </view>
+    </Panel>
   );
 }
 

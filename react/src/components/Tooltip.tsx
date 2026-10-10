@@ -1,5 +1,6 @@
 import type { TooltipSnapshot } from '../bridge/types';
 import { HudMark } from './HudMark';
+import { Panel } from './Panel';
 
 /**
  * Cursor-following help tooltip. Mirrors the original `PromptMenu`: Unity resolves the hovered
@@ -13,7 +14,7 @@ export function Tooltip({ tooltip }: { tooltip: TooltipSnapshot | undefined }) {
   const top = `${Math.min(90, Math.max(0, (1 - tooltip.y) * 100))}%`;
 
   return (
-    <view className="tooltip" style={{ left, top }}>
+    <Panel className="tooltip" edge="left" surface="menu" style={{ left, top }}>
       {tooltip.title ? (
         <view className="tooltip__head">
           <HudMark icon="reticle" className="hud-mark--sm" />
@@ -23,6 +24,6 @@ export function Tooltip({ tooltip }: { tooltip: TooltipSnapshot | undefined }) {
       {tooltip.description ? <text className="tooltip__desc">{tooltip.description}</text> : null}
       {tooltip.info1 ? <text className="tooltip__info">{tooltip.info1}</text> : null}
       {tooltip.info2 ? <text className="tooltip__info">{tooltip.info2}</text> : null}
-    </view>
+    </Panel>
   );
 }

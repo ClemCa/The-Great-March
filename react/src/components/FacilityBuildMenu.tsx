@@ -2,7 +2,7 @@ import { actions } from '../bridge/actions';
 import { iconFor } from '../assets/icons';
 import type { FacilityOption } from '../bridge/types';
 import { cn } from '../lib/cn';
-import { HudMark } from './HudMark';
+import { Panel } from './Panel';
 
 interface FacilityBuildMenuProps {
   title: string;
@@ -16,13 +16,14 @@ interface FacilityBuildMenuProps {
  */
 export function FacilityBuildMenu({ title, options, onClose }: FacilityBuildMenuProps) {
   return (
-    <view className="hud-submenu">
-      <view className="hud-vignette" />
-      <view className="hud-submenu__title">
-        <HudMark icon="plus" />
-        <text>{title}</text>
-      </view>
-
+    <Panel
+      className="hud-submenu"
+      edge="left"
+      surface="hud"
+      title={title}
+      icon="plus"
+      headerSize="sm"
+    >
       <scroll className="hud-submenu__list">
         <view className="hud-submenu__grid">
           {options.map((option) => (
@@ -49,6 +50,6 @@ export function FacilityBuildMenu({ title, options, onClose }: FacilityBuildMenu
       <button className="hud-submenu__return" onClick={onClose}>
         <text>Return</text>
       </button>
-    </view>
+    </Panel>
   );
 }
